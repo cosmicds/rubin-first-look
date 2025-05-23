@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  pull_request_target:
+    branches:
+      main
+
+permissions: read-all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+    
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.17.1'
+
+      - name: Yarn install
+        run: yarn install
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Build
+        run: yarn build
+
+          # - name: BrowserStack env setup
+          #   uses: browserstack/github-actions/setup-env@master
+          #   with:
+          #     username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          #     access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+
+          # - name: 'BrowserStack local tunnel setup'
+          #   uses: browserstack/github-actions/setup-local@master
+          #   with:
+          #     local-testing: start
+          #     local-identifier: random
+
+          # - name: Run BrowserStack tests
+          #   run: |
+          #     set -xeuo pipefail
+          #     yarn serve &
+          #     sleep 10
+          #     yarn test-bslocal -e default,firefox,edge,safari -o reports
+
+          # - name: 'BrowserStackLocal Stop'  # Terminating the BrowserStackLocal tunnel connection
+          #   uses: browserstack/github-actions/setup-local@master
+          #   with:
+          #     local-testing: stop
