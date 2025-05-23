@@ -79,6 +79,13 @@
           tooltip-location="start"
         >
         </icon-button>
+        <folder-view
+          v-if="folder"
+          :root-folder="folder"
+          flex-direction="column"
+          @select="handleSelection"
+        >
+        </folder-view>
       </div>
       <div id="center-buttons">
       </div>
@@ -240,7 +247,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, nextTick } from "vue";
+import { ref, reactive, computed, onMounted, nextTick, type Ref } from "vue";
+import { Folder, Imageset, Place } from "@wwtelescope/engine";
+import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { useDisplay } from "vuetify";
@@ -280,6 +289,9 @@ const accentColor = ref("#ffffff");
 const buttonColor = ref("#ffffff");
 const tab = ref(0);
 
+const folder: Ref<Folder | null> = ref(null);
+const wtmlUrl = "https://data1.wwtassets.org/packages/2022/07_jwst/jwst_first_v2.wtml";
+
 onMounted(() => {
   store.waitForReady().then(async () => {
     skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
@@ -290,8 +302,38 @@ onMounted(() => {
 
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
+
+    store.loadImageCollection({
+      url: wtmlUrl,
+      loadChildFolders: false,
+    }).then(resultFolder => {
+      folder.value = resultFolder; 
+    });
+
   });
 });
+
+function handleSelection(item: Thumbnail) {
+  if (item instanceof Imageset) {
+    store.setForegroundImageByName(item.get_name());
+    const type = item.get_dataSetType();
+    if (type === ImageSetType.planet) {
+      store.setBackgroundImageByName(item.get_name());
+    }
+  } else if (item instanceof Place) {
+    const imageset = item.get_backgroundImageset() ?? item.get_studyImageset();
+    if (imageset !== null) {
+      store.setForegroundImageByName(imageset.get_name());
+    }
+
+    store.gotoTarget({
+      place: item,
+      noZoom: false,
+      instant: false,
+      trackObject: true,
+    });
+  }
+}
 
 const ready = computed(() => layersLoaded.value && positionSet.value);
 
@@ -481,6 +523,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  .icon-wrapper {
+    width: fit-content;
+  }
 }
 
 #right-buttons {

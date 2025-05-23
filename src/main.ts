@@ -55,6 +55,7 @@ createApp(RubinFirstLight, {
   .component('icon-button', IconButton)
   .component('funding-acknowledgement', FundingAcknowledgement)
   .component('credit-logos', CreditLogos)
+  .component('folder-view', FolderView)
 
   // Mount
   .mount("#app");
