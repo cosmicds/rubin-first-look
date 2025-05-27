@@ -303,11 +303,26 @@ onMounted(() => {
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
 
+    // We'll probably end up changing the WTML setup once we have the final images anyways
+    // so not worth trying to make this super-clean now
     store.loadImageCollection({
       url: wtmlUrl,
       loadChildFolders: false,
     }).then(resultFolder => {
       folder.value = resultFolder; 
+    });
+
+    store.loadImageCollection({
+      url: "bg.wtml",
+      loadChildFolders: false,
+    }).then(folder => {
+      const children = folder.get_children();
+      if (children !== null) {
+        const item = children[0];
+        if (item instanceof Imageset) {
+          store.setBackgroundImageByName(item.get_name());
+        }
+      }
     });
 
   });
