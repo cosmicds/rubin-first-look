@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Folder Browseable="True" Group="Explorer" Name="JWST First Images" Searchable="True">
+  <ImageSet BandPass="Visible" BaseDegreesPerTile="180.0" BaseTileLevel="0" BottomsUp="False" CenterX="0.0" CenterY="0.0" DataSetType="Sky" ElevationModel="False" FileType=".png" Generic="False" MeanRadius="1.0" Name="All-sky photo of the night sky" OffsetX="0.0" OffsetY="0.0" Projection="Toast" QuadTreeMap="0123" ReferenceFrame="Sky" Rotation="0.0" Sparse="True" StockSet="False" TileLevels="12" Url="https://cdn.worldwidetelescope.org/wwtweb/nlasdss.aspx?Q={1},{2},{3}" WidthFactor="1">
+    <Credits>NOIRLab/NSF/AURA/E. Slawik/M. Zamani</Credits>
+    <CreditsUrl>https://webbtelescope.org/contents/news-releases/2022/news-2022-031</CreditsUrl>
+    <Description>This is the largest open-source, freely available all-sky photo of the night sky. With 40,000 pixels, this is arguably one of the best such images ever made. The colossal sky-scape was compiled using images taken by astrophotographer Eckhard Slawik from the best and darkest locations around the globe: Germany (Waldenburg), Spain (Tenerife, La Palma), Namibia and Chile. An annotated version can be found at https://noirlab.edu/public/images/noirlab2430a/.</Description>
+    <ThumbnailUrl></ThumbnailUrl>
+  </ImageSet>
+</Folder>
