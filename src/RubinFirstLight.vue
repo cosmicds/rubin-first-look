@@ -73,6 +73,7 @@
         </icon-button>
         <folder-view
           v-if="folder"
+          :class="['folder-view', tall ? 'folder-view-tall' : '']"
           :root-folder="folder"
           flex-direction="column"
           @select="handleSelection"
@@ -87,7 +88,7 @@
 
     <div
       id="selected-info"
-      v-if="selectedItem"
+      v-if="selectedItem && !showTextSheet"
     >
       <div>{{ selectedItem.get_name() }}</div>
       <div
@@ -255,7 +256,7 @@ import { ref, reactive, computed, onMounted, nextTick, type Ref } from "vue";
 import { Folder, Imageset, Place } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
-import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls, isMobile } from "@cosmicds/vue-toolkit";
+import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { useDisplay } from "vuetify";
 
 type SheetType = "text" | "video";
@@ -270,10 +271,10 @@ const store = engineStore();
 useWWTKeyboardControls(store);
 
 const touchscreen = supportsTouchscreen();
-const mobile = isMobile(navigator.userAgent);
 // TODO: Determine this in a better way
-const tall = mobile;
 const { smAndDown } = useDisplay();
+
+const tall = computed(() => smAndDown.value);
 
 const props = withDefaults(defineProps<RubinFirstLightProps>(), {
   wwtNamespace: "rubin-first-light",
@@ -375,8 +376,8 @@ const cssVars = computed(() => {
   return {
     "--accent-color": accentColor.value,
     "--app-content-width": showTextSheet.value ? "66%" : "100%",
-    "--info-sheet-height": tall ? "34%" : "100%",
-    "--info-sheet-width": tall ? "100%" : "34%",
+    "--info-sheet-height": tall.value ? "34%" : "100%",
+    "--info-sheet-width": tall.value ? "100%" : "34%",
   };
 });
 
@@ -777,5 +778,6 @@ video {
   background: rgba(0, 0, 0, 0.5);
   top: 50px;
   right: 20px;
+  height: 250px;
 }
 </style>
