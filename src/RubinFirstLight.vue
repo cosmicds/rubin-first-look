@@ -64,14 +64,6 @@
     <div id="top-content">
       <div id="left-buttons">
         <icon-button
-          v-model="showTextSheet"
-          fa-icon="book-open"
-          :color="buttonColor"
-          :tooltip-text="showTextSheet ? 'Hide Info' : 'Learn More'"
-          tooltip-location="start"
-        >
-        </icon-button>
-        <icon-button
           v-model="showVideoSheet"
           fa-icon="video"
           :color="buttonColor"
@@ -102,6 +94,7 @@
         v-if="selectedItem instanceof Place"
       >
         <div v-html="selectedItem.htmlDescription"></div> 
+        <v-btn @click="showTextSheet = true">Read More</v-btn>
       </div>
     </div>
 

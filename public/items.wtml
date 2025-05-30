@@ -12,7 +12,7 @@
         Brief description of the place
     </Annotation>
     <Description>
-        Some extended text is here. We can put whatever HTML we want here
+        Some extended text is here. We can put whatever HTML we want here&lt;br&gt;
         &lt;ul&lt;
             &lt;li&gt;Some fact&lt;/li&gt;
             &lt;li&gt;Some other fact&lt;/li&gt;
