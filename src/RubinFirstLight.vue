@@ -64,14 +64,6 @@
     <div id="top-content">
       <div id="left-buttons">
         <icon-button
-          v-model="showTextSheet"
-          fa-icon="book-open"
-          :color="buttonColor"
-          :tooltip-text="showTextSheet ? 'Hide Info' : 'Learn More'"
-          tooltip-location="start"
-        >
-        </icon-button>
-        <icon-button
           v-model="showVideoSheet"
           fa-icon="video"
           :color="buttonColor"
@@ -81,6 +73,7 @@
         </icon-button>
         <folder-view
           v-if="folder"
+          :class="['folder-view', tall ? 'folder-view-tall' : '']"
           :root-folder="folder"
           flex-direction="column"
           @select="handleSelection"
@@ -90,6 +83,19 @@
       <div id="center-buttons">
       </div>
       <div id="right-buttons">
+      </div>
+    </div>
+
+    <div
+      id="selected-info"
+      v-if="selectedItem && !showTextSheet"
+    >
+      <div>{{ selectedItem.get_name() }}</div>
+      <div
+        v-if="selectedItem instanceof Place"
+      >
+        <div v-html="selectedItem.htmlDescription"></div> 
+        <v-btn @click="showTextSheet = true">Read More</v-btn>
       </div>
     </div>
 
@@ -135,17 +141,16 @@
 
     <v-dialog
       :style="cssVars"
-      class="bottom-sheet"
-      id="text-bottom-sheet"
+      :class="['info-sheet', !tall ? 'info-sheet-wide' : '']"
+      id="text-info-sheet"
       hide-overlay
       persistent
       no-click-animation
       absolute
-      width="100%"
       :scrim="false"
-      location="bottom"
+      location="end"
       v-model="showTextSheet"
-      transition="dialog-bottom-transition"
+      :transition="tall ? 'dialog-bottom-transition' : 'tab-reverse-transition'"
     >
       <v-card height="100%">
         <v-tabs
@@ -266,7 +271,10 @@ const store = engineStore();
 useWWTKeyboardControls(store);
 
 const touchscreen = supportsTouchscreen();
+// TODO: Determine this in a better way
 const { smAndDown } = useDisplay();
+
+const tall = computed(() => smAndDown.value);
 
 const props = withDefaults(defineProps<RubinFirstLightProps>(), {
   wwtNamespace: "rubin-first-light",
@@ -285,12 +293,15 @@ const backgroundImagesets = reactive<BackgroundImageset[]>([]);
 const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
-const accentColor = ref("#ffffff");
-const buttonColor = ref("#ffffff");
+// See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
+const accentColor = ref("#00BABC");
+const buttonColor = ref("#05B8BC");
 const tab = ref(0);
 
 const folder: Ref<Folder | null> = ref(null);
-const wtmlUrl = "https://data1.wwtassets.org/packages/2022/07_jwst/jwst_first_v2.wtml";
+const wtmlUrl = "items.wtml";
+const selectedItem = ref<Thumbnail | null>(null);
+
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -348,6 +359,8 @@ function handleSelection(item: Thumbnail) {
       trackObject: true,
     });
   }
+
+  selectedItem.value = item;
 }
 
 const ready = computed(() => layersLoaded.value && positionSet.value);
@@ -362,7 +375,9 @@ const smallSize = computed(() => smAndDown.value);
 const cssVars = computed(() => {
   return {
     "--accent-color": accentColor.value,
-    "--app-content-height": showTextSheet.value ? "66%" : "100%",
+    "--app-content-width": showTextSheet.value ? "66%" : "100%",
+    "--info-sheet-height": tall.value ? "34%" : "100%",
+    "--info-sheet-width": tall.value ? "100%" : "34%",
   };
 });
 
@@ -451,11 +466,11 @@ body {
 
 #main-content {
   position: fixed;
-  width: 100%;
-  height: var(--app-content-height);
+  height: 100%;
+  width: var(--app-content-width);
   overflow: hidden;
 
-  transition: height 0.1s ease-in-out;
+  transition: width 0.1s ease-in-out;
 }
 
 #app {
@@ -676,13 +691,20 @@ video {
   z-index: 10;
 }
 
-.bottom-sheet {
+.info-sheet {
   .v-overlay__content {
     align-self: flex-end;
     padding: 0;
     margin: 0;
     max-width: 100%;
-    height: 34%;
+    height: var(--info-sheet-height);
+    width: var(--info-sheet-width);
+  }
+
+  &.info-sheet-wide .v-overlay__content {
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
   #tabs {
@@ -747,5 +769,15 @@ video {
   .v-tabs:not(.v-tabs--vertical).v-tabs--right>.v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-slide-group--has-affixes) .v-slide-group__next, .v-tabs:not(.v-tabs--vertical):not(.v-tabs--right)>.v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-slide-group--has-affixes) .v-slide-group__prev {
     display: none;
   }
+}
+
+#selected-info {
+  position: absolute;
+  padding: 10px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.5);
+  top: 50px;
+  right: 20px;
+  height: 250px;
 }
 </style>
