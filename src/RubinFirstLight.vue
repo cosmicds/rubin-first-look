@@ -376,6 +376,7 @@ const cssVars = computed(() => {
   return {
     "--accent-color": accentColor.value,
     "--app-content-width": (!tall.value && showTextSheet.value) ? "66%" : "100%",
+    "--app-content-height": (tall.value && showTextSheet.value) ? "66%" : "100%",
     "--info-sheet-height": tall.value ? "34%" : "100%",
     "--info-sheet-width": tall.value ? "100%" : "34%",
   };
@@ -466,7 +467,7 @@ body {
 
 #main-content {
   position: fixed;
-  height: 100%;
+  height: var(--app-content-height);
   width: var(--app-content-width);
   overflow: hidden;
 
