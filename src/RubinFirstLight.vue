@@ -375,7 +375,7 @@ const smallSize = computed(() => smAndDown.value);
 const cssVars = computed(() => {
   return {
     "--accent-color": accentColor.value,
-    "--app-content-width": showTextSheet.value ? "66%" : "100%",
+    "--app-content-width": (!tall.value && showTextSheet.value) ? "66%" : "100%",
     "--info-sheet-height": tall.value ? "34%" : "100%",
     "--info-sheet-width": tall.value ? "100%" : "34%",
   };
