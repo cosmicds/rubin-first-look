@@ -73,7 +73,7 @@
         </icon-button>
         <folder-view
           v-if="folder"
-          :class="['folder-view', tall ? 'folder-view-tall' : '']"
+          :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
           flex-direction="column"
           @select="handleSelection"
@@ -141,7 +141,7 @@
 
     <v-dialog
       :style="cssVars"
-      :class="['info-sheet', !tall ? 'info-sheet-wide' : '']"
+      :class="['info-sheet', `info-sheet-${infoSheetLocation}`]"
       id="text-info-sheet"
       hide-overlay
       persistent
@@ -150,7 +150,7 @@
       :scrim="false"
       location="end"
       v-model="showTextSheet"
-      :transition="tall ? 'dialog-bottom-transition' : 'tab-reverse-transition'"
+      :transition="infoSheetTransition"
     >
       <v-card height="100%">
         <v-tabs
@@ -274,7 +274,6 @@ const touchscreen = supportsTouchscreen();
 // TODO: Determine this in a better way
 const { smAndDown } = useDisplay();
 
-const tall = computed(() => smAndDown.value);
 
 const props = withDefaults(defineProps<RubinFirstLightProps>(), {
   wwtNamespace: "rubin-first-light",
@@ -301,7 +300,6 @@ const tab = ref(0);
 const folder: Ref<Folder | null> = ref(null);
 const wtmlUrl = "items.wtml";
 const selectedItem = ref<Thumbnail | null>(null);
-
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -371,13 +369,22 @@ const isLoading = computed(() => !ready.value);
 /* Properties related to device/screen characteristics */
 const smallSize = computed(() => smAndDown.value);
 
+const infoFraction = 34;
+const infoSheetLocation = computed(() => smallSize.value ? "bottom" : "right");
+const infoSheetHeight = computed(() => infoSheetLocation.value === "bottom" ? `${infoFraction}%` : "100%");
+const infoSheetWidth = computed(() => infoSheetLocation.value === "bottom" ? "100%" : `${infoFraction}%`);
+const infoTextHeight = computed(() => infoSheetLocation.value === "bottom" ? `calc(${infoFraction}vh - 25px)` : "calc(100vh - 25px)");
+const infoSheetTransition = computed(() => infoSheetLocation.value === "bottom" ? "dialog-bottom-transition" : "tab-reverse-transition");
+
 /* This lets us inject component data into element CSS */
 const cssVars = computed(() => {
   return {
     "--accent-color": accentColor.value,
-    "--app-content-width": showTextSheet.value ? "66%" : "100%",
-    "--info-sheet-height": tall.value ? "34%" : "100%",
-    "--info-sheet-width": tall.value ? "100%" : "34%",
+    "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}%` : "100%",
+    "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}%` : "100%",
+    "--info-sheet-width": infoSheetWidth.value,
+    "--info-sheet-height": infoSheetHeight.value,
+    "--info-text-height": infoTextHeight.value,
   };
 });
 
@@ -466,7 +473,7 @@ body {
 
 #main-content {
   position: fixed;
-  height: 100%;
+  height: var(--app-content-height);
   width: var(--app-content-width);
   overflow: hidden;
 
@@ -701,10 +708,18 @@ video {
     width: var(--info-sheet-width);
   }
 
-  &.info-sheet-wide .v-overlay__content {
+  &.info-sheet-right .v-overlay__content {
     position: absolute;
     top: 0;
     right: 0;
+    max-height: 100%;
+    & .v-card, & .v-card .v-window {
+      height: 100%;
+    }
+    
+    & .info-tabs h3 {
+      font-size: 10pt;
+    }
   }
 
   #tabs {
@@ -713,7 +728,7 @@ video {
   }
   
   .info-text {
-    height: 33vh;
+    height: var(--info-text-height);
     padding-bottom: 25px;
   
     & a {
