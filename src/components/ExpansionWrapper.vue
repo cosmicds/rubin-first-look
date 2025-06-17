@@ -1,23 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 
+interface Props {
+  title: string;
+  content: string;
+  normallyOpen?: boolean;
+}
 
-const props = defineProps({
-  title: String,
-  content: String,
-  normallyOpen: { type: Boolean, default: false }
+withDefaults(defineProps<Props>(), {
+  normallyOpen: false,
 });
-
-
-const panel = ref<string[]>([]);
-function openPanel() {
-  panel.value = ['panel'];
-}
-
-if (props.normallyOpen) {
-  openPanel();
-}
-
 
 </script>
 
