@@ -68,6 +68,7 @@
       <infobox
         v-show="!showTextSheet"
         :places="places"
+        :start-place="selectedItem instanceof Place ? selectedItem : null"
         @read-more="showTextSheet = true"
       >
 

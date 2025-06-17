@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { D2R, distance, H2R } from "@wwtelescope/astro";
-import { Place, WWTControl } from "@wwtelescope/engine";
+import { Circle, Place, WWTControl } from "@wwtelescope/engine";
 import { engineStore } from "@wwtelescope/engine-pinia";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
@@ -35,6 +35,7 @@ interface Props {
   places: Place[];
   showReadMore?: boolean;
   zoomCutoff?: number;
+  startPlace?: Place;
 }
 
 
@@ -51,14 +52,15 @@ const store = engineStore();
 const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 const closestPlace = ref<Place | null>(null);
+let circle: Circle | null = null;
 
 function readMoreClicked() {
   emit("read-more");
 }
 
 function findClosest(places: Place[]): Place | null {
-  let closestDist: number | null = null;
-  let closest: Place | null = null;
+  let closest = closestPlace.value;
+  let closestDist = closest === null ? null : distance(closest.get_RA() * H2R, closest.get_dec() * D2R, raRad.value, decRad.value);
 
   places.forEach(place => {
     const dist = distance(place.get_RA() * H2R, place.get_dec() * D2R, raRad.value, decRad.value);
@@ -114,4 +116,30 @@ onMounted(updateClosest);
 watch(raRad, (_ra: number) => updateClosest());
 watch(decRad, (_dec: number) => updateClosest());
 watch(zoomDeg, (_zoom: number) => updateClosest());
+
+watch(closestPlace, (place: Place | null) => {
+  if (place === null) {
+    circle?.set_opacity(0);
+    return;
+  }
+
+  if (circle === null) {
+    circle = new Circle();
+    circle.set_id("infobox");
+    circle.set_lineWidth(3);
+    circle.set_lineColor("#ffffff");
+    circle.set_skyRelative(true);
+    store.addAnnotation(circle);
+  }
+
+  circle.set_opacity(1);
+  circle.setCenter(place.get_RA() * 15, place.get_dec());
+  circle.set_radius(place?.angularSize);
+});
+
+watch(() => props.startPlace, (place: Place | undefined) => {
+  if (place != null) {
+    closestPlace.value = place;
+  }
+});
 </script>
