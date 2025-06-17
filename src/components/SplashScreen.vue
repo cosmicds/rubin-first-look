@@ -47,6 +47,7 @@
       <div id="splash-screen-acknowledgements">
         <div id="splash-screen-logos">
           <credit-logos
+            :default-logos="['cosmicds', 'wwt']"
             :extra-logos = "[
               {
                 alt: 'Vera C. Rubin Observatory',

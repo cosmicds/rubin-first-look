@@ -91,7 +91,17 @@
 
     <div id="bottom-content">
       <div id="body-logos" v-if= "!smallSize">
-        <credit-logos/>
+        <credit-logos
+          :default-logos="['cosmicds', 'wwt']"
+          :extra-logos = "[
+              {
+                alt: 'Vera C. Rubin Observatory',
+                src: './rubin_white_2.png',
+                href: 'https://rubinobservatory.org/',
+                name: 'Rubin Observatory'
+              }
+            ]"
+        />
       </div>
     </div>
 
