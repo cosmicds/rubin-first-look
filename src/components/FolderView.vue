@@ -10,6 +10,11 @@
       :key="item.get_name()"
       :title="item.get_name()"
       @click="() => selectItem(item)"
+      @keydown.enter="() => selectItem(item)"
+      tabindex="0"
+      role="button"
+      :aria-label="item.get_name()"
+      :aria-selected="lastSelectedItem === item"
     >
       <img :src="item.get_thumbnailUrl()" :alt="item.get_name()" />
       <div

@@ -13,37 +13,12 @@
 
     <!-- This contains the splash screen content -->
 
-    <v-overlay
-      :model-value="showSplashScreen"
-      absolute
-      opacity="0.6"
-      :style="cssVars"
-      id="splash-overlay"
-    >
-      <div
-        id="splash-screen"
-        v-click-outside="closeSplashScreen"
-        :style="cssVars"
-      >
-        <font-awesome-icon
-          id="close-splash-button"
-          @click="closeSplashScreen"
-          @keyup.enter="closeSplashScreen"
-          icon="xmark"
-          tabindex="0"
-        />
-        <div id="splash-screen-text">
-          <p>Splash Screen Content</p>
-        </div>
-        <div id="splash-screen-acknowledgements" class="small">
-          This Data Story is brought to you by <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a>.
-          
-          <div id="splash-screen-logos">
-            <credit-logos logo-size="5vmin"/>
-          </div>
-        </div>
-      </div>
-    </v-overlay>
+
+    <splash-screen
+      title="Rubin First Light"
+      :cssVars="cssVars"
+      @close="closeSplashScreen"
+    ></splash-screen>
 
     <transition name="fade">
       <div
@@ -87,24 +62,46 @@
     </div>
 
     <div
-      id="selected-info"
+      :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
       v-if="selectedItem && !showTextSheet"
-    >
-      <div>{{ selectedItem.get_name() }}</div>
-      <div
-        v-if="selectedItem instanceof Place"
+    > 
+      <expansion-wrapper
+        collapse-to-fab
+        v-if="selectedItem && !showTextSheet"
+        :normally-open="true"
       >
-        <div v-html="selectedItem.htmlDescription"></div> 
+      <template #title>
+        <strong>{{ selectedItem.get_name() }}</strong>
+      </template>
+      
+      <template #content>
+        <div v-if="selectedItem instanceof Place">
+          <div v-html="selectedItem.htmlDescription"></div> 
+        </div>
+      </template>
+      
+      <template #actions>
         <v-btn @click="showTextSheet = true">Read More</v-btn>
-      </div>
-    </div>
-
+      </template>
+      </expansion-wrapper>
+  </div>
+    
 
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
     <div id="bottom-content">
       <div id="body-logos" v-if= "!smallSize">
-        <credit-logos/>
+        <credit-logos
+          :default-logos="['cosmicds', 'wwt']"
+          :extra-logos = "[
+              {
+                alt: 'Vera C. Rubin Observatory',
+                src: './rubin_white_2.png',
+                href: 'https://rubinobservatory.org/',
+                name: 'Rubin Observatory'
+              }
+            ]"
+        />
       </div>
     </div>
 
@@ -272,7 +269,7 @@ useWWTKeyboardControls(store);
 
 const touchscreen = supportsTouchscreen();
 // TODO: Determine this in a better way
-const { smAndDown } = useDisplay();
+const display = useDisplay();
 
 
 const props = withDefaults(defineProps<RubinFirstLightProps>(), {
@@ -286,15 +283,16 @@ const props = withDefaults(defineProps<RubinFirstLightProps>(), {
   }
 });
 
-const splash = new URLSearchParams(window.location.search).get("splash")?.toLowerCase() !== "false";
-const showSplashScreen = ref(splash);
 const backgroundImagesets = reactive<BackgroundImageset[]>([]);
 const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
-const accentColor = ref("#00BABC");
-const buttonColor = ref("#05B8BC");
+const rubinTeal = "#05B8BC";
+const rubinTurquoise = "#00BABC";
+const rubinCharcoal = "#313333";
+const accentColor = ref(rubinTurquoise);
+const buttonColor = ref(rubinTeal);
 const tab = ref(0);
 
 const folder: Ref<Folder | null> = ref(null);
@@ -367,7 +365,9 @@ const ready = computed(() => layersLoaded.value && positionSet.value);
 const isLoading = computed(() => !ready.value);
 
 /* Properties related to device/screen characteristics */
-const smallSize = computed(() => smAndDown.value);
+const smallSize = computed(() => {
+  return display.smAndDown.value && (display.height.value > 1.2 * display.width.value);
+});
 
 const infoFraction = 34;
 const infoSheetLocation = computed(() => smallSize.value ? "bottom" : "right");
@@ -380,8 +380,11 @@ const infoSheetTransition = computed(() => infoSheetLocation.value === "bottom" 
 const cssVars = computed(() => {
   return {
     "--accent-color": accentColor.value,
-    "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}%` : "100%",
-    "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}%` : "100%",
+    "--rubin-teal": rubinTeal,
+    "--rubin-turquoise": rubinTurquoise,
+    "--rubin-charcoal": rubinCharcoal,
+    "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100vh",
+    "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100vw",
     "--info-sheet-width": infoSheetWidth.value,
     "--info-sheet-height": infoSheetHeight.value,
     "--info-text-height": infoTextHeight.value,
@@ -422,7 +425,7 @@ const showVideoSheet = computed({
   when the splash screen is closed
 */
 function closeSplashScreen() {
-  showSplashScreen.value = false;
+  // showSplashScreen.value = false;
 }
 
 function selectSheet(sheetType: SheetType | null) {
@@ -438,10 +441,7 @@ function selectSheet(sheetType: SheetType | null) {
 </script>
 
 <style lang="less">
-@font-face {
-  font-family: "Highway Gothic Narrow";
-  src: url("./assets/HighwayGothicNarrow.ttf");
-}
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
 
 :root {
   --default-font-size: clamp(0.7rem, min(1.7vh, 1.7vw), 1.1rem);
@@ -468,7 +468,8 @@ body {
   padding: 0;
   overflow: hidden;
 
-  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-family: "Source Sans 3", Helvetica, sans-serif;
+  font-weight: regular;
 }
 
 #main-content {
@@ -586,65 +587,12 @@ body {
   gap: 5px;
 }
 
-#splash-overlay {
+#body-logos {
   position: fixed;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  bottom: 0;
+  right: 0;
 }
 
-#splash-screen {
-  color: #FFFFFF;
-  background-color: #000000;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  align-content: center;
-  justify-content: space-around;
-
-  font-family: 'Highway Gothic Narrow', 'Roboto', sans-serif;
-  font-size: min(8vw, 7vh);
-
-  border-radius: 10%;
-  border: min(1.2vw, 0.9vh) solid var(--accent-color);
-  overflow: auto;
-  padding-top: 4rem;
-  padding-bottom: 1rem;
-
-  @media (max-width: 699px) {
-    max-height: 80vh;
-    max-width: 90vw;
-  }
-
-  @media (min-width: 700px) {
-    max-height: 85vh;
-    max-width: min(70vw, 800px);
-  }
-
-  div {
-    margin-inline: auto;
-    text-align: center;
-  }
-
-  .small {
-    font-size: var(--default-font-size);
-    font-weight: bold;
-  }
-
-  #close-splash-button {
-    position: absolute;
-    top: 0.5rem;
-    right: 1.75rem;
-    text-align: end;
-    color: var(--accent-color);
-    font-size: min(8vw, 5vh);
-
-    &:hover {
-      cursor: pointer;
-    }
-  }
-}
 
 // From Sara Soueidan (https://www.sarasoueidan.com/blog/focus-indicators/) & Erik Kroes (https://www.erikkroes.nl/blog/the-universal-focus-state/)
 :focus-visible,
@@ -786,13 +734,20 @@ video {
   }
 }
 
-#selected-info {
+.selected-info {
   position: absolute;
   padding: 10px;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.5);
-  top: 50px;
-  right: 20px;
-  height: 250px;
+  top: 10px;
+  right: 10px;
+  max-width: 30%;
+}
+.selected-info.selected-info-tall {
+  max-width: 60%;
+  top: 20px;
+}
+
+// make sure we get the scrollbar for the folder view
+.fv-root { // account for button and padding
+  max-height: calc(var(--app-content-height) - 2rem - 2rem);
 }
 </style>
