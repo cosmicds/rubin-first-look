@@ -69,7 +69,9 @@
 
 
 <script setup lang="ts">
-import {computed} from 'vue';
+import { computed } from 'vue';
+import { FocusTrap } from "focus-trap-vue";
+
 export interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   cssVars?: any;
