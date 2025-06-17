@@ -1,6 +1,6 @@
 <template>
   <expansion-wrapper
-    v-show="closestPlace"
+    v-show="showFromZoom && (closestPlace !== null)"
     :normally-open="true"
   >
     <template #title>
@@ -22,10 +22,11 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { D2R, distance, H2R } from "@wwtelescope/astro";
-import { Place } from "@wwtelescope/engine";
+import { Place, WWTControl } from "@wwtelescope/engine";
 import { engineStore } from "@wwtelescope/engine-pinia";
 import { storeToRefs } from "pinia";
 import { onMounted } from "vue";
+import { computed } from "vue";
 
 interface Props {
   places: Place[];
@@ -46,21 +47,50 @@ const closestPlace = ref<Place | null>(null);
 
 function findClosest(places: Place[]): Place | null {
   let closestDist: number | null = null;
-  let closestPlace: Place | null = null;
+  let closest: Place | null = null;
 
   places.forEach(place => {
     const dist = distance(place.get_RA() * H2R, place.get_dec() * D2R, raRad.value, decRad.value);
     if ((!isNaN(dist)) && ((closestDist === null) || (dist < closestDist))) {
-      closestPlace = place;
+      closest = place;
       closestDist = dist;
     }
   });
 
-  return closestPlace;
+  return closest !== null && placeInView(closest) ? closest : null;
 }
 
+function wwtSmallestFov() {
+  const renderContext = WWTControl.singleton.renderContext;
+  const fovH = renderContext.get_fovAngle() * D2R;
+  const fovW = fovH * renderContext.width / renderContext.height;
+  return Math.min(fovW, fovH);
+}
+
+function placeInView(place: Place, fraction=1/3): boolean {
+  // checks if the center of place is in the current field of view
+  // Assume the Zoom level corresponds to the size of the image
+  // fraction_of_place is ~fraction of the place that must be in the current FOV
+  // by default, allow 1/3 of the place to be visible and still be considered in view
+  const iset = place.get_studyImageset() ?? place.get_backgroundImageset();
+  if (iset == null) {
+    return false;
+  }
+
+  const isetRa = iset.get_centerX() * D2R;
+  const isetDec = iset.get_centerY() * D2R;
+  const isetFov = (place.get_zoomLevel() / 6) * D2R;
+  
+  const curFov = wwtSmallestFov();
+
+  const dist = distance(isetRa, isetDec, raRad.value, decRad.value) + (fraction - 0.5) * isetFov;
+  return dist < curFov / 2;
+}
+
+const showFromZoom = computed(() => zoomDeg.value < props.zoomCutoff);
+
 function updateClosest() {
-  if (zoomDeg.value > props.zoomCutoff) {
+  if (!showFromZoom.value) {
     closestPlace.value = null;
     return;
   }
