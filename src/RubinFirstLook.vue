@@ -68,6 +68,7 @@
       <infobox
         v-show="!showTextSheet"
         :places="places"
+        @read-more="showTextSheet = true"
       >
 
       </infobox>

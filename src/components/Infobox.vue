@@ -1,6 +1,6 @@
 <template>
   <expansion-wrapper
-    v-show="showFromZoom && (closestPlace !== null)"
+    v-if="show"
     :normally-open="true"
   >
     <template #title>
@@ -14,7 +14,10 @@
     </template>
     
     <template #actions>
-      <v-btn @click="showReadMore">Read More</v-btn>
+      <v-btn
+        v-show="showReadMore"
+        @click="readMoreClicked"
+      >Read More</v-btn>
     </template>
   </expansion-wrapper>
 </template>
@@ -40,10 +43,18 @@ const props = withDefaults(defineProps<Props>(), {
   showReadMore: true,
 });
 
+const emit = defineEmits<{
+  (event: "read-more"): void
+}>();
+
 const store = engineStore();
 const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 const closestPlace = ref<Place | null>(null);
+
+function readMoreClicked() {
+  emit("read-more");
+}
 
 function findClosest(places: Place[]): Place | null {
   let closestDist: number | null = null;
@@ -88,6 +99,7 @@ function placeInView(place: Place, fraction=1/3): boolean {
 }
 
 const showFromZoom = computed(() => zoomDeg.value < props.zoomCutoff);
+const show = computed(() => closestPlace.value !== null && showFromZoom.value);
 
 function updateClosest() {
   if (!showFromZoom.value) {
