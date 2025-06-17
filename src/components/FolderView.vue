@@ -40,7 +40,7 @@ const emit = defineEmits<{
 }>();
 
 onMounted(() => {
-  const folderItems = [];
+  const folderItems: Place[] = [];
   const propItems = props.rootFolder.get_children() ?? [];
   for (const c of propItems) {
     if (c instanceof Place) {

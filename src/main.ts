@@ -4,6 +4,7 @@ import { FundingAcknowledgement, IconButton, CreditLogos } from "@cosmicds/vue-t
 import RubinFirstLook from "./RubinFirstLook.vue";
 import FolderView from "./components/FolderView.vue";
 import ExpansionWrapper from "./components/ExpansionWrapper.vue";
+import Infobox from "./components/Infobox.vue";
 import SplashScreen from "./components/SplashScreen.vue";
 
 import vuetify from "../plugins/vuetify";
@@ -60,6 +61,7 @@ createApp(RubinFirstLook, {
   .component('splash-screen', SplashScreen)
   .component('folder-view', FolderView)
   .component('expansion-wrapper', ExpansionWrapper)
+  .component('infobox', Infobox)
 
   // Mount
   .mount("#app");

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
 interface Props {
-  title: string;
-  content: string;
+  title?: string;
+  content?: string;
   normallyOpen?: boolean;
 }
 

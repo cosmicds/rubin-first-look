@@ -65,25 +65,12 @@
       :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
       v-if="selectedItem && !showTextSheet"
     > 
-      <expansion-wrapper
-        collapse-to-fab
-        v-if="selectedItem && !showTextSheet"
-        :normally-open="true"
+      <infobox
+        v-if="!showTextSheet"
+        :places="[]"
       >
-      <template #title>
-        <strong>{{ selectedItem.get_name() }}</strong>
-      </template>
-      
-      <template #content>
-        <div v-if="selectedItem instanceof Place">
-          <div v-html="selectedItem.htmlDescription"></div> 
-        </div>
-      </template>
-      
-      <template #actions>
-        <v-btn @click="showTextSheet = true">Read More</v-btn>
-      </template>
-      </expansion-wrapper>
+
+      </infobox>
   </div>
     
 
