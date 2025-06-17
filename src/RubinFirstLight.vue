@@ -87,16 +87,28 @@
     </div>
 
     <div
-      id="selected-info"
+      :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
       v-if="selectedItem && !showTextSheet"
     >
-      <div>{{ selectedItem.get_name() }}</div>
-      <div
-        v-if="selectedItem instanceof Place"
+      <expansion-wrapper
+        collapse-to-fab
+        v-if="selectedItem && !showTextSheet"
+        :normally-open="true"
       >
+      <template #title>
+        <strong>{{ selectedItem.get_name() }}</strong>
+      </template>
+      
+      <template #content>
+        <div v-if="selectedItem instanceof Place">
         <div v-html="selectedItem.htmlDescription"></div> 
+        </div>
+      </template>
+      
+      <template #actions>
         <v-btn @click="showTextSheet = true">Read More</v-btn>
-      </div>
+      </template>
+      </expansion-wrapper>
     </div>
 
 
@@ -272,7 +284,7 @@ useWWTKeyboardControls(store);
 
 const touchscreen = supportsTouchscreen();
 // TODO: Determine this in a better way
-const { smAndDown } = useDisplay();
+const display = useDisplay();
 
 
 const props = withDefaults(defineProps<RubinFirstLightProps>(), {
@@ -293,8 +305,11 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
-const accentColor = ref("#00BABC");
-const buttonColor = ref("#05B8BC");
+const rubinTeal = "#05B8BC";
+const rubinTurquoise = "#00BABC";
+const rubinCharcoal = "#313333";
+const accentColor = ref(rubinTurquoise);
+const buttonColor = ref(rubinTeal);
 const tab = ref(0);
 
 const folder: Ref<Folder | null> = ref(null);
@@ -367,7 +382,9 @@ const ready = computed(() => layersLoaded.value && positionSet.value);
 const isLoading = computed(() => !ready.value);
 
 /* Properties related to device/screen characteristics */
-const smallSize = computed(() => smAndDown.value);
+const smallSize = computed(() => {
+  return display.smAndDown.value && (display.height.value > 1.2 * display.width.value);
+});
 
 const infoFraction = 34;
 const infoSheetLocation = computed(() => smallSize.value ? "bottom" : "right");
@@ -380,8 +397,11 @@ const infoSheetTransition = computed(() => infoSheetLocation.value === "bottom" 
 const cssVars = computed(() => {
   return {
     "--accent-color": accentColor.value,
-    "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}%` : "100%",
-    "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}%` : "100%",
+    "--rubin-teal": rubinTeal,
+    "--rubin-turquoise": rubinTurquoise,
+    "--rubin-charcoal": rubinCharcoal,
+    "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100vh",
+    "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100vw",
     "--info-sheet-width": infoSheetWidth.value,
     "--info-sheet-height": infoSheetHeight.value,
     "--info-text-height": infoTextHeight.value,
@@ -438,10 +458,7 @@ function selectSheet(sheetType: SheetType | null) {
 </script>
 
 <style lang="less">
-@font-face {
-  font-family: "Highway Gothic Narrow";
-  src: url("./assets/HighwayGothicNarrow.ttf");
-}
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
 
 :root {
   --default-font-size: clamp(0.7rem, min(1.7vh, 1.7vw), 1.1rem);
@@ -468,7 +485,8 @@ body {
   padding: 0;
   overflow: hidden;
 
-  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-family: "Source Sans 3", Helvetica, sans-serif;
+  font-weight: regular;
 }
 
 #main-content {
@@ -786,9 +804,17 @@ video {
   }
 }
 
-#selected-info {
+.selected-info {
   position: absolute;
   padding: 10px;
+  top: 10px;
+  right: 10px;
+  max-width: 30%;
+}
+.selected-info.selected-info-tall {
+  max-width: 60%;
+  top: 20px;
+}
 
 // make sure we get the scrollbar for the folder view
 .fv-root { // account for button and padding

@@ -3,6 +3,7 @@ import Vue, { createApp, type Plugin } from "vue";
 import { FundingAcknowledgement, IconButton, CreditLogos } from "@cosmicds/vue-toolkit";
 import RubinFirstLight from "./RubinFirstLight.vue";
 import FolderView from "./components/FolderView.vue";
+import ExpansionWrapper from "./components/ExpansionWrapper.vue";
 
 import vuetify from "../plugins/vuetify";
 
@@ -56,6 +57,7 @@ createApp(RubinFirstLight, {
   .component('funding-acknowledgement', FundingAcknowledgement)
   .component('credit-logos', CreditLogos)
   .component('folder-view', FolderView)
+  .component('expansion-wrapper', ExpansionWrapper)
 
   // Mount
   .mount("#app");
