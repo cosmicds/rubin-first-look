@@ -789,10 +789,9 @@ video {
 #selected-info {
   position: absolute;
   padding: 10px;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.5);
-  top: 50px;
-  right: 20px;
-  height: 250px;
+
+// make sure we get the scrollbar for the folder view
+.fv-root { // account for button and padding
+  max-height: calc(var(--app-content-height) - 2rem - 2rem);
 }
 </style>
