@@ -90,6 +90,25 @@
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
     <div id="bottom-content">
+      <v-btn
+        class="control-icon"
+        style="pointer-events: auto;"
+        id="play-sequence-button"
+        :color="buttonColor"
+        @click="() => exampleGoTo()"
+        tabindex="0"
+      >
+        Go To Local WWT Imageset
+      </v-btn>
+      <v-slider
+        :model-value="1"
+        style="width: 100px; pointer-events: auto;"
+        @update:model-value="exampleSetOpacity"
+        min="0"
+        max="1"
+        step="0.01"
+        />
+        
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
           :default-logos="['cosmicds', 'wwt']"
@@ -250,7 +269,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, nextTick, type Ref } from "vue";
-import { Folder, Imageset, Place } from "@wwtelescope/engine";
+import { Folder, Imageset, Place, ImageSetLayer } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
@@ -299,6 +318,10 @@ const folder: Ref<Folder | null> = ref(null);
 const wtmlUrl = "items.wtml";
 const selectedItem = ref<Thumbnail | null>(null);
 
+
+import { applyImageSetLayerSetting } from "@wwtelescope/engine-helpers";
+const localWWTImageset = ref<{place: Place, layer: ImageSetLayer} | null>(null);
+
 onMounted(() => {
   store.waitForReady().then(async () => {
     skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
@@ -331,9 +354,66 @@ onMounted(() => {
         }
       }
     });
+    
+    // load the an WTML containing a single Imageset/Place
+    store.loadImageCollection({
+      // url: 'https://raw.githubusercontent.com/cosmicds/cds-website/main/public/comet_c2022-e3/C2022_E3.wtml',
+      url: 'http://127.0.0.1:49299/index.wtml',
+      loadChildFolders: false,
+    })
+      .then(sequenceFolderResult => {
+        // Get the children
+        const children = sequenceFolderResult.get_children();
+        if (children == null || children.length == 0) { return; }
+        
+        // We expect only a single item in the folder, which should be a Place
+        const item = children[0] as Place;
+        // let's also get the Imageset for this Place
+        const imageset = item.get_backgroundImageset() ?? item.get_studyImageset();
+        if (imageset == null) { return; }
+        
+        // Add the Imageset layer
+        store.addImageSetLayer({
+          url: imageset.get_url(),
+          mode: "autodetect",
+          name: imageset.get_name(),
+          goto: false
+        })
+          .then((layer) => {
+            // Keep the layer and place together in some array
+            localWWTImageset.value = ({ place: item, layer: layer });
+            applyImageSetLayerSetting(layer, ['opacity', 1]);
+          });
+      });
 
   });
 });
+
+
+function exampleGoTo() {
+  if (localWWTImageset.value !== null) {
+    const place = localWWTImageset.value.place;
+    const iset = place.get_backgroundImageset() ?? place.get_studyImageset();
+    if (iset === null) {
+      console.warn("No Imageset found for the local WWT Imageset");
+      return;
+    }
+    store.gotoRADecZoom({
+      raRad: iset.get_centerX() * Math.PI / 180,
+      decRad: iset.get_centerY() * Math.PI / 180,
+      zoomDeg: place.get_zoomLevel(),
+      instant: true,
+    });
+  }
+}
+
+function exampleSetOpacity(opacity: number) {
+  if (localWWTImageset.value !== null) {
+    applyImageSetLayerSetting(localWWTImageset.value.layer, ['opacity', opacity]);
+  }
+}
+
+
 
 function handleSelection(item: Thumbnail) {
   if (item instanceof Imageset) {
@@ -351,7 +431,7 @@ function handleSelection(item: Thumbnail) {
     store.gotoTarget({
       place: item,
       noZoom: false,
-      instant: false,
+      instant: true,
       trackObject: true,
     });
   }
