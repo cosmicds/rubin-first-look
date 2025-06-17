@@ -66,8 +66,8 @@
       v-if="selectedItem && !showTextSheet"
     > 
       <infobox
-        v-if="!showTextSheet"
-        :places="[]"
+        v-show="!showTextSheet"
+        :places="places"
       >
 
       </infobox>
@@ -286,6 +286,8 @@ const folder: Ref<Folder | null> = ref(null);
 const wtmlUrl = "items.wtml";
 const selectedItem = ref<Thumbnail | null>(null);
 
+const places = ref<Place[]>([]);
+
 onMounted(() => {
   store.waitForReady().then(async () => {
     skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
@@ -304,6 +306,11 @@ onMounted(() => {
       loadChildFolders: false,
     }).then(resultFolder => {
       folder.value = resultFolder; 
+      (folder.value.get_children() ?? []).forEach(item => {
+        if (item instanceof Place) {
+          places.value.push(item);
+        }
+      });
     });
 
     store.loadImageCollection({

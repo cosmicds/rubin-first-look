@@ -20,21 +20,56 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { D2R, distance, H2R } from "@wwtelescope/astro";
 import { Place } from "@wwtelescope/engine";
-// import { engineStore } from "@wwtelescope/engine-pinia";
+import { engineStore } from "@wwtelescope/engine-pinia";
+import { storeToRefs } from "pinia";
+import { onMounted } from "vue";
 
 interface Props {
   places: Place[];
   showReadMore?: boolean;
+  zoomCutoff?: number;
 }
 
-// const store = engineStore();
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
+  zoomCutoff: 10,
   showReadMore: true,
 });
 
+const store = engineStore();
+const { raRad, decRad, zoomDeg } = storeToRefs(store);
+
 const closestPlace = ref<Place | null>(null);
 
+function findClosest(places: Place[]): Place | null {
+  let closestDist: number | null = null;
+  let closestPlace: Place | null = null;
+
+  places.forEach(place => {
+    const dist = distance(place.get_RA() * H2R, place.get_dec() * D2R, raRad.value, decRad.value);
+    if ((!isNaN(dist)) && ((closestDist === null) || (dist < closestDist))) {
+      closestPlace = place;
+      closestDist = dist;
+    }
+  });
+
+  return closestPlace;
+}
+
+function updateClosest() {
+  if (zoomDeg.value > props.zoomCutoff) {
+    closestPlace.value = null;
+    return;
+  }
+  closestPlace.value = findClosest(props.places);
+}
+
+onMounted(updateClosest);
+
+watch(raRad, (_ra: number) => updateClosest());
+watch(decRad, (_dec: number) => updateClosest());
+watch(zoomDeg, (_zoom: number) => updateClosest());
 </script>
