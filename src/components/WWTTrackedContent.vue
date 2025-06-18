@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /*  eslint-disable @typescript-eslint/no-unused-vars */
 import { onMounted, defineProps, ref, withDefaults, defineSlots, watch } from 'vue';
-import { useTrackedElements, useTrackedPosition, TrackedHTMLElement } from '@/composables/useTrackedElements';
+import { useTrackedElements, UseTrackedElementsReturn, TrackedHTMLElement } from '@/composables/useTrackedElements';
 
 import { Place } from '@wwtelescope/engine';
 import { engineStore } from '@wwtelescope/engine-pinia';
@@ -101,12 +101,17 @@ function onClick() {
   }
 }
 
-const ute = useTrackedElements(props.containerID, props.store);
+const ute = ref<UseTrackedElementsReturn | null>(null);
+
 
 onMounted(() => {
   props.store.waitForReady().then(() => {
-    
-    trackedElement.value = ute.placeElement(
+    ute.value = useTrackedElements(props.containerID, props.store) as unknown as typeof ute.value;
+    if (!ute.value) {
+      console.error('useTrackedElements returned null');
+      return;
+    }
+    trackedElement.value = ute.value.placeElement(
       parent.value as HTMLElement | null,
       {
         ra: ra.value + offsetRA.value,
@@ -137,14 +142,16 @@ watch(() => [props.ra, props.dec], ([newRa, newDec]) => {
   if (!trackedElement.value) return;
   trackedElement.value.trackedData.dec = newDec + offsetDec.value;
   trackedElement.value.trackedData.ra = newRa + offsetRA.value;
-  ute.updateElements();
+  if (ready.value && ute.value) {
+    ute.value.updateElements();
+  }
 }, { immediate: true });
 
 
 
 
 const slots = defineSlots<{
-  default: { class: string; on: Record<string, (event: Event) => void> };
+  default: { on: Record<string, (event: Event) => void> };
 }>();
 
 

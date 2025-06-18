@@ -67,7 +67,7 @@ export interface TrackedHTMLElement extends HTMLElement {
   trackedData: TrackedElementData;
 }
 
-type UseTrackedElementsReturn = {
+export type UseTrackedElementsReturn = {
   trackedElements: Ref<TrackedHTMLElement[]>;
   createTrackedElement: (pt: TrackedElementData, tag?: string, name?: string) => TrackedHTMLElement;
   removeTrackedElement: (el: TrackedHTMLElement) => void;
@@ -154,7 +154,7 @@ export function useTrackedPosition(_ra: Ref<Degree> | Degree, _dec: Ref<Degree> 
 let instance: UseTrackedElementsReturn | null = null;
 export function useTrackedElements(parentID: string | null, store: WWTEngineStore): UseTrackedElementsReturn {
   if (instance) {
-    return instance;
+    return instance as UseTrackedElementsReturn;
   }
   // WWT setup
   const parentElement = ref<HTMLElement | null>(null);
