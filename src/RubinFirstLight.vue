@@ -10,8 +10,12 @@
       :wwt-namespace="wwtNamespace"
     ></WorldWideTelescope>
 
-
-    <!-- This contains the splash screen content -->
+    <div id="marker-layer" ref="parent">
+      <!-- place makrers here -->
+      <div id="marker-container">
+      </div>
+      
+    </div>
 
 
     <splash-screen
@@ -243,6 +247,12 @@
         </v-window>
       </v-card>
     </v-dialog>
+    
+    <v-card
+      id="tracked-elements-card"
+      position="absolute"
+      >This is a card tracked to the sky.
+    </v-card>
 
   </div>
 </v-app>
@@ -299,6 +309,38 @@ const folder: Ref<Folder | null> = ref(null);
 const wtmlUrl = "items.wtml";
 const selectedItem = ref<Thumbnail | null>(null);
 
+import { useTrackedElements } from "./composables/useTrackedElements";
+const ute = useTrackedElements("marker-container", store);
+
+
+function createTrackedElementsFromPlace(place: Place) {
+  const iset = place.get_backgroundImageset() ?? place.get_studyImageset();
+  if (iset === null) {
+    console.warn(`Place ${place.get_name()} does not have a background or study imageset.`);
+    return;
+  }
+  
+  const ra = iset.get_centerX();
+  const dec = iset.get_centerY();
+  
+  if (ra === null || dec === null) {
+    console.warn(`Place ${place.get_name()} does not have a valid center position.`);
+    return;
+  }
+  
+  const el = ute.createTrackedElement(
+    {
+      ra: ra, 
+      dec: dec
+    },
+    'div',
+    place.get_name(),
+  );
+  el.classList.add("auto-tracked-element");
+  ute.getMarkerLayer()?.append(el);
+  return el;
+}
+
 onMounted(() => {
   store.waitForReady().then(async () => {
     skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
@@ -317,8 +359,17 @@ onMounted(() => {
       loadChildFolders: false,
     }).then(resultFolder => {
       folder.value = resultFolder; 
+      const children = resultFolder.get_children();
+      if (children !== null) {
+        children.forEach(item => {
+          if (item instanceof Place) {
+            const el = createTrackedElementsFromPlace(item);
+            if (el) {el.innerText = item.get_name();}
+          }
+        });
+      } 
     });
-
+    
     store.loadImageCollection({
       url: "bg.wtml",
       loadChildFolders: false,
@@ -332,8 +383,19 @@ onMounted(() => {
       }
     });
 
+  }).then(() => {
+    ute.hideElementByName("JWST Carina MIRI");
+    ute.placeElement(
+      document.querySelector("#tracked-elements-card") as HTMLElement,
+      {
+        ra: 159.21261854583,
+        dec: -58.62001801087, // Example Dec
+      }
+    );
+
   });
 });
+
 
 function handleSelection(item: Thumbnail) {
   if (item instanceof Imageset) {
@@ -351,7 +413,7 @@ function handleSelection(item: Thumbnail) {
     store.gotoTarget({
       place: item,
       noZoom: false,
-      instant: false,
+      instant: true,
       trackObject: true,
     });
   }
@@ -749,5 +811,36 @@ video {
 // make sure we get the scrollbar for the folder view
 .fv-root { // account for button and padding
   max-height: calc(var(--app-content-height) - 2rem - 2rem);
+}
+
+
+#marker-layer {
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  contain: strict;
+}
+
+#marker-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+
+.auto-tracked-element {
+  width: auto;
+  padding: 0.5em;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.51);
+  backdrop-filter: blur(5px);
+  border-radius: 5px;
 }
 </style>
