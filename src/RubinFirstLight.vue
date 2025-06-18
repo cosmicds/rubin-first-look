@@ -9,7 +9,7 @@
     <WorldWideTelescope
       :wwt-namespace="wwtNamespace"
     ></WorldWideTelescope>
-
+    
     <div id="marker-layer" ref="parent">
       <!-- place makrers here -->
       <div id="marker-container">
@@ -248,16 +248,6 @@
       </v-card>
     </v-dialog>
     
-    <v-card
-      id="tracked-elements-card"
-      position="absolute"
-      :style="{
-        top:  tec.y + 'px',
-        left: tec.x + 'px',
-      }"
-      >This is a card tracked to the sky.
-    </v-card>
-
   </div>
 </v-app>
 </template>
@@ -371,7 +361,14 @@ onMounted(() => {
         children.forEach(item => {
           if (item instanceof Place) {
             const el = createTrackedElementsFromPlace(item);
-            if (el) {el.innerText = item.get_name();}
+            if (el) {
+              el.innerText = item.get_name();
+              el.tabIndex = 0;
+              // add a click handler to the element
+              el.addEventListener("click", () => {
+                console.log(`Clicked on place: ${item.get_name()}`);
+              });
+            }
           }
         });
       } 
@@ -392,23 +389,6 @@ onMounted(() => {
 
   }).then(() => {
     ute.hideElementByName("JWST Carina MIRI");
-    // ute.placeElement(
-    //   document.querySelector("#tracked-elements-card") as HTMLElement,
-    //   {
-    //     ra: 159.21261854583,
-    //     dec: -58.62001801087, // Example Dec
-    //   }
-    // );
-    const { screenPoint } = useTrackedPosition(
-      159.21261854583, // Example RA
-      -58.62001801087, // Example Dec
-      store
-    );
-    // Watch the `screenPoint` and update `tec` accordingly
-    watch(screenPoint, (newPoint) => {
-      tec.value = newPoint;
-    });
-
   });
 });
 
@@ -828,6 +808,13 @@ video {
   max-height: calc(var(--app-content-height) - 2rem - 2rem);
 }
 
+.auto-tracked-element {
+  pointer-events: auto;
+}
+
+.auto-tracked-element:hover {
+  background-color: red;
+}
 
 #marker-layer {
   z-index: 0;
