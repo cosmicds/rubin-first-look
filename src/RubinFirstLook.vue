@@ -253,7 +253,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, nextTick, type Ref, watch } from "vue";
+import { ref, reactive, computed, onMounted, nextTick, type Ref } from "vue";
 import { Folder, Imageset, Place } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
@@ -335,8 +335,6 @@ function createTrackedElementsFromPlace(place: Place) {
   return el;
 }
 
-import { useTrackedPosition } from "./composables/useTrackedElements";
-const tec = ref({ x: 0, y: 0 });
 
 onMounted(() => {
   store.waitForReady().then(async () => {
