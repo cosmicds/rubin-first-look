@@ -74,16 +74,53 @@
         @read-more="showTextSheet = true"
       >
       </infobox>
-      <v-checkbox
-        v-model="showCircle"
-        label="Show circle"
-      ></v-checkbox>
   </div>
     
 
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
     <div id="bottom-content">
+      <div id="controls-row">
+        <div
+          id="options"
+        >
+          <div id="options-top-row">
+            <icon-button
+              :fa-icon="showControls ? 'chevron-down' : 'gear'"
+              :color="accentColor"
+              @activate="showControls = !showControls"
+              tabindex="0"
+              :border="false"
+            ></icon-button>
+          </div>
+          <div
+            id="options-content"
+            v-if="showControls"
+          >
+            <v-checkbox
+              v-model="showCircle"
+              label="Show circle"
+              :color="accentColor"
+              hide-details
+              density="compact"
+            ></v-checkbox>
+            <v-checkbox
+              v-model="showLabels"
+              label="Show labels"
+              :color="accentColor"
+              hide-details
+              density="compact"
+            ></v-checkbox>
+            <v-checkbox
+              v-model="showConstellations"
+              label="Show constellations"
+              :color="accentColor"
+              hide-details
+              density="compact"
+            ></v-checkbox>
+          </div>
+        </div>
+      </div>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
           :default-logos="['cosmicds', 'wwt']"
@@ -301,12 +338,16 @@ const currentPlace = ref<Place | null>(null);
 
 const INFOBOX_ZOOM_CUTOFF = 10;
 let circle: Circle | null = null;
+const showControls = ref(false);
 const showCircle = ref(true);
+const showLabels = ref(true);
+const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
 
 import { useTrackedElements } from "./composables/useTrackedElements";
 const ute = useTrackedElements("marker-container", store);
+const { hideElementByName, showElementByName } = ute;
 
 
 function createTrackedElementsFromPlace(place: Place) {
@@ -573,7 +614,15 @@ function onZoomChange(_zoomDeg: number) {
 watch(raRad, (_ra: number) => updateClosestPlace());
 watch(decRad, (_dec: number) => updateClosestPlace());
 watch(zoomDeg, onZoomChange);
-watch(showCircle, (_value: boolean) => updateCircle(currentPlace.value));
+watch(showCircle, (_show: boolean) => updateCircle(currentPlace.value));
+watch(showConstellations, (show: boolean) => {
+  store.applySetting(["showConstellationFigures", show]);
+  store.applySetting(["showConstellationLabels", show]);
+});
+watch(showLabels, (show: boolean) => {
+  const updater = show ? showElementByName : hideElementByName;
+  places.forEach(place => updater(place.get_name()));
+});
 watch(currentPlace, updateCircle);
 </script>
 
@@ -719,8 +768,8 @@ body {
   display: flex;
   flex-direction: column;
   position: absolute;
-  bottom: 1rem;
-  right: 1rem;
+  bottom: 0;
+  right: 0;
   width: calc(100% - 2rem);
   pointer-events: none;
   align-items: center;
@@ -728,9 +777,7 @@ body {
 }
 
 #body-logos {
-  position: fixed;
-  bottom: 0;
-  right: 0;
+  align-self: flex-end;
 }
 
 
@@ -930,5 +977,30 @@ video {
   background-color: rgba(0, 0, 0, 0.51);
   backdrop-filter: blur(5px);
   border-radius: 5px;
+}
+
+#controls-row {
+  padding: 5px;
+  width: 100%;
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+#options {
+  background: black;
+  border: 1px solid var(--accent-color);
+  border-radius: 2px;
+  align-self: flex-end;
+  pointer-events: auto;
+
+  .icon-wrapper {
+    border: none;
+  }
+
+  #options-top-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
 }
 </style>
