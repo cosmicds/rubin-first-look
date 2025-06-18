@@ -6,7 +6,7 @@ import FolderView from "./components/FolderView.vue";
 import ExpansionWrapper from "./components/ExpansionWrapper.vue";
 import Infobox from "./components/Infobox.vue";
 import SplashScreen from "./components/SplashScreen.vue";
-
+import WWTTrackedContent from "./components/WWTTrackedContent.vue";
 import vuetify from "../plugins/vuetify";
 
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -66,6 +66,7 @@ createApp(RubinFirstLook, {
   .component('folder-view', FolderView)
   .component('expansion-wrapper', ExpansionWrapper)
   .component('infobox', Infobox)
+  .component('wwt-tracked-content', WWTTrackedContent)
 
   // Mount
   .mount("#app");

@@ -9,14 +9,34 @@
     <WorldWideTelescope
       :wwt-namespace="wwtNamespace"
     ></WorldWideTelescope>
+    <wwt-tracked-content
+      v-if="ready"
+      class="first-place"
+      :ra="159"
+      :dec="-57"
+      name="First Place"
+      :store="store"
+      :visible="true"
+      center-on-click
+      instant
+      zoom-deg="60"
+      debug
+      >
+    </wwt-tracked-content>
     
-    <div id="marker-layer" ref="parent">
-      <!-- place makrers here -->
-      <div id="marker-container">
-      </div>
-      
-    </div>
-
+    <wwt-tracked-content
+      v-for="place in places"
+      :key="place.get_name()"
+      :place="place"
+      :store="store"
+      :visible="true"
+      v-slot="props"
+      debug
+      @click.prevent="handleSelection(place)"
+      >
+        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+    </wwt-tracked-content>
+    
 
     <splash-screen
       title="Rubin First Look"
@@ -346,38 +366,8 @@ const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOF
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
 
 import { useTrackedElements } from "./composables/useTrackedElements";
-const ute = useTrackedElements("marker-container", store);
+const ute = useTrackedElements("", store);
 const { hideElementByName, showElementByName } = ute;
-
-
-function createTrackedElementsFromPlace(place: Place) {
-  const iset = place.get_backgroundImageset() ?? place.get_studyImageset();
-  if (iset === null) {
-    console.warn(`Place ${place.get_name()} does not have a background or study imageset.`);
-    return;
-  }
-  
-  const ra = iset.get_centerX();
-  const dec = iset.get_centerY();
-  
-  if (ra === null || dec === null) {
-    console.warn(`Place ${place.get_name()} does not have a valid center position.`);
-    return;
-  }
-  
-  const el = ute.createTrackedElement(
-    {
-      ra: ra, 
-      dec: dec
-    },
-    'div',
-    place.get_name(),
-  );
-  el.classList.add("auto-tracked-element");
-  ute.getMarkerLayer()?.append(el);
-  return el;
-}
-
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -402,15 +392,15 @@ onMounted(() => {
         children.forEach(item => {
           if (item instanceof Place) {
             places.push(item);
-            const el = createTrackedElementsFromPlace(item);
-            if (el) {
-              el.innerText = item.get_name();
-              el.tabIndex = 0;
-              // add a click handler to the element
-              el.addEventListener("click", () => {
-                console.log(`Clicked on place: ${item.get_name()}`);
-              });
-            }
+            // const el = createTrackedElementsFromPlace(item);
+            // if (el) {
+            //   el.innerText = item.get_name();
+            //   el.tabIndex = 0;
+            //   // add a click handler to the element
+            //   el.addEventListener("click", () => {
+            //     console.log(`Clicked on place: ${item.get_name()}`);
+            //   });
+            // }
           }
         });
       } 
@@ -941,42 +931,26 @@ video {
   max-height: calc(var(--app-content-height) - 2rem - 2rem);
 }
 
-.auto-tracked-element {
+
+
+
+.tracked-element {
   pointer-events: auto;
+  transition: scale 0.2s ease-in-out;
 }
 
-.auto-tracked-element:hover {
-  background-color: red;
+.tracked-element:hover {
+  scale: 1.2;
 }
 
-#marker-layer {
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  contain: strict;
-}
-
-#marker-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-}
-
-
-.auto-tracked-element {
+.tracked-places {
   width: auto;
   padding: 0.5em;
   color: white;
   background-color: rgba(0, 0, 0, 0.51);
   backdrop-filter: blur(5px);
   border-radius: 5px;
+  // transform: translate(-50%, 50%); // center on the point
 }
 
 #controls-row {

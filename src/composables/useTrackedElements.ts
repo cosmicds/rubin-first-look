@@ -75,7 +75,7 @@ type UseTrackedElementsReturn = {
   addTrackedElement: (element: TrackedHTMLElement) => void;
   updateOffScreenElements: Ref<boolean>;
   getScreenPositionAndVisibility: (el: TrackedHTMLElement) => [ScreenPosition, boolean];
-  placeElement: (el: HTMLElement, pt: LocationDegrees) => TrackedHTMLElement;
+  placeElement: (_el: HTMLElement | string | null, pt: LocationDegrees, name: string) => TrackedHTMLElement;
   getMarkerLayer: () => HTMLElement | null;
   hideElementByName: (name: string) => void;
   showElementByName: (name: string) => void;
@@ -151,10 +151,29 @@ export function useTrackedPosition(_ra: Ref<Degree> | Degree, _dec: Ref<Degree> 
 /**
  * Sets up and manages tracked HTML elements that move with the WWT frame.
  */
+let instance: UseTrackedElementsReturn | null = null;
 export function useTrackedElements(parentID: string | null, store: WWTEngineStore): UseTrackedElementsReturn {
+  if (instance) {
+    return instance;
+  }
   // WWT setup
   const parentElement = ref<HTMLElement | null>(null);
   const ready = ref(false);
+  const trackedElements = ref<TrackedHTMLElement[]>([]);
+  const parentElementRect = ref(null as DOMRect | null);
+  const resizeObserver = ref(null as ResizeObserver | null);
+  const updateOffScreenElements = ref(false);
+
+  const elementVisibilityCache = new Map<string, 'hidden' | 'visible'>();
+  const observer = new MutationObserver(() => {
+    elementVisibilityCache.forEach((visibility, name) => {
+      const el = getElementByName(name);
+      if (el) {
+        el.style.visibility = visibility;
+        elementVisibilityCache.delete(name);
+      }
+    });
+  });
 
   function initializeParentElement() {
     if (parentID !== null && parentID !== '') {
@@ -168,38 +187,37 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
     parentElement.value = store.$wwt.inst.ctl.canvas.parentElement as HTMLElement;
   }
 
-  const parentElementRect = ref(null as DOMRect | null);
-  const resizeObserver = ref(null as ResizeObserver | null);
-
-  const trackedElements = ref<TrackedHTMLElement[]>([]);
-  const updateOffScreenElements = ref(false);
-  
-
-  const addTrackedElement = (element: TrackedHTMLElement) => {
-    trackedElements.value.push(element);
-  };
   
   function getMarkerLayer(): HTMLElement | null {
     return parentElement.value as HTMLElement ?? null;
   }
 
+  const addTrackedElement = (element: TrackedHTMLElement) => {
+    trackedElements.value.push(element);
+  };
+  
+  function applyUniformStyles(el: HTMLElement) {
+    el.style.position = 'absolute';
+    el.style.transformOrigin = 'center center';
+  }
 
   /**
    * Places an HTML element at a specified RA/Dec location.
    * @param _el {HTMLElement | string | null} The ID for the element (or the element itself).
    * @param pt {ra: Degree, dec: Degree, ....} Other values will be added to the elements trackedData attribute
    */
-  function placeElement(_el: HTMLElement | string | null, pt: TrackedElementData): TrackedHTMLElement {
+  function placeElement(_el: HTMLElement | string | null, pt: TrackedElementData, name: string): TrackedHTMLElement {
     const el = resolveElement(_el);
     if (el === null) {
       console.warn('Element is null, cannot place it.');
       return null as unknown as TrackedHTMLElement;
     }
 
-    el.style.position = 'absolute';
+    applyUniformStyles(el);
 
     el.classList.add('tracked-element');
     (el as TrackedHTMLElement).trackedData = pt as TrackedElementData;
+    el.dataset.name = name;
 
     addTrackedElement(el as TrackedHTMLElement);
 
@@ -208,7 +226,7 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
 
   function _createElement(pt: { x: number, y: number }, tag = "div"): HTMLElement {
     const marker = document.createElement(tag);
-    marker.style.position = 'absolute';
+    applyUniformStyles(marker);
     marker.style.left = `${pt.x}px`;
     marker.style.top = `${pt.y}px`;
     return marker;
@@ -304,6 +322,8 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
     const el = getElementByName(name);
     if (el) {
       el.style.visibility = 'hidden';
+    } else {
+      elementVisibilityCache.set(name, 'hidden');
     }
   }
 
@@ -311,6 +331,8 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
     const el = getElementByName(name);
     if (el) {
       el.style.visibility = 'visible';
+    } else {
+      elementVisibilityCache.set(name, 'visible');
     }
   }
 
@@ -345,16 +367,18 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
         ready.value = true;
       }
       
-      
     });
+
+    observer.observe(document.body, { childList: true, subtree: true });
   });
 
   onUnmounted(() => {
     resizeObserver.value?.disconnect();
     trackedElements.value.forEach((el) => el.remove());
+    observer.disconnect();
   });
 
-  return {
+  instance = {
     trackedElements: trackedElements as Ref<TrackedHTMLElement[]>,
     createTrackedElement,
     removeTrackedElement,
@@ -367,4 +391,6 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
     hideElementByName,
     showElementByName,
   };
+  
+  return instance;
 }
