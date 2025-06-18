@@ -19,7 +19,7 @@
 
 
     <splash-screen
-      title="Rubin First Light"
+      title="Rubin First Look"
       :cssVars="cssVars"
       @close="closeSplashScreen"
     ></splash-screen>
@@ -262,7 +262,7 @@ import { useDisplay } from "vuetify";
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
-export interface RubinFirstLightProps {
+export interface RubinFirstLookProps {
   wwtNamespace?: string;
   initialCameraParams?: CameraParams;
 }
@@ -276,7 +276,7 @@ const touchscreen = supportsTouchscreen();
 const display = useDisplay();
 
 
-const props = withDefaults(defineProps<RubinFirstLightProps>(), {
+const props = withDefaults(defineProps<RubinFirstLookProps>(), {
   wwtNamespace: "rubin-first-light",
   initialCameraParams: () => {
     return {
