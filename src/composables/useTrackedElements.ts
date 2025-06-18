@@ -1,4 +1,4 @@
-import { ref, watch, onUnmounted, onMounted, type Ref } from 'vue';
+import { ref, watch, onUnmounted, onMounted, type Ref, computed, toValue, toRef } from 'vue';
 import { engineStore } from '@wwtelescope/engine-pinia';
 export interface WWTEngineStore extends ReturnType<typeof engineStore> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,9 +26,13 @@ export function checkPointContainedByDiv(point: { x: number; y: number }, divRec
   return point.x >= 0 && point.x <= window.innerWidth && point.y >= 0 && point.y <= window.innerHeight;
 }
 
+export type Degree = number;
+export type Radian = number;
+export type HourAngle = number;
+
 export type LocationDegrees = {
-  ra: number;
-  dec: number;
+  ra: Degree;
+  dec: Degree;
 };
 
 export type ScreenPosition = {
@@ -57,6 +61,59 @@ type UseTrackedElementsReturn = {
   hideElementByName: (name: string) => void;
   showElementByName: (name: string) => void;
 };
+
+
+export function useTrackedPosition(_ra: Ref<Degree> | Degree, _dec: Ref<Degree> | Degree, store: WWTEngineStore)  {
+  const ready = ref(false);
+  store.waitForReady().then(() => {
+    ready.value = true;
+    updatePosition = () => {
+      if (!ready.value) {
+        console.warn('WWT Engine is not ready yet.');
+        return;
+      }
+      screenPoint.value = store.findScreenPointForRADec(worldPoint.value);
+    };
+  });
+  
+  const ra = toRef(_ra) as Ref<Degree>;
+  const dec = toRef(_dec) as Ref<Degree>;
+  
+  const worldPoint = computed(() => {
+    return { ra: toValue(ra) as Degree, dec: toValue(dec) as Degree };
+  });
+  
+  const toRad = ({ ra, dec }: LocationDegrees): { ra: Radian; dec: Radian } => {
+    return {
+      ra: (ra * Math.PI) / 180 as Radian,
+      dec: (dec * Math.PI) / 180 as Radian,
+    };
+  };
+  
+  const worldPointRad = computed(() => toRad(worldPoint.value));
+  
+  
+  const screenPoint = ref<ScreenPosition>({ x: 0, y: 0 });
+
+  let updatePosition = () => {
+    console.warn('WWT Engine is not ready yet.');
+  };
+
+
+  watch(() => [store.raRad, store.decRad, store.zoomDeg, store.rollRad], () => {
+    updatePosition();
+  });
+  
+  watch([ra, dec], () => {
+    console.log(`Updating position for RA: ${ra.value}, Dec: ${dec.value}`);
+    updatePosition();
+  });
+  
+  
+  updatePosition();
+ 
+  return { screenPoint, worldPoint, worldPointRad, ra, dec };
+}
 
 /**
  * Sets up and manages tracked HTML elements that move with the WWT frame.
@@ -239,7 +296,7 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
     }
   });
 
-  watch(store, () => {
+  watch(() => [store.raRad, store.decRad, store.zoomDeg, store.rollRad], () => {
     updateElements();
   });
 

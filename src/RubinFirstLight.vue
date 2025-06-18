@@ -251,6 +251,10 @@
     <v-card
       id="tracked-elements-card"
       position="absolute"
+      :style="{
+        top:  tec.y + 'px',
+        left: tec.x + 'px',
+      }"
       >This is a card tracked to the sky.
     </v-card>
 
@@ -259,7 +263,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, nextTick, type Ref } from "vue";
+import { ref, reactive, computed, onMounted, nextTick, type Ref, watch } from "vue";
 import { Folder, Imageset, Place } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
@@ -341,6 +345,9 @@ function createTrackedElementsFromPlace(place: Place) {
   return el;
 }
 
+import { useTrackedPosition } from "./composables/useTrackedElements";
+const tec = ref({ x: 0, y: 0 });
+
 onMounted(() => {
   store.waitForReady().then(async () => {
     skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
@@ -385,17 +392,25 @@ onMounted(() => {
 
   }).then(() => {
     ute.hideElementByName("JWST Carina MIRI");
-    ute.placeElement(
-      document.querySelector("#tracked-elements-card") as HTMLElement,
-      {
-        ra: 159.21261854583,
-        dec: -58.62001801087, // Example Dec
-      }
+    // ute.placeElement(
+    //   document.querySelector("#tracked-elements-card") as HTMLElement,
+    //   {
+    //     ra: 159.21261854583,
+    //     dec: -58.62001801087, // Example Dec
+    //   }
+    // );
+    const { screenPoint } = useTrackedPosition(
+      159.21261854583, // Example RA
+      -58.62001801087, // Example Dec
+      store
     );
+    // Watch the `screenPoint` and update `tec` accordingly
+    watch(screenPoint, (newPoint) => {
+      tec.value = newPoint;
+    });
 
   });
 });
-
 
 function handleSelection(item: Thumbnail) {
   if (item instanceof Imageset) {
