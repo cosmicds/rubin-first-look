@@ -407,15 +407,6 @@ onMounted(() => {
         children.forEach(item => {
           if (item instanceof Place) {
             places.push(item);
-            // const el = createTrackedElementsFromPlace(item);
-            // if (el) {
-            //   el.innerText = item.get_name();
-            //   el.tabIndex = 0;
-            //   // add a click handler to the element
-            //   el.addEventListener("click", () => {
-            //     console.log(`Clicked on place: ${item.get_name()}`);
-            //   });
-            // }
           }
         });
       } 
