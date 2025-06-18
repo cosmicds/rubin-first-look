@@ -1,10 +1,11 @@
 import { ref, watch, onUnmounted, onMounted, type Ref } from 'vue';
 import { engineStore } from '@wwtelescope/engine-pinia';
-export type WWTEngineStore = ReturnType<typeof engineStore>;
+export interface WWTEngineStore extends ReturnType<typeof engineStore> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  $wwt?: any;
+}
 
-
-export type ScreenLoc = { x: number; y: number};
-
+export type ScreenLoc = { x: number; y: number };
 
 type BoundingClientRect = {
   left: number;
@@ -60,13 +61,25 @@ type UseTrackedElementsReturn = {
 /**
  * Sets up and manages tracked HTML elements that move with the WWT frame.
  */
-export function useTrackedElements(parentElement: string | null, store: WWTEngineStore): UseTrackedElementsReturn {
+export function useTrackedElements(parentID: string | null, store: WWTEngineStore): UseTrackedElementsReturn {
   // WWT setup
-  const frameDiv = ref(null as HTMLElement | null);
-  const frameDivRect = ref(null as DOMRect | null);
+  const parentElement = ref<HTMLElement | null>(null);
+
+  function initializeParentElement() {
+    if (parentID !== null && parentID !== '') {
+      const element = document.getElementById(parentID);
+      if (element) {
+        parentElement.value = element as HTMLElement;
+        return;
+      }
+    }
+    console.error(`Element with ID '${parentID}' does not exist.`);
+    parentElement.value = store.$wwt.inst.ctl.canvas.parentElement as HTMLElement;
+  }
+
+  const parentElementRect = ref(null as DOMRect | null);
   const resizeObserver = ref(null as ResizeObserver | null);
-  const wwtDiv = ref(null as HTMLElement | null);
-  
+
   const trackedElements = ref<TrackedHTMLElement[]>([]);
   const updateOffScreenElements = ref(false);
   
@@ -78,7 +91,6 @@ export function useTrackedElements(parentElement: string | null, store: WWTEngin
    */
   function placeElement(el: HTMLElement, pt: LocationDegrees): TrackedHTMLElement {
     const { x, y } = store.findScreenPointForRADec(pt);
-    console.log(el);
     el.style.position = 'absolute';
     el.style.left = `${x}px`;
     el.style.top = `${y}px`;
@@ -89,7 +101,7 @@ export function useTrackedElements(parentElement: string | null, store: WWTEngin
     trackedElements.value.push(el as TrackedHTMLElement);
 
     return el as TrackedHTMLElement;
-  }
+  } 
 
   /**
    * Creates a new HTML element at a specified screen position.
@@ -109,19 +121,23 @@ export function useTrackedElements(parentElement: string | null, store: WWTEngin
   function createTrackedElement(pt: TrackedElementData, tag = 'div', name = ''): TrackedHTMLElement {
     const { x, y } = store.findScreenPointForRADec({ra: pt.ra, dec: pt.dec});
     const element = createElement({ x, y }, tag) as TrackedHTMLElement;
-    element.className = "tracked-element";
-    if (name) {
-      element.dataset.name = name;
-    }
+    element.classList.add('tracked-element');
 
     if (name) {
-      const validName = name.replace(/[^a-zA-Z0-9-_]/g, ''); // sanitize name
+      element.dataset.name = name;
+      const validName = name.replace(/[^a-zA-Z0-9-_]/g, ''); // sanitize name for CSS class usage
+      
       element.classList.add(`tracked-element__${validName}`);
     }
 
     element.trackedData = pt;
+    element.dataset.ra = pt.ra.toString();
+    element.dataset.dec = pt.dec.toString();
+    element.dataset.screenX = x.toString();
+    element.dataset.screenY = y.toString();
+
     trackedElements.value.push(element);
-    return element as TrackedHTMLElement;
+    return element;
   }
 
   function addClassToElement(element: HTMLElement, class_name: string) {
@@ -150,6 +166,8 @@ export function useTrackedElements(parentElement: string | null, store: WWTEngin
   function updateElementScreenPosition(el: TrackedHTMLElement, screenPos: ScreenPosition) {
     el.style.left = `${screenPos.x}px`;
     el.style.top = `${screenPos.y}px`;
+    el.dataset.screenX = screenPos.x.toString();
+    el.dataset.screenY = screenPos.y.toString();
   }
 
   /**
@@ -157,11 +175,13 @@ export function useTrackedElements(parentElement: string | null, store: WWTEngin
    */
   function isMarkerVisible(el: TrackedHTMLElement): [ScreenPosition, boolean] {
     const screen = store.findScreenPointForRADec(el.trackedData);
-    // if (screen.z === 0) {
-    //   return [screen, false];
-    // }
-    
-    return [screen, checkPointContainedByDiv(screen, frameDivRect.value)];
+    const visible = checkPointContainedByDiv(screen, parentElementRect.value);
+
+    // Update dataset entries for screen position
+    el.dataset.screenX = screen.x.toString();
+    el.dataset.screenY = screen.y.toString();
+
+    return [screen, visible];
   }
 
   /**
@@ -188,22 +208,22 @@ export function useTrackedElements(parentElement: string | null, store: WWTEngin
     }
     el.remove();
   }
-  
-  function getMarkerLayer() {
-    return document.getElementById("marker-container");
+
+  function getMarkerLayer(): HTMLElement | null {
+    return parentElement.value as HTMLElement ?? null;
   }
-  
+
   function getElementByName(name: string): TrackedHTMLElement | null {
-    return trackedElements.value.find(el => el.dataset.name === name) as TrackedHTMLElement || null;
+    return trackedElements.value.find((el) => el.dataset.name === name) as TrackedHTMLElement || null;
   }
-  
+
   function hideElementByName(name: string) {
     const el = getElementByName(name);
     if (el) {
       el.style.visibility = 'hidden';
     }
   }
-  
+
   function showElementByName(name: string) {
     const el = getElementByName(name);
     if (el) {
@@ -213,17 +233,17 @@ export function useTrackedElements(parentElement: string | null, store: WWTEngin
 
   // Watchers, Lifecycle, and Cleanup
 
-  watch(frameDiv, (newDiv) => {
-    if (newDiv) {
-      frameDivRect.value = newDiv.getBoundingClientRect();
+  watch(parentElement, (newElement) => {
+    if (newElement) {
+      parentElementRect.value = newElement.getBoundingClientRect();
     }
   });
 
   watch(store, () => {
     updateElements();
   });
-  
-  watch(frameDivRect, () => {
+
+  watch(parentElementRect, () => {
     updateElements();
   });
 
@@ -231,37 +251,20 @@ export function useTrackedElements(parentElement: string | null, store: WWTEngin
     updateElements();
   });
 
-  /**
-   * Initialize the frameDiv and set up the ResizeObserver.
-   */
-  function initializeFrameDiv(frame: HTMLElement) {
-    frameDiv.value = frame;
-    resizeObserver.value = new ResizeObserver(() => {
-      if (!frameDiv.value) return;
-      frameDivRect.value = frameDiv.value.getBoundingClientRect();
-    });
-    resizeObserver.value.observe(frameDiv.value as HTMLElement);
-    console.log('Initialized frameDiv:', frameDiv.value);
-  }
-
   onMounted(() => {
-    if (parentElement !== null) {
-      const frame = document.getElementById(parentElement);
-      if (frame) {
-        initializeFrameDiv(frame);
+    store.waitForReady().then(() => {
+      initializeParentElement();
+      if (parentElement.value !== null) {
+        resizeObserver.value = new ResizeObserver(() => {
+          if (parentElement.value === null) return;
+          parentElementRect.value = parentElement.value.getBoundingClientRect();
+        });
+        if (resizeObserver.value) {
+          resizeObserver.value.observe(parentElement.value as HTMLElement);
+        }
+        
       }
-    }
-  });
-
-  store.waitForReady().then(() => {
-    // @ts-expect-error - hackery way to get the canvas parent element
-    wwtDiv.value = store.$wwt.inst.ctl.canvas.parentElement as HTMLElement;
-
-    if (frameDiv.value === null) {
-      const frame = parentElement === null ? null : document.getElementById(parentElement);
-      initializeFrameDiv(frame ?? wwtDiv.value as HTMLElement);
-    }
-    
+    });
   });
 
   onUnmounted(() => {
@@ -282,6 +285,6 @@ export function useTrackedElements(parentElement: string | null, store: WWTEngin
     placeElement,
     getMarkerLayer,
     hideElementByName,
-    showElementByName
+    showElementByName,
   };
 }
