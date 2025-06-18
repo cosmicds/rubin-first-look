@@ -66,12 +66,10 @@
       v-if="selectedItem && !showTextSheet"
     > 
       <infobox
-        v-show="!showTextSheet"
-        :places="places"
-        :start-place="selectedItem instanceof Place ? selectedItem : null"
+        v-show="showInfobox"
+        :place="currentPlace"
         @read-more="showTextSheet = true"
       >
-
       </infobox>
   </div>
     
@@ -238,8 +236,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, nextTick, type Ref } from "vue";
-import { Folder, Imageset, Place } from "@wwtelescope/engine";
+import { storeToRefs } from "pinia";
+import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
+import { D2R, distance, H2R } from "@wwtelescope/astro";
+import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
@@ -253,6 +253,7 @@ export interface RubinFirstLookProps {
 }
 
 const store = engineStore();
+const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 useWWTKeyboardControls(store);
 
@@ -288,7 +289,14 @@ const folder: Ref<Folder | null> = ref(null);
 const wtmlUrl = "items.wtml";
 const selectedItem = ref<Thumbnail | null>(null);
 
-const places = ref<Place[]>([]);
+const places: Place[] = [];
+const currentPlace = ref<Place | null>(null);
+
+const INFOBOX_ZOOM_CUTOFF = 10;
+let circle: Circle | null = null;
+const showCircle = ref(true);
+const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
+const showInfobox = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -310,7 +318,7 @@ onMounted(() => {
       folder.value = resultFolder; 
       (folder.value.get_children() ?? []).forEach(item => {
         if (item instanceof Place) {
-          places.value.push(item);
+          places.push(item);
         }
       });
     });
@@ -328,8 +336,76 @@ onMounted(() => {
       }
     });
 
+    updateClosestPlace();
+
   });
 });
+
+function findClosest(places: Place[]): Place | null {
+  let closest = currentPlace.value;
+  let closestDist = closest === null ? null : distance(closest.get_RA() * H2R, closest.get_dec() * D2R, raRad.value, decRad.value);
+
+  places.forEach(place => {
+    const dist = distance(place.get_RA() * H2R, place.get_dec() * D2R, raRad.value, decRad.value);
+    if ((!isNaN(dist)) && ((closestDist === null) || (dist < closestDist))) {
+      closest = place;
+      closestDist = dist;
+    }
+  });
+
+  return closest !== null && placeInView(closest) ? closest : null;
+}
+
+function updateClosestPlace() {
+  currentPlace.value = findClosest(places);
+}
+
+function updateCircle(place: Place | null) {
+  if (!highlightPlaceFromZoom.value || place === null) {
+    circle?.set_opacity(0);
+    return;
+  }
+
+  if (circle === null) {
+    circle = new Circle();
+    circle.set_id("infobox");
+    circle.set_lineWidth(3);
+    circle.set_lineColor("#ffffff");
+    circle.set_skyRelative(true);
+    store.addAnnotation(circle);
+  }
+
+  circle.set_opacity(showCircle.value ? 1 : 0);
+  circle.setCenter(place.get_RA() * 15, place.get_dec());
+  circle.set_radius(place?.angularSize);
+}
+
+function wwtSmallestFov() {
+  const renderContext = WWTControl.singleton.renderContext;
+  const fovH = renderContext.get_fovAngle() * D2R;
+  const fovW = fovH * renderContext.width / renderContext.height;
+  return Math.min(fovW, fovH);
+}
+
+function placeInView(place: Place, fraction=1/3): boolean {
+  // checks if the center of place is in the current field of view
+  // Assume the Zoom level corresponds to the size of the image
+  // fraction_of_place is ~fraction of the place that must be in the current FOV
+  // by default, allow 1/3 of the place to be visible and still be considered in view
+  const iset = place.get_studyImageset() ?? place.get_backgroundImageset();
+  if (iset == null) {
+    return false;
+  }
+
+  const isetRa = iset.get_centerX() * D2R;
+  const isetDec = iset.get_centerY() * D2R;
+  const isetFov = (place.get_zoomLevel() / 6) * D2R;
+  
+  const curFov = wwtSmallestFov();
+
+  const dist = distance(isetRa, isetDec, raRad.value, decRad.value) + (fraction - 0.5) * isetFov;
+  return dist < curFov / 2;
+}
 
 function handleSelection(item: Thumbnail) {
   if (item instanceof Imageset) {
@@ -434,6 +510,17 @@ function selectSheet(sheetType: SheetType | null) {
     sheet.value = sheetType;
   }
 }
+
+function onZoomChange(_zoomDeg: number) {
+  updateClosestPlace();
+  updateCircle(currentPlace.value);
+}
+
+watch(raRad, (_ra: number) => updateClosestPlace());
+watch(decRad, (_dec: number) => updateClosestPlace());
+watch(zoomDeg, onZoomChange);
+watch(showCircle, (_value: boolean) => updateCircle(currentPlace.value));
+watch(currentPlace, updateCircle);
 </script>
 
 <style lang="less">
