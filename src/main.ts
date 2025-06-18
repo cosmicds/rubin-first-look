@@ -28,7 +28,7 @@ library.add(faVideo);
 const update = (el: HTMLElement, binding: Vue.DirectiveBinding) => el.style.visibility = (binding.value) ? "hidden" : "";
 
 createApp(RubinFirstLook, {
-  wwtNamespace: "rubin-first-light"
+  wwtNamespace: "rubin-first-look"
 })
  
   // Plugins
