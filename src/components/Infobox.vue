@@ -1,6 +1,7 @@
 <template>
   <expansion-wrapper
     v-if="show"
+    class="infobox"
     :normally-open="true"
   >
     <template #title>
@@ -14,6 +15,11 @@
     </template>
     
     <template #actions>
+      <v-checkbox
+        v-model="showCircle"
+        label="Show circle"
+        hide-details
+      ></v-checkbox>
       <v-btn
         v-show="showReadMore"
         @click="readMoreClicked"
@@ -53,6 +59,8 @@ const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 const closestPlace = ref<Place | null>(null);
 let circle: Circle | null = null;
+
+const showCircle = ref(true);
 
 function readMoreClicked() {
   emit("read-more");
@@ -111,13 +119,7 @@ function updateClosest() {
   closestPlace.value = findClosest(props.places);
 }
 
-onMounted(updateClosest);
-
-watch(raRad, (_ra: number) => updateClosest());
-watch(decRad, (_dec: number) => updateClosest());
-watch(zoomDeg, (_zoom: number) => updateClosest());
-
-watch(closestPlace, (place: Place | null) => {
+function updateCircle(place: Place | null) {
   if (place === null) {
     circle?.set_opacity(0);
     return;
@@ -132,10 +134,18 @@ watch(closestPlace, (place: Place | null) => {
     store.addAnnotation(circle);
   }
 
-  circle.set_opacity(1);
+  circle.set_opacity(showCircle.value ? 1 : 0);
   circle.setCenter(place.get_RA() * 15, place.get_dec());
   circle.set_radius(place?.angularSize);
-});
+}
+
+onMounted(updateClosest);
+
+watch(raRad, (_ra: number) => updateClosest());
+watch(decRad, (_dec: number) => updateClosest());
+watch(zoomDeg, (_zoom: number) => updateClosest());
+watch(showCircle, (_value: boolean) => updateCircle(closestPlace.value));
+watch(closestPlace, updateCircle);
 
 watch(() => props.startPlace, (place: Place | undefined) => {
   if (place != null) {
