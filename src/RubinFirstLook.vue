@@ -25,6 +25,21 @@
     </wwt-tracked-content>
     
     <wwt-tracked-content
+    v-if="ready"
+    :ra="10.5"
+    :dec="41.3"
+    name="Andromeda Galaxy"
+    :store="store"
+    center-on-click
+    v-slot="props"
+    :zoomDeg="8"
+  >
+    <div class="custom-content" v-on="props.on">
+      <p>Track Andromeda Galaxy</p>
+    </div>
+  </wwt-tracked-content>
+    
+    <wwt-tracked-content
       v-for="place in places"
       :key="place.get_name()"
       :place="place"
@@ -32,7 +47,7 @@
       :visible="true"
       v-slot="props"
       debug
-      @click.prevent="handleSelection(place)"
+      @click="handleSelection(place)"
       >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
