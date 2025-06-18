@@ -451,9 +451,12 @@ html {
   background-color: #000;
   overflow: hidden;
 
-  
   -ms-overflow-style: none;
-  // scrollbar-width: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 body {
