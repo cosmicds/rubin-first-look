@@ -277,7 +277,7 @@ const display = useDisplay();
 
 
 const props = withDefaults(defineProps<RubinFirstLookProps>(), {
-  wwtNamespace: "rubin-first-light",
+  wwtNamespace: "rubin-first-look",
   initialCameraParams: () => {
     return {
       raRad: 0,
