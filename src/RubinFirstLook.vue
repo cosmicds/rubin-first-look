@@ -63,14 +63,17 @@
 
     <div
       :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
-      v-if="selectedItem && !showTextSheet"
+      v-show="showPlaceHighlights"
     > 
       <infobox
-        v-show="showInfobox"
         :place="currentPlace"
         @read-more="showTextSheet = true"
       >
       </infobox>
+      <v-checkbox
+        v-model="showCircle"
+        label="Show circle"
+      ></v-checkbox>
   </div>
     
 
@@ -296,7 +299,7 @@ const INFOBOX_ZOOM_CUTOFF = 10;
 let circle: Circle | null = null;
 const showCircle = ref(true);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
-const showInfobox = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
+const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -826,6 +829,9 @@ video {
   top: 10px;
   right: 10px;
   max-width: 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 .selected-info.selected-info-tall {
   max-width: 60%;

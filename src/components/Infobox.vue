@@ -13,11 +13,6 @@
     </template>
     
     <template #actions>
-      <v-checkbox
-        v-model="showCircle"
-        label="Show circle"
-        hide-details
-      ></v-checkbox>
       <v-btn
         v-show="showReadMore"
         @click="readMoreClicked"
@@ -27,7 +22,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { Place } from "@wwtelescope/engine";
 
 interface Props {
@@ -42,8 +36,6 @@ withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (event: "read-more"): void
 }>();
-
-const showCircle = ref(true);
 
 function readMoreClicked() {
   emit("read-more");
