@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Folder Browseable="True" Group="Explorer" Name="JWST First Images" Searchable="True">
-  <Place Angle="0" AngularSize="0" Constellation="CAR" DataSetType="Sky" Dec="-58.620167596399455" Magnitude="0" Name="JWST Carina NIRCam" Opacity="100" RA="10.614202486602357" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/carina_nircam/thumb.jpg" ZoomLevel="0.7175138317174115">
+  <Place Angle="0" AngularSize="0.25" Constellation="CAR" DataSetType="Sky" Dec="-58.620167596399455" Magnitude="0" Name="JWST Carina NIRCam" Opacity="100" RA="10.614202486602357" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/carina_nircam/thumb.jpg" ZoomLevel="0.7175138317174115">
     <ForegroundImageSet>
       <ImageSet BandPass="Visible" BaseDegreesPerTile="0.13653881984592092" BaseTileLevel="0" BottomsUp="False" CenterX="159.21261854583" CenterY="-58.62001801087" DataSetType="Sky" ElevationModel="False" FileType=".png" Generic="False" Name="JWST Carina NIRCam" OffsetX="-9.676683405186081e-05" OffsetY="0.0002460841694251934" Projection="Tan" QuadTreeMap="" Rotation="102.98491848225136" Sparse="True" StockSet="False" TileLevels="6" Url="http://data1.wwtassets.org/packages/2022/07_jwst/carina_nircam/{1}/{3}/{3}_{2}.png" WidthFactor="2">
         <Credits>NASA, ESA, CSA, STScI, Webb ERO Production Team</Credits>
@@ -20,14 +20,14 @@
     </Description>
 
   </Place>
-	<Place Angle="0" AngularSize="0" Constellation="CAR" DataSetType="Sky" Dec="-58.620167596399455" Magnitude="0" Name="JWST Carina MIRI" Opacity="100" RA="10.614202486602357" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/carina_miri/thumb.jpg" ZoomLevel="0.7175138317174115">
+	<Place Angle="0" AngularSize="0.1" Constellation="CAR" DataSetType="Sky" Dec="-58.620167596399455" Magnitude="0" Name="JWST Carina MIRI" Opacity="100" RA="10.614202486602357" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/carina_miri/thumb.jpg" ZoomLevel="0.7175138317174115">
     <ForegroundImageSet>
       <ImageSet BandPass="Visible" BaseDegreesPerTile="0.13608475168336676" BaseTileLevel="0" BottomsUp="False" CenterX="159.225778067319" CenterY="-58.6133228431339" DataSetType="Sky" ElevationModel="False" FileType=".png" Generic="False" Name="JWST Carina MIRI" Projection="Tan" QuadTreeMap="" Rotation="117.79623295101801" Sparse="False" StockSet="False" TileLevels="6" Url="http://data1.wwtassets.org/packages/2022/07_jwst/carina_miri/{1}/{3}/{3}_{2}.png" WidthFactor="2">
         <ThumbnailUrl>http://data1.wwtassets.org/packages/2022/07_jwst/carina_miri/thumb.jpg</ThumbnailUrl>
       </ImageSet>
     </ForegroundImageSet>
   </Place>
-  <Place Angle="0" AngularSize="0" Constellation="VEL" DataSetType="Sky" Dec="-40.43593551739831" Magnitude="0" Name="JWST Southern Ring Nebula (MIRI)" Opacity="100" RA="10.117059441311776" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/jwst_s_ring_miri/thumb.jpg" ZoomLevel="0.3826336529248513">
+  <Place Angle="0" AngularSize="0.05" Constellation="VEL" DataSetType="Sky" Dec="-40.43593551739831" Magnitude="0" Name="JWST Southern Ring Nebula (MIRI)" Opacity="100" RA="10.117059441311776" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/jwst_s_ring_miri/thumb.jpg" ZoomLevel="0.3826336529248513">
     <ForegroundImageSet>
       <ImageSet BandPass="Visible" BaseDegreesPerTile="0.06263730715855399" BaseTileLevel="0" BottomsUp="False" CenterX="151.75342140040956" CenterY="-40.435283048321544" DataSetType="Sky" ElevationModel="False" FileType=".png" Generic="False" Name="JWST Southern Ring Nebula (MIRI)" OffsetX="0.0004614603238030514" OffsetY="0.002670092708239829" Projection="Tan" QuadTreeMap="" Rotation="124.75158258895605" Sparse="True" StockSet="False" TileLevels="3" Url="http://data1.wwtassets.org/packages/2022/07_jwst/jwst_s_ring_miri/{1}/{3}/{3}_{2}.png" WidthFactor="2">
         <Credits>NASA, ESA, CSA, STScI, Webb ERO Production Team</Credits>
@@ -51,7 +51,7 @@ MIRI was contributed by ESA and NASA, with the instrument designed and built by 
       </ImageSet>
     </ForegroundImageSet>
   </Place>
-  <Place Angle="0" AngularSize="0" Constellation="VEL" DataSetType="Sky" Dec="-40.43593551739831" Magnitude="0" Name="JWST Southern Ring Nebula (NIRCam)" Opacity="100" RA="10.117059441311776" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/jwst_s_ring_nircam/thumb.jpg" ZoomLevel="0.3826336529248513">
+  <Place Angle="0" AngularSize="0.001" Constellation="VEL" DataSetType="Sky" Dec="-40.43593551739831" Magnitude="0" Name="JWST Southern Ring Nebula (NIRCam)" Opacity="100" RA="10.117059441311776" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/jwst_s_ring_nircam/thumb.jpg" ZoomLevel="0.3826336529248513">
     <ForegroundImageSet>
       <ImageSet BandPass="Visible" BaseDegreesPerTile="0.0682753480655798" BaseTileLevel="0" BottomsUp="False" CenterX="151.7570552015" CenterY="-40.43643336052" DataSetType="Sky" ElevationModel="False" FileType=".png" Generic="False" Name="JWST Southern Ring Nebula (NIRCam)" OffsetX="0.0001300159024991165" OffsetY="-0.0010076180875328632" Projection="Tan" QuadTreeMap="" Rotation="111.98888905823296" Sparse="True" StockSet="False" TileLevels="5" Url="http://data1.wwtassets.org/packages/2022/07_jwst/jwst_s_ring_nircam/{1}/{3}/{3}_{2}.png" WidthFactor="2">
         <Credits>NASA, ESA, CSA, STScI, Webb ERO Production Team</Credits>
@@ -77,7 +77,7 @@ NIRCam was built by a team at the University of Arizona and Lockheed Martin’s 
       </ImageSet>
     </ForegroundImageSet>
   </Place>
-  <Place Angle="0" AngularSize="0" Constellation="VOL" DataSetType="Sky" Dec="-73.45389956415659" Magnitude="0" Name="JWST SMACS 0723" Opacity="100" RA="7.388518370448916" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/smacs0723/thumb.jpg" ZoomLevel="0.39337455578028513">
+  <Place Angle="0" AngularSize="0.2" Constellation="VOL" DataSetType="Sky" Dec="-73.45389956415659" Magnitude="0" Name="JWST SMACS 0723" Opacity="100" RA="7.388518370448916" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/smacs0723/thumb.jpg" ZoomLevel="0.39337455578028513">
     <ForegroundImageSet>
       <ImageSet BandPass="Visible" BaseDegreesPerTile="0.06824517526732732" BaseTileLevel="0" BottomsUp="False" CenterX="110.785677941" CenterY="-73.4497732804" DataSetType="Sky" ElevationModel="False" FileType=".png" Generic="False" Name="Webb Delivers Deepest Infrared Image of Universe Yet: SMACS 0723" OffsetX="-0.0074597408661543655" OffsetY="-0.010255996337093122" Projection="Tan" QuadTreeMap="" Rotation="-34.968546008628586" Sparse="True" StockSet="False" TileLevels="5" Url="http://data1.wwtassets.org/packages/2022/07_jwst/smacs0723/{1}/{3}/{3}_{2}.png" WidthFactor="2">
         <Credits>NASA, ESA, CSA, STScI, Webb ERO Production Team</Credits>
@@ -86,7 +86,7 @@ NIRCam was built by a team at the University of Arizona and Lockheed Martin’s 
       </ImageSet>
     </ForegroundImageSet>
   </Place>
-  <Place Angle="0" AngularSize="0" Constellation="PEG" DataSetType="Sky" Dec="33.9621954626131" Magnitude="0" Name="JWST Stephan's Quintet (NIRCam and MIRI)" Opacity="100" RA="22.6001036467436" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/weic2208a/thumb.jpg" ZoomLevel="1.031446312671409">
+  <Place Angle="0" AngularSize="0.5" Constellation="PEG" DataSetType="Sky" Dec="33.9621954626131" Magnitude="0" Name="JWST Stephan's Quintet (NIRCam and MIRI)" Opacity="100" RA="22.6001036467436" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/weic2208a/thumb.jpg" ZoomLevel="1.031446312671409">
     <ForegroundImageSet>
       <ImageSet BandPass="Visible" BaseDegreesPerTile="0.13656329708830614" BaseTileLevel="0" BottomsUp="False" CenterX="338.957209422" CenterY="33.9614640787" DataSetType="Sky" ElevationModel="False" FileType=".png" Generic="False" Name="JWST Stephan's Quintet (NIRCam and MIRI)" OffsetX="-0.0165777055597548" OffsetY="0.029078594982448" Projection="Tan" QuadTreeMap="" Rotation="61.94540334829502" Sparse="True" StockSet="False" TileLevels="6" Url="http://data1.wwtassets.org/packages/2022/07_jwst/weic2208a/{1}/{3}/{3}_{2}.png" WidthFactor="2">
         <Credits>NASA, ESA, CSA, STScI, Webb ERO Production Team</Credits>
@@ -99,7 +99,7 @@ NIRCam was built by a team at the University of Arizona and Lockheed Martin’s 
     <Credits>IPAC/NASA - D. Lang for the reprocessing</Credits>
     <ThumbnailUrl>http://alasky.u-strasbg.fr/unWISE/color-W2-W1W2-W1/preview.jpg</ThumbnailUrl>
   </ImageSet>
-  <Place Angle="0" AngularSize="0" Constellation="PEG" DataSetType="Sky" Dec="33.9621954626131" Magnitude="0" Name="JWST Stephan's Quintet (MIRI)" Opacity="100" RA="22.6001036467436" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/weic2208b/thumb.jpg" ZoomLevel="1.031446312671409">
+  <Place Angle="0" AngularSize="0.3" Constellation="PEG" DataSetType="Sky" Dec="33.9621954626131" Magnitude="0" Name="JWST Stephan's Quintet (MIRI)" Opacity="100" RA="22.6001036467436" Rotation="0" Thumbnail="http://data1.wwtassets.org/packages/2022/07_jwst/weic2208b/thumb.jpg" ZoomLevel="1.031446312671409">
     <ForegroundImageSet>
       <ImageSet BandPass="Visible" BaseDegreesPerTile="0.12519334465700208" BaseTileLevel="0" BottomsUp="False" CenterX="339.006091227726" CenterY="33.9598767383477" DataSetType="Sky" ElevationModel="False" FileType=".png" Generic="False" Name="JWST Stephan's Quintet MIRI" Projection="Tan" QuadTreeMap="" Rotation="63.0269001983675" Sparse="False" StockSet="False" TileLevels="4" Url="http://data1.wwtassets.org/packages/2022/07_jwst/weic2208b/{1}/{3}/{3}_{2}.png" WidthFactor="2">
         <ThumbnailUrl>http://data1.wwtassets.org/packages/2022/07_jwst/weic2208b/thumb.jpg</ThumbnailUrl>
