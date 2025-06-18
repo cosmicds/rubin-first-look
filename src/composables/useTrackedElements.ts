@@ -86,8 +86,6 @@ export function useTrackedPosition(_ra: Ref<Degree> | Degree, _dec: Ref<Degree> 
   const ready = ref(false);
   const resizeObserver = ref<ResizeObserver | null>(null);
   
-  
-  
   store.waitForReady().then(() => {
     ready.value = true;
     updatePosition = () => {
@@ -324,21 +322,10 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
     }
   });
   
-  watch(ready, () => {
-    updateElements();
-  });
-
-  watch(() => [store.raRad, store.decRad, store.zoomDeg, store.rollRad], () => {
-    updateElements();
-  });
-
-  watch(parentElementRect, () => {
-    updateElements();
-  });
-
-  watch(updateOffScreenElements, () => {
-    updateElements();
-  });
+  watch(ready, updateElements);
+  watch(() => [store.raRad, store.decRad, store.zoomDeg, store.rollRad], updateElements);
+  watch(parentElementRect, updateElements);
+  watch(updateOffScreenElements, updateElements);
 
   onMounted(() => {
     store.waitForReady().then(() => {
