@@ -1,7 +1,7 @@
 import Vue, { createApp, type Plugin } from "vue";
 
 import { FundingAcknowledgement, IconButton, CreditLogos } from "@cosmicds/vue-toolkit";
-import RubinFirstLight from "./RubinFirstLight.vue";
+import RubinFirstLook from "./RubinFirstLook.vue";
 import FolderView from "./components/FolderView.vue";
 import ExpansionWrapper from "./components/ExpansionWrapper.vue";
 import SplashScreen from "./components/SplashScreen.vue";
@@ -27,7 +27,7 @@ library.add(faVideo);
 // Extract the function out, up here, so I'm not writing it twice
 const update = (el: HTMLElement, binding: Vue.DirectiveBinding) => el.style.visibility = (binding.value) ? "hidden" : "";
 
-createApp(RubinFirstLight, {
+createApp(RubinFirstLook, {
   wwtNamespace: "rubin-first-light"
 })
  

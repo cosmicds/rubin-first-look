@@ -8,7 +8,7 @@ To start creating your own data story, you can use the following steps.
 
 * First, clone the repository, setting the name of the destination folder as appropriate for your story
 ```
-git clone https://github.com/cosmicds/vue-ds-template.git <my-story-name>
+git clone https://github.com/cosmicds/rubin-first-look.git <my-story-name>
 ```
 * Next, you can run the setup script to do some basic renaming for you. You should give the story name in `kebab-case`. Where conventions dictate, the script will automatically rename using `PascalCase` and `camelCase`.
 ```
