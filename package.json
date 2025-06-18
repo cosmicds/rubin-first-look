@@ -35,5 +35,5 @@
     "lint": "vue-cli-service lint src --no-fix",
     "serve": "vue-cli-service serve"
   },
-  "name": "@cosmicds/rubin-first-light"
+  "name": "@cosmicds/rubin-first-look"
 }
