@@ -18,8 +18,8 @@ import {
   faChevronDown,
   faCompress,
   faExpand,
-  faGear,
   faInfo,
+  faSliders,
   faTimes,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
@@ -27,8 +27,8 @@ import {
 library.add(faChevronDown);
 library.add(faCompress);
 library.add(faExpand);
-library.add(faGear);
 library.add(faInfo);
+library.add(faSliders);
 library.add(faTimes);
 library.add(faVideo);
 

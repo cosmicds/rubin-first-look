@@ -115,29 +115,12 @@
           tooltip-location="start"
         >
         </icon-button>
-      </div>
-    </div>
-
-    <div
-      :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
-      v-show="showPlaceHighlights"
-    > 
-  </div>
-    
-
-    <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
-
-    <div
-      id="bottom-content"
-      v-hide="fullscreen"
-    >
-      <div id="controls-row">
         <div
           id="options"
         >
           <div id="options-top-row">
             <icon-button
-              :fa-icon="showControls ? 'chevron-down' : 'gear'"
+              :fa-icon="showControls ? 'chevron-down' : 'sliders'"
               :color="accentColor"
               @activate="showControls = !showControls"
               tabindex="0"
@@ -171,6 +154,24 @@
             ></v-checkbox>
           </div>
         </div>
+
+      </div>
+    </div>
+
+    <div
+      :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
+      v-show="showPlaceHighlights"
+    > 
+  </div>
+    
+
+    <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
+
+    <div
+      id="bottom-content"
+      v-hide="fullscreen"
+    >
+      <div id="controls-row">
         <infobox
           :place="currentPlace"
           @read-more="showTextSheet = true"
@@ -996,7 +997,7 @@ video {
 #options {
   background: black;
   border: 1px solid var(--accent-color);
-  border-radius: 2px;
+  border-radius: 20px;
   align-self: flex-end;
   pointer-events: auto;
 
