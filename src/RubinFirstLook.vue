@@ -117,6 +117,7 @@
         </icon-button>
         <div
           id="options"
+          v-hide="fullscreen"
         >
           <div id="options-top-row">
             <icon-button
