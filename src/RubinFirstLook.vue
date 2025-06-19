@@ -120,16 +120,17 @@
         >
           <div id="options-top-row">
             <icon-button
-              :fa-icon="showControls ? 'chevron-down' : 'sliders'"
+              id="options-toggle"
+              :fa-icon="showOptions ? 'chevron-down' : 'sliders'"
               :color="accentColor"
-              @activate="showControls = !showControls"
+              @activate="showOptions = !showOptions"
               tabindex="0"
               :border="false"
             ></icon-button>
           </div>
           <div
             id="options-content"
-            v-if="showControls"
+            v-if="showOptions"
           >
             <v-checkbox
               v-model="showCircle"
@@ -171,13 +172,6 @@
       id="bottom-content"
       v-hide="fullscreen"
     >
-      <div id="controls-row">
-        <infobox
-          :place="currentPlace"
-          @read-more="showTextSheet = true"
-        >
-      </infobox>
-      </div>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
           :default-logos="['cosmicds', 'wwt']"
@@ -193,6 +187,8 @@
       </div>
     </div>
 
+    <infobox :place="currentPlace">
+    </infobox>
 
     <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
@@ -397,7 +393,7 @@ const currentPlace = ref<Place | null>(null);
 
 const INFOBOX_ZOOM_CUTOFF = 10;
 let circle: Circle | null = null;
-const showControls = ref(false);
+const showOptions = ref(false);
 const showCircle = ref(true);
 const showLabels = ref(true);
 const showConstellations = ref(false);
@@ -987,18 +983,10 @@ video {
   // transform: translate(-50%, 50%); // center on the point
 }
 
-#controls-row {
-  padding: 5px;
-  width: 100%;
-  display: flex;
-  flex-direction: row-reverse;
-}
-
 #options {
   background: black;
   border: 1px solid var(--accent-color);
   border-radius: 20px;
-  align-self: flex-end;
   pointer-events: auto;
 
   .icon-wrapper {
@@ -1010,5 +998,11 @@ video {
     flex-direction: row;
     justify-content: flex-end;
   }
+}
+
+.infobox {
+  position: fixed;
+  left: 5px;
+  bottom: 5px;
 }
 </style>
