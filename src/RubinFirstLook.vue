@@ -74,7 +74,7 @@
     <!-- This block contains the elements (e.g. icon buttons displayed at/near the top of the screen -->
 
     <div id="top-content">
-      <div id="left-buttons" v-show="!fullscreen">
+      <div id="left-buttons" v-hide="fullscreen">
         <icon-button
           v-model="showVideoSheet"
           fa-icon="video"
@@ -92,25 +92,26 @@
         >
         </folder-view>
       </div>
-      <div id="center-buttons" v-show="!fullscreen">
+      <div id="center-buttons" v-hide="fullscreen">
       </div>
       <div id="right-buttons">
-        <icon-button
-          v-show="!fullscreen"
-          id="info-icon"
-          v-model="showTextSheet"
-          fa-icon="info"
-          :color="buttonColor"
-          tooltip-text="Show information"
-          tooltip-location="start"
-        >
-        </icon-button>
+        <div v-hide="fullscreen">
+          <icon-button
+            id="info-icon"
+            v-model="showTextSheet"
+            fa-icon="info"
+            :color="buttonColor"
+            tooltip-text="Show information"
+            tooltip-location="start"
+          >
+          </icon-button>
+        </div>
         <icon-button
           id="fullscreen-icon"
           @activate="fullscreen = !fullscreen"
           :fa-icon="fullscreen ? 'compress' : 'expand'"
           :color="buttonColor"
-          tooltip-text="Fullscreen"
+          :tooltip-text="`${fullscreen ? 'Exit' : 'Make'} fullscreen`"
           tooltip-location="start"
         >
         </icon-button>
@@ -128,7 +129,7 @@
 
     <div
       id="bottom-content"
-      v-show="!fullscreen"
+      v-hide="fullscreen"
     >
       <div id="controls-row">
         <div
@@ -362,7 +363,6 @@ const fullscreen = useFullscreen();
 const touchscreen = supportsTouchscreen();
 // TODO: Determine this in a better way
 const display = useDisplay();
-
 
 const props = withDefaults(defineProps<RubinFirstLookProps>(), {
   wwtNamespace: "rubin-first-look",
