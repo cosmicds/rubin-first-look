@@ -83,7 +83,7 @@ function goTo() {
         trackObject: true,
       });
       
-    } else {
+    } else if (ra.value && dec.value) {
       props.store.gotoRADecZoom({
         raRad: ra.value * (Math.PI / 180), 
         decRad: dec.value * (Math.PI / 180), 
