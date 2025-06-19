@@ -201,7 +201,10 @@
       </div>
     </div>
 
-    <infobox :place="currentPlace">
+    <infobox
+      v-hide="fullscreen"
+      :place="currentPlace"
+    >
     </infobox>
 
     <!-- This dialog contains the video that is displayed when the video icon is clicked -->
