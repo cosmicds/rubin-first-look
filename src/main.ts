@@ -16,6 +16,8 @@ import { WWTComponent, wwtPinia } from "@wwtelescope/engine-pinia";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faChevronDown,
+  faCompress,
+  faExpand,
   faGear,
   faInfo,
   faTimes,
@@ -23,6 +25,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(faChevronDown);
+library.add(faCompress);
+library.add(faExpand);
 library.add(faGear);
 library.add(faInfo);
 library.add(faTimes);

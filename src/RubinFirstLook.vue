@@ -74,7 +74,7 @@
     <!-- This block contains the elements (e.g. icon buttons displayed at/near the top of the screen -->
 
     <div id="top-content">
-      <div id="left-buttons">
+      <div id="left-buttons" v-show="!fullscreen">
         <icon-button
           v-model="showVideoSheet"
           fa-icon="video"
@@ -92,15 +92,25 @@
         >
         </folder-view>
       </div>
-      <div id="center-buttons">
+      <div id="center-buttons" v-show="!fullscreen">
       </div>
       <div id="right-buttons">
         <icon-button
+          v-show="!fullscreen"
           id="info-icon"
           v-model="showTextSheet"
           fa-icon="info"
           :color="buttonColor"
           tooltip-text="Show information"
+          tooltip-location="start"
+        >
+        </icon-button>
+        <icon-button
+          id="fullscreen-icon"
+          @activate="fullscreen = !fullscreen"
+          :fa-icon="fullscreen ? 'compress' : 'expand'"
+          :color="buttonColor"
+          tooltip-text="Fullscreen"
           tooltip-location="start"
         >
         </icon-button>
@@ -116,7 +126,10 @@
 
     <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
 
-    <div id="bottom-content">
+    <div
+      id="bottom-content"
+      v-show="!fullscreen"
+    >
       <div id="controls-row">
         <div
           id="options"
@@ -324,6 +337,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
+import { useFullscreen } from "./composables/useFullscreen";
 import { D2R, distance, H2R } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
@@ -342,6 +356,8 @@ const store = engineStore();
 const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 useWWTKeyboardControls(store);
+
+const fullscreen = useFullscreen();
 
 const touchscreen = supportsTouchscreen();
 // TODO: Determine this in a better way
