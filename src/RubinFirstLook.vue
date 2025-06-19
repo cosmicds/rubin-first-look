@@ -394,7 +394,7 @@ onMounted(() => {
 
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
-
+    
     // We'll probably end up changing the WTML setup once we have the final images anyways
     // so not worth trying to make this super-clean now
     store.loadImageCollection({
@@ -947,16 +947,18 @@ video {
 
 .tracked-element:hover {
   scale: 1.2;
+  z-index: 10;
 }
 
 .tracked-places {
-  width: auto;
+  width: max-content;
   padding: 0.5em;
   color: white;
   background-color: rgba(0, 0, 0, 0.51);
   backdrop-filter: blur(5px);
   border-radius: 5px;
-  // transform: translate(-50%, 50%); // center on the point
+  // transform: translate(-50%, -50%); // center on the point
+  position: absolute;
 }
 
 #controls-row {
