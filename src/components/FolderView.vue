@@ -5,21 +5,35 @@
     :style="cssVars"
   >
     <div
-      :class="['item', lastSelectedItem === item ? 'selected' : '']"
-      v-for="item of items"
-      :key="item.get_name()"
-      :title="item.get_name()"
-      @click="() => selectItem(item)"
-      @keydown.enter="() => selectItem(item)"
-      tabindex="0"
-      role="button"
-      :aria-label="item.get_name()"
-      :aria-selected="lastSelectedItem === item"
+      class="fv-header-container"
     >
-      <img :src="item.get_thumbnailUrl()" :alt="item.get_name()" />
+      <slot
+        name="header"
+        :expanded="expanded"
+        :toggle-expanded="toggleExpanded"
+      ></slot>
+    </div>
+    <div
+      v-show="expanded"
+      class="fv-content"
+    >
       <div
-        class="item-name"
-      >{{item.get_name()}}</div>
+        :class="['item', lastSelectedItem === item ? 'selected' : '']"
+        v-for="item of items"
+        :key="item.get_name()"
+        :title="item.get_name()"
+        @click="() => selectItem(item)"
+        @keydown.enter="() => selectItem(item)"
+        tabindex="0"
+        role="button"
+        :aria-label="item.get_name()"
+        :aria-selected="lastSelectedItem === item"
+      >
+        <img :src="item.get_thumbnailUrl()" :alt="item.get_name()" />
+        <div
+          class="item-name"
+        >{{item.get_name()}}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -33,11 +47,21 @@ import { FolderViewProps } from "../types";
 const items: Ref<Thumbnail[] | null> = ref<Thumbnail[]>([]);
 const lastSelectedItem: Ref<Thumbnail | null> = ref(null);
 
-const props = defineProps<FolderViewProps>();
+const props = withDefaults(defineProps<FolderViewProps>(), {
+  gap: "5px",
+  highlightColor: "#1671e0",
+  backgroundColor: "black",
+  textColor: "white",
+});
 
 const emit = defineEmits<{
   (event: "select", item: Thumbnail): void;
 }>();
+
+const expanded = ref(true);
+function toggleExpanded() {
+  expanded.value = !expanded.value;
+}
 
 onMounted(() => {
   const folderItems: Place[] = [];
@@ -66,18 +90,20 @@ function selectItem(item: Thumbnail) {
 
 const cssVars = computed(() => ({
   "--flex-direction": props.flexDirection,
+  "--background-color": props.backgroundColor,
+  "--highlight-color": props.highlightColor,
+  "--text-color": props.textColor,
+  "--gap": props.gap,
 }));
 </script>
 
 <style scoped lang="less">
 .fv-root {
-  display: flex;
-  flex-direction: var(--flex-direction);
   width: auto;
 	height: 100%;
   overflow-x: auto;
   overflow-y: auto;
-  background: black;
+  background: var(--background-color);
 
 	&::-webkit-scrollbar {
     padding: 1px;
@@ -100,11 +126,36 @@ const cssVars = computed(() => ({
   //justify-content: space-around;
 }
 
+.fv-header-container {
+  pointer-events: auto;
+  padding: 5px;
+  user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+}
+
+.fv-content {
+  margin: auto;
+  display: flex;
+  flex-direction: var(--flex-direction);
+  align-items: center;
+  justify-content: space-around;
+  gap: var(--gap);
+
+  &::after {
+    content: "";
+    height: 0px;
+  }
+}
+
 .item {
   padding: 3px;
   border: 1px solid #444;
   border-radius: 2px;
   width: ~"min(96px, 16vw)";
+  color: var(--text-color);
   cursor: pointer;
   pointer-events: auto;
 
@@ -116,12 +167,12 @@ const cssVars = computed(() => ({
   }
 	
 	&:hover {
-		border: 1px solid #1671e0;
+		border: 1px solid var(--highlight-color);
 		transition: all 200ms ease-out;
   }
 
   &.selected {
-    border: 1px solid #1671e0;
+    border: 1px solid var(--highlight-color);
   }
 }
 

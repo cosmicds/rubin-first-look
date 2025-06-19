@@ -70,7 +70,6 @@
       </div>
     </transition>
 
-
     <!-- This block contains the elements (e.g. icon buttons displayed at/near the top of the screen -->
 
     <div id="top-content">
@@ -87,9 +86,22 @@
           v-if="folder"
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
+          :background-color="accentColor"
           flex-direction="column"
           @select="handleSelection"
         >
+          <template #header="{ toggleExpanded, expanded }">
+            <div class="fv-header">
+              <span>Explore {{ mode.charAt(0).toUpperCase() + mode.slice(1) }}</span>
+              <font-awesome-icon
+                :icon="expanded ? 'chevron-down' : 'chevron-up'"
+                @click="toggleExpanded()"
+                @keyup.enter="toggleExpanded()"
+                tabindex="0"
+              >
+              </font-awesome-icon>
+            </div>
+          </template>
         </folder-view>
       </div>
       <div id="center-buttons" v-hide="fullscreen">
@@ -123,7 +135,7 @@
             <icon-button
               id="options-toggle"
               :fa-icon="showOptions ? 'chevron-down' : 'sliders'"
-              :color="accentColor"
+              :color="buttonColor"
               @activate="showOptions = !showOptions"
               tabindex="0"
               :border="false"
@@ -343,7 +355,8 @@ import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
-import { useDisplay } from "vuetify";
+import { RUBIN_COLORS } from "../plugins/vuetify";
+import { useDisplay, useTheme } from "vuetify";
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
@@ -362,6 +375,7 @@ const fullscreen = useFullscreen();
 const touchscreen = supportsTouchscreen();
 // TODO: Determine this in a better way
 const display = useDisplay();
+const theme = useTheme();
 
 const props = withDefaults(defineProps<RubinFirstLookProps>(), {
   wwtNamespace: "rubin-first-look",
@@ -379,11 +393,8 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
-const rubinTeal = "#05B8BC";
-const rubinTurquoise = "#00BABC";
-const rubinCharcoal = "#313333";
-const accentColor = ref(rubinTurquoise);
-const buttonColor = ref(rubinTeal);
+const accentColor = computed(() => theme.current.value.colors.primaryVariant);
+const buttonColor = computed(() => theme.global.current.value.colors.primary);
 const tab = ref(0);
 
 const folder: Ref<Folder | null> = ref(null);
@@ -392,6 +403,9 @@ const selectedItem = ref<Thumbnail | null>(null);
 
 const places: Place[] = [];
 const currentPlace = ref<Place | null>(null);
+
+type Mode = "galaxy" | "nebula";
+const mode = ref<Mode>("nebula");
 
 const INFOBOX_ZOOM_CUTOFF = 10;
 let circle: Circle | null = null;
@@ -563,11 +577,13 @@ const infoSheetTransition = computed(() => infoSheetLocation.value === "bottom" 
 
 /* This lets us inject component data into element CSS */
 const cssVars = computed(() => {
+  const rubinColors = Object.keys(RUBIN_COLORS).reduce((acc: Record<string, string>, key: string) => {
+    acc[`--${key}`] = RUBIN_COLORS[key];
+    return acc;
+  }, {});
   return {
+    ...rubinColors,
     "--accent-color": accentColor.value,
-    "--rubin-teal": rubinTeal,
-    "--rubin-turquoise": rubinTurquoise,
-    "--rubin-charcoal": rubinCharcoal,
     "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100vh",
     "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100vw",
     "--info-sheet-width": infoSheetWidth.value,
@@ -642,6 +658,9 @@ watch(showLabels, (show: boolean) => {
   places.forEach(place => updater(place.get_name()));
 });
 watch(currentPlace, updateCircle);
+watch(mode, (newMode: Mode) => {
+  theme.global.name.value = newMode === "galaxy" ? "rubinGalaxy" : "rubinNebula";
+});
 </script>
 
 <style lang="less">
@@ -1003,6 +1022,15 @@ video {
 
   #options-content {
     padding: 5px;
+  }
+}
+
+.fv-header {
+  font-size: 10pt;
+
+  svg {
+    padding: 0px 5px;
+    cursor: pointer;
   }
 }
 
