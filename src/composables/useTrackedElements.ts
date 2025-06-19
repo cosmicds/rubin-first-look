@@ -1,4 +1,5 @@
 import { ref, watch, onUnmounted, onMounted, type Ref, computed, toValue, toRef } from 'vue';
+import { WWTControl } from '@wwtelescope/engine';
 import { engineStore } from '@wwtelescope/engine-pinia';
 interface WWTEngineStore extends ReturnType<typeof engineStore> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,12 +82,22 @@ export type UseTrackedElementsReturn = {
   showElementByName: (name: string) => void;
 };
 
+let wwtReady = false;
+async function waitForWWTReady(store: WWTEngineStore): Promise<void> {
+  if (wwtReady) {
+    return;
+  }
+  return store.waitForReady().then(() => {
+    WWTControl.singleton.renderOneFrame();
+    wwtReady = true;
+  });
+}
 
 export function useTrackedPosition(_ra: Ref<Degree> | Degree, _dec: Ref<Degree> | Degree, store: WWTEngineStore)  {
   const ready = ref(false);
   const resizeObserver = ref<ResizeObserver | null>(null);
   
-  store.waitForReady().then(() => {
+  waitForWWTReady(store).then(() => {
     ready.value = true;
     updatePosition = () => {
       if (!ready.value) {
@@ -350,8 +361,8 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
   watch(updateOffScreenElements, updateElements);
 
   onMounted(() => {
-    store.waitForReady().then(() => {
-      
+    waitForWWTReady(store).then(() => {
+
       // 1. Make sure we have a parent element
       initializeParentElement();
       

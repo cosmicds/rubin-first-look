@@ -18,10 +18,10 @@ type Pixel = number;
 
 interface WWTTrackedContentProps {
   containerID?: string;
-  ra: Degree;
-  dec: Degree;
-  name: string
-  place?: Place | undefined; // Optional place object, if needed
+  ra?: Degree;
+  dec?: Degree;
+  name?: string
+  place?: Place; // Optional place object, if needed
   offsetRA?: Degree;
   offsetDec?: Degree;
   store: WWTEngineStore;
