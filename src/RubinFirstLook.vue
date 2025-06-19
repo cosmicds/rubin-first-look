@@ -126,6 +126,7 @@
               @activate="showOptions = !showOptions"
               tabindex="0"
               :border="false"
+              background-color="transparent"
             ></icon-button>
           </div>
           <div
@@ -997,6 +998,10 @@ video {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+  }
+
+  #options-content {
+    padding: 5px;
   }
 }
 
