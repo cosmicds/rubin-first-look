@@ -189,8 +189,8 @@
           id="tabs"
           dense
         >
-          <v-tab class="info-tabs" tabindex="0"><h3>Information</h3></v-tab>
-          <v-tab class="info-tabs" tabindex="0"><h3>Using WWT</h3></v-tab>
+          <v-tab class="info-tabs" tabindex="0"><h3>About these Images</h3></v-tab>
+          <v-tab class="info-tabs" tabindex="0"><h3>Using This Interactive</h3></v-tab>
         </v-tabs>
         <font-awesome-icon
           id="close-text-icon"
