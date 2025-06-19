@@ -95,6 +95,15 @@
       <div id="center-buttons">
       </div>
       <div id="right-buttons">
+        <icon-button
+          id="info-icon"
+          v-model="showTextSheet"
+          fa-icon="info"
+          :color="buttonColor"
+          tooltip-text="Show information"
+          tooltip-location="start"
+        >
+        </icon-button>
       </div>
     </div>
 
@@ -102,11 +111,6 @@
       :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
       v-show="showPlaceHighlights"
     > 
-      <infobox
-        :place="currentPlace"
-        @read-more="showTextSheet = true"
-      >
-      </infobox>
   </div>
     
 
@@ -153,6 +157,11 @@
             ></v-checkbox>
           </div>
         </div>
+        <infobox
+          :place="currentPlace"
+          @read-more="showTextSheet = true"
+        >
+      </infobox>
       </div>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
@@ -756,6 +765,10 @@ body {
   gap: 10px;
   align-items: flex-end;
   height: auto;
+}
+
+#info-icon-button {
+  padding: 5px 12px;
 }
 
 #bottom-content {
