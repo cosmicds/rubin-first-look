@@ -25,15 +25,30 @@
   </wwt-tracked-content>
     
     <wwt-tracked-content
-      v-for="(place, index) in places"
+      v-for="(place, index) in lowerLevelPlaces"
       :key="index"
       :place="place"
+      :name="place.get_name()"
       :store="store"
-      :visible="true"
+      :visible="showLabels && !atTopLevel"
       v-slot="props"
       debug
       @click="handleSelection(place)"
-      >
+    >
+        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+    </wwt-tracked-content>
+
+    <wwt-tracked-content
+      v-for="(place, index) in topLevelPlaces"
+      :key="index"
+      :place="place"
+      :name="place.get_name()"
+      :store="store"
+      :visible="showLabels && atTopLevel"
+      v-slot="props"
+      debug
+      @click="handleSelection(place)"
+    >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
     
@@ -394,41 +409,34 @@ const folder: Ref<Folder> = ref(new Folder());
 const domain = "http://localhost:12345";
 // const wtmlUrl = `${domain}/index.wtml`;
 const trifidPlacesUrl = `${domain}/trifid_places.wtml`;
-const virgoPlacesUrl = `${domain}/trifid_places.wtml`;
+const virgoPlacesUrl = `${domain}/virgo_places.wtml`;
 const selectedItem = ref<Thumbnail | null>(null);
 
-const places: Place[] = [];
+const lowerLevelPlaces: Place[] = [];
+const topLevelPlaces: Place[] = [];
 const currentPlace = ref<Place | null>(null);
 
 type Mode = "galaxy" | "nebula";
 const mode = ref<Mode>("nebula");
 
-const CONTENT_ITEMS = [
+const TOP_LEVEL_ITEMS = [
   "The Cosmic Treasure Chest",
-  "Messier 49",
-  "NGC 4365",
-  "NGC 4535",
-  "RSCG 55",
   "Trifid and Lagoon Nebulae",
-  "Trifid Nebula",
-  "Lagoon Nebula",
-  "Messier 21",
-  "Bochum 14",
-  "NGC 6544",
 ];
 
 const INFOBOX_ZOOM_CUTOFF = 10;
+const SMALL_LABELS_ZOOM = 20;
 let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
-const showLabels = ref(true);
+const showLabels = ref(false);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
+const atTopLevel = computed(() => zoomDeg.value > SMALL_LABELS_ZOOM);
 
 import { useTrackedElements } from "./composables/useTrackedElements";
 const ute = useTrackedElements("", store);
-const { hideElementByName, showElementByName } = ute;
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -449,12 +457,16 @@ onMounted(() => {
       }).then(loadedFolder => {
         const children = loadedFolder.get_children();
         children?.forEach(item => {
-          console.log(item);
           if (item instanceof Place) {
-            if (CONTENT_ITEMS.includes(item.get_name())) {
+            if (TOP_LEVEL_ITEMS.includes(item.get_name())) {
               folder.value.addChildPlace(item);
+              topLevelPlaces.push(item);
+            } else {
+              if (item.get_names().length == 1) {
+                folder.value.addChildPlace(item);
+              }
+              lowerLevelPlaces.push(item);
             }
-            places.push(item);
           }
         });
       });
@@ -496,7 +508,7 @@ function findClosest(places: Place[]): Place | null {
 }
 
 function updateClosestPlace() {
-  currentPlace.value = findClosest(places);
+  currentPlace.value = findClosest(atTopLevel.value ? topLevelPlaces : lowerLevelPlaces);
 }
 
 function updateCircle(place: Place | null) {
@@ -664,14 +676,6 @@ watch(showCircle, (_show: boolean) => updateCircle(currentPlace.value));
 watch(showConstellations, (show: boolean) => {
   store.applySetting(["showConstellationFigures", show]);
   store.applySetting(["showConstellationLabels", show]);
-});
-watch(showLabels, (show: boolean) => {
-  const updater = show ? showElementByName : hideElementByName;
-  places.forEach(place => {
-    const iset = place.get_backgroundImageset() ?? place.get_studyImageset();
-    const name = iset?.get_name() ?? place.get_name();
-    updater(name);
-  });
 });
 watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
@@ -1056,5 +1060,6 @@ video {
   position: fixed;
   left: 5px;
   bottom: 5px;
+  max-width: 50%;
 }
 </style>
