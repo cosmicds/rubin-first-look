@@ -25,8 +25,8 @@
   </wwt-tracked-content>
     
     <wwt-tracked-content
-      v-for="place in places"
-      :key="place.get_name()"
+      v-for="(place, index) in places"
+      :key="index"
       :place="place"
       :store="store"
       :visible="true"
@@ -62,7 +62,7 @@
     <div id="top-content">
       <div id="left-buttons" v-hide="fullscreen">
         <folder-view
-          v-if="folder"
+          v-if="folder.get_children()?.length ?? 0 > 0"
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
           :background-color="accentColor"
@@ -390,8 +390,11 @@ const accentColor = computed(() => theme.current.value.colors.primaryVariant);
 const buttonColor = computed(() => theme.global.current.value.colors.primary);
 const tab = ref(0);
 
-const folder: Ref<Folder | null> = ref(null);
-const wtmlUrl = "items.wtml";
+const folder: Ref<Folder> = ref(new Folder());
+const domain = "http://localhost:12345";
+// const wtmlUrl = `${domain}/index.wtml`;
+const trifidPlacesUrl = `${domain}/trifid_places.wtml`;
+const virgoPlacesUrl = `${domain}/trifid_places.wtml`;
 const selectedItem = ref<Thumbnail | null>(null);
 
 const places: Place[] = [];
@@ -399,6 +402,20 @@ const currentPlace = ref<Place | null>(null);
 
 type Mode = "galaxy" | "nebula";
 const mode = ref<Mode>("nebula");
+
+const CONTENT_ITEMS = [
+  "The Cosmic Treasure Chest",
+  "Messier 49",
+  "NGC 4365",
+  "NGC 4535",
+  "RSCG 55",
+  "Trifid and Lagoon Nebulae",
+  "Trifid Nebula",
+  "Lagoon Nebula",
+  "Messier 21",
+  "Bochum 14",
+  "NGC 6544",
+];
 
 const INFOBOX_ZOOM_CUTOFF = 10;
 let circle: Circle | null = null;
@@ -424,21 +441,23 @@ onMounted(() => {
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
 
-    // We'll probably end up changing the WTML setup once we have the final images anyways
-    // so not worth trying to make this super-clean now
-    store.loadImageCollection({
-      url: wtmlUrl,
-      loadChildFolders: false,
-    }).then(resultFolder => {
-      folder.value = resultFolder; 
-      const children = resultFolder.get_children();
-      if (children !== null) {
-        children.forEach(item => {
+    // Add labeled places
+    [trifidPlacesUrl, virgoPlacesUrl].forEach(url => {
+      store.loadImageCollection({
+        url,
+        loadChildFolders: false,
+      }).then(loadedFolder => {
+        const children = loadedFolder.get_children();
+        children?.forEach(item => {
+          console.log(item);
           if (item instanceof Place) {
+            if (CONTENT_ITEMS.includes(item.get_name())) {
+              folder.value.addChildPlace(item);
+            }
             places.push(item);
           }
         });
-      } 
+      });
     });
     
     store.loadImageCollection({
@@ -648,7 +667,11 @@ watch(showConstellations, (show: boolean) => {
 });
 watch(showLabels, (show: boolean) => {
   const updater = show ? showElementByName : hideElementByName;
-  places.forEach(place => updater(place.get_name()));
+  places.forEach(place => {
+    const iset = place.get_backgroundImageset() ?? place.get_studyImageset();
+    const name = iset?.get_name() ?? place.get_name();
+    updater(name);
+  });
 });
 watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
