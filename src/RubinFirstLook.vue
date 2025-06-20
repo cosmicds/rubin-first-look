@@ -419,11 +419,6 @@ const currentPlace = ref<Place | null>(null);
 type Mode = "galaxy" | "nebula";
 const mode = ref<Mode>("nebula");
 
-const TOP_LEVEL_ITEMS = [
-  "The Cosmic Treasure Chest",
-  "Trifid and Lagoon Nebulae",
-];
-
 const INFOBOX_ZOOM_CUTOFF = 10;
 const SMALL_LABELS_ZOOM = 20;
 let circle: Circle | null = null;
@@ -456,9 +451,9 @@ onMounted(() => {
         loadChildFolders: false,
       }).then(loadedFolder => {
         const children = loadedFolder.get_children();
-        children?.forEach(item => {
+        children?.forEach((item, index) => {
           if (item instanceof Place) {
-            if (TOP_LEVEL_ITEMS.includes(item.get_name())) {
+            if (index === 0) {
               folder.value.addChildPlace(item);
               topLevelPlaces.push(item);
             } else {
