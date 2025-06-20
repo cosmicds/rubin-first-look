@@ -9,20 +9,7 @@
     <WorldWideTelescope
       :wwt-namespace="wwtNamespace"
     ></WorldWideTelescope>
-    <wwt-tracked-content
-      class="first-place"
-      :ra="159"
-      :dec="-57"
-      name="First Place"
-      :store="store"
-      :visible="true"
-      center-on-click
-      instant
-      :zoom-deg="60"
-      debug
-      >
-    </wwt-tracked-content>
-    
+
     <wwt-tracked-content
     :ra="10.5"
     :dec="41.3"
