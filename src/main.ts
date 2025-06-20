@@ -15,16 +15,22 @@ import { WWTComponent, wwtPinia } from "@wwtelescope/engine-pinia";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
-  faBookOpen,
   faChevronDown,
-  faGear,
+  faChevronUp,
+  faCompress,
+  faExpand,
+  faInfo,
+  faSliders,
   faTimes,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 
-library.add(faBookOpen);
 library.add(faChevronDown);
-library.add(faGear);
+library.add(faChevronUp);
+library.add(faCompress);
+library.add(faExpand);
+library.add(faInfo);
+library.add(faSliders);
 library.add(faTimes);
 library.add(faVideo);
 

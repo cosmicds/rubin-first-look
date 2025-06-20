@@ -11,13 +11,6 @@
     <template #content>
       <div v-html="place.htmlDescription"></div> 
     </template>
-    
-    <template #actions>
-      <v-btn
-        v-show="showReadMore"
-        @click="readMoreClicked"
-      >Read More</v-btn>
-    </template>
   </expansion-wrapper>
 </template>
 
@@ -32,12 +25,4 @@ interface Props {
 withDefaults(defineProps<Props>(), {
   showReadMore: true,
 });
-
-const emit = defineEmits<{
-  (event: "read-more"): void
-}>();
-
-function readMoreClicked() {
-  emit("read-more");
-}
 </script>

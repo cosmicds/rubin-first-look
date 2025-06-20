@@ -9,20 +9,7 @@
     <WorldWideTelescope
       :wwt-namespace="wwtNamespace"
     ></WorldWideTelescope>
-    <wwt-tracked-content
-      class="first-place"
-      :ra="159"
-      :dec="-57"
-      name="First Place"
-      :store="store"
-      :visible="true"
-      center-on-click
-      instant
-      :zoom-deg="60"
-      debug
-      >
-    </wwt-tracked-content>
-    
+
     <wwt-tracked-content
     :ra="10.5"
     :dec="41.3"
@@ -70,65 +57,83 @@
       </div>
     </transition>
 
-
     <!-- This block contains the elements (e.g. icon buttons displayed at/near the top of the screen -->
 
     <div id="top-content">
-      <div id="left-buttons">
-        <icon-button
-          v-model="showVideoSheet"
-          fa-icon="video"
-          :color="buttonColor"
-          tooltip-text="Watch video"
-          tooltip-location="start"
-        >
-        </icon-button>
+      <div id="left-buttons" v-hide="fullscreen">
         <folder-view
           v-if="folder"
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
+          :background-color="accentColor"
           flex-direction="column"
           @select="handleSelection"
         >
+          <template #header="{ toggleExpanded, expanded }">
+            <div class="fv-header">
+              <span>Explore {{ mode.charAt(0).toUpperCase() + mode.slice(1) }}</span>
+              <font-awesome-icon
+                :icon="expanded ? 'chevron-up' : 'chevron-down'"
+                @click="toggleExpanded()"
+                @keyup.enter="toggleExpanded()"
+                tabindex="0"
+              >
+              </font-awesome-icon>
+            </div>
+          </template>
         </folder-view>
       </div>
-      <div id="center-buttons">
+      <div id="center-buttons" v-hide="fullscreen">
       </div>
       <div id="right-buttons">
-      </div>
-    </div>
-
-    <div
-      :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
-      v-show="showPlaceHighlights"
-    > 
-      <infobox
-        :place="currentPlace"
-        @read-more="showTextSheet = true"
-      >
-      </infobox>
-  </div>
-    
-
-    <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
-
-    <div id="bottom-content">
-      <div id="controls-row">
+        <div v-hide="fullscreen">
+          <icon-button
+            id="info-icon"
+            v-model="showTextSheet"
+            fa-icon="info"
+            :color="buttonColor"
+            tooltip-text="Show information"
+            tooltip-location="start"
+          >
+          </icon-button>
+        </div>
+        <div v-hide="fullscreen">
+          <icon-button
+            v-model="showVideoSheet"
+            fa-icon="video"
+            :color="buttonColor"
+            tooltip-text="Watch video"
+            tooltip-location="start"
+          >
+          </icon-button>
+        </div>
+        <icon-button
+          id="fullscreen-icon"
+          @activate="fullscreen = !fullscreen"
+          :fa-icon="fullscreen ? 'compress' : 'expand'"
+          :color="buttonColor"
+          :tooltip-text="`${fullscreen ? 'Exit' : 'Make'} fullscreen`"
+          tooltip-location="start"
+        >
+        </icon-button>
         <div
           id="options"
+          v-hide="fullscreen"
         >
           <div id="options-top-row">
             <icon-button
-              :fa-icon="showControls ? 'chevron-down' : 'gear'"
-              :color="accentColor"
-              @activate="showControls = !showControls"
+              id="options-toggle"
+              :fa-icon="showOptions ? 'chevron-up' : 'sliders'"
+              :color="buttonColor"
+              @activate="showOptions = !showOptions"
               tabindex="0"
               :border="false"
+              background-color="transparent"
             ></icon-button>
           </div>
           <div
             id="options-content"
-            v-if="showControls"
+            v-if="showOptions"
           >
             <v-checkbox
               v-model="showCircle"
@@ -153,7 +158,23 @@
             ></v-checkbox>
           </div>
         </div>
+
       </div>
+    </div>
+
+    <div
+      :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
+      v-show="showPlaceHighlights"
+    > 
+  </div>
+    
+
+    <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
+
+    <div
+      id="bottom-content"
+      v-hide="fullscreen"
+    >
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
           :default-logos="['cosmicds', 'wwt']"
@@ -169,6 +190,11 @@
       </div>
     </div>
 
+    <infobox
+      v-hide="fullscreen"
+      :place="currentPlace"
+    >
+    </infobox>
 
     <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
@@ -315,12 +341,14 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
+import { useFullscreen } from "./composables/useFullscreen";
 import { D2R, distance, H2R } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
-import { useDisplay } from "vuetify";
+import { RUBIN_COLORS } from "../plugins/vuetify";
+import { useDisplay, useTheme } from "vuetify";
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
@@ -334,10 +362,12 @@ const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 useWWTKeyboardControls(store);
 
+const fullscreen = useFullscreen();
+
 const touchscreen = supportsTouchscreen();
 // TODO: Determine this in a better way
 const display = useDisplay();
-
+const theme = useTheme();
 
 const props = withDefaults(defineProps<RubinFirstLookProps>(), {
   wwtNamespace: "rubin-first-look",
@@ -355,11 +385,8 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
-const rubinTeal = "#05B8BC";
-const rubinTurquoise = "#00BABC";
-const rubinCharcoal = "#313333";
-const accentColor = ref(rubinTurquoise);
-const buttonColor = ref(rubinTeal);
+const accentColor = computed(() => theme.current.value.colors.primaryVariant);
+const buttonColor = computed(() => theme.global.current.value.colors.primary);
 const tab = ref(0);
 
 const folder: Ref<Folder | null> = ref(null);
@@ -369,9 +396,12 @@ const selectedItem = ref<Thumbnail | null>(null);
 const places: Place[] = [];
 const currentPlace = ref<Place | null>(null);
 
+type Mode = "galaxy" | "nebula";
+const mode = ref<Mode>("nebula");
+
 const INFOBOX_ZOOM_CUTOFF = 10;
 let circle: Circle | null = null;
-const showControls = ref(false);
+const showOptions = ref(false);
 const showCircle = ref(true);
 const showLabels = ref(true);
 const showConstellations = ref(false);
@@ -539,11 +569,13 @@ const infoSheetTransition = computed(() => infoSheetLocation.value === "bottom" 
 
 /* This lets us inject component data into element CSS */
 const cssVars = computed(() => {
+  const rubinColors = Object.keys(RUBIN_COLORS).reduce((acc: Record<string, string>, key: string) => {
+    acc[`--${key}`] = RUBIN_COLORS[key];
+    return acc;
+  }, {});
   return {
+    ...rubinColors,
     "--accent-color": accentColor.value,
-    "--rubin-teal": rubinTeal,
-    "--rubin-turquoise": rubinTurquoise,
-    "--rubin-charcoal": rubinCharcoal,
     "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100vh",
     "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100vw",
     "--info-sheet-width": infoSheetWidth.value,
@@ -618,6 +650,9 @@ watch(showLabels, (show: boolean) => {
   places.forEach(place => updater(place.get_name()));
 });
 watch(currentPlace, updateCircle);
+watch(mode, (newMode: Mode) => {
+  theme.global.name.value = newMode === "galaxy" ? "rubinGalaxy" : "rubinNebula";
+});
 </script>
 
 <style lang="less">
@@ -756,6 +791,10 @@ body {
   gap: 10px;
   align-items: flex-end;
   height: auto;
+}
+
+#info-icon-button {
+  padding: 5px 12px;
 }
 
 #bottom-content {
@@ -957,18 +996,10 @@ video {
   // transform: translate(-50%, 50%); // center on the point
 }
 
-#controls-row {
-  padding: 5px;
-  width: 100%;
-  display: flex;
-  flex-direction: row-reverse;
-}
-
 #options {
   background: black;
   border: 1px solid var(--accent-color);
-  border-radius: 2px;
-  align-self: flex-end;
+  border-radius: 20px;
   pointer-events: auto;
 
   .icon-wrapper {
@@ -980,5 +1011,24 @@ video {
     flex-direction: row;
     justify-content: flex-end;
   }
+
+  #options-content {
+    padding: 5px;
+  }
+}
+
+.fv-header {
+  font-size: 10pt;
+
+  svg {
+    padding: 0px 5px;
+    cursor: pointer;
+  }
+}
+
+.infobox {
+  position: fixed;
+  left: 5px;
+  bottom: 5px;
 }
 </style>

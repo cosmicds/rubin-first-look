@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /*  eslint-disable @typescript-eslint/no-unused-vars */
-import { onMounted, defineProps, ref, withDefaults, defineSlots, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useTrackedElements, UseTrackedElementsReturn, TrackedHTMLElement } from '@/composables/useTrackedElements';
 
 import { Place } from '@wwtelescope/engine';

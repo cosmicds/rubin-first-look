@@ -84,8 +84,6 @@ const props = withDefaults(defineProps<Props>(), {
   cssVars: () => ({}),
 });
 
-console.log(props.cssVars);
-
 const cssVars = computed(() => {
   return {
     ...props.cssVars,
