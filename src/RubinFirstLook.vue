@@ -86,7 +86,7 @@
             <div class="fv-header">
               <span>Explore {{ mode.charAt(0).toUpperCase() + mode.slice(1) }}</span>
               <font-awesome-icon
-                :icon="expanded ? 'chevron-down' : 'chevron-up'"
+                :icon="expanded ? 'chevron-up' : 'chevron-down'"
                 @click="toggleExpanded()"
                 @keyup.enter="toggleExpanded()"
                 tabindex="0"
@@ -136,7 +136,7 @@
           <div id="options-top-row">
             <icon-button
               id="options-toggle"
-              :fa-icon="showOptions ? 'chevron-down' : 'sliders'"
+              :fa-icon="showOptions ? 'chevron-up' : 'sliders'"
               :color="buttonColor"
               @activate="showOptions = !showOptions"
               tabindex="0"
