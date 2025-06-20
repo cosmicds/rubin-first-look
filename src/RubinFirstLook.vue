@@ -74,14 +74,6 @@
 
     <div id="top-content">
       <div id="left-buttons" v-hide="fullscreen">
-        <icon-button
-          v-model="showVideoSheet"
-          fa-icon="video"
-          :color="buttonColor"
-          tooltip-text="Watch video"
-          tooltip-location="start"
-        >
-        </icon-button>
         <folder-view
           v-if="folder"
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
@@ -114,6 +106,16 @@
             fa-icon="info"
             :color="buttonColor"
             tooltip-text="Show information"
+            tooltip-location="start"
+          >
+          </icon-button>
+        </div>
+        <div v-hide="fullscreen">
+          <icon-button
+            v-model="showVideoSheet"
+            fa-icon="video"
+            :color="buttonColor"
+            tooltip-text="Watch video"
             tooltip-location="start"
           >
           </icon-button>
