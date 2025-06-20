@@ -71,5 +71,7 @@ withDefaults(defineProps<Props>(), {
   pointer-events: auto;
   margin: auto;
   max-width: 75%;
+  max-height: 75vh;
+  overflow-y: scroll;
 }
 </style>
