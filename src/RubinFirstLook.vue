@@ -25,15 +25,30 @@
   </wwt-tracked-content>
     
     <wwt-tracked-content
-      v-for="place in places"
-      :key="place.get_name()"
+      v-for="(place, index) in lowerLevelPlaces"
+      :key="index"
       :place="place"
+      :name="place.get_name()"
       :store="store"
-      :visible="true"
+      :visible="showLabels && !atTopLevel"
       v-slot="props"
       debug
       @click="handleSelection(place)"
-      >
+    >
+        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+    </wwt-tracked-content>
+
+    <wwt-tracked-content
+      v-for="(place, index) in topLevelPlaces"
+      :key="index"
+      :place="place"
+      :name="place.get_name()"
+      :store="store"
+      :visible="showLabels && atTopLevel"
+      v-slot="props"
+      debug
+      @click="handleSelection(place)"
+    >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
     
@@ -62,7 +77,7 @@
     <div id="top-content">
       <div id="left-buttons" v-hide="fullscreen">
         <folder-view
-          v-if="folder"
+          v-if="folder.get_children()?.length ?? 0 > 0"
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
           :background-color="accentColor"
@@ -193,6 +208,7 @@
     <infobox
       v-hide="fullscreen"
       :place="currentPlace"
+      :small="smallSize"
     >
     </infobox>
 
@@ -389,28 +405,33 @@ const accentColor = computed(() => theme.current.value.colors.primaryVariant);
 const buttonColor = computed(() => theme.global.current.value.colors.primary);
 const tab = ref(0);
 
-const folder: Ref<Folder | null> = ref(null);
-const wtmlUrl = "items.wtml";
+const folder: Ref<Folder> = ref(new Folder());
+const domain = "http://localhost:12345";
+// const wtmlUrl = `${domain}/index.wtml`;
+const imageAPlacesURL = `${domain}/a_places.wtml`;
+const imageBPlacesURL= `${domain}/b_places.wtml`;
 const selectedItem = ref<Thumbnail | null>(null);
 
-const places: Place[] = [];
+const lowerLevelPlaces: Place[] = [];
+const topLevelPlaces: Place[] = [];
 const currentPlace = ref<Place | null>(null);
 
 type Mode = "galaxy" | "nebula";
 const mode = ref<Mode>("nebula");
 
 const INFOBOX_ZOOM_CUTOFF = 10;
+const SMALL_LABELS_ZOOM = 20;
 let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
-const showLabels = ref(true);
+const showLabels = ref(false);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
+const atTopLevel = computed(() => zoomDeg.value > SMALL_LABELS_ZOOM);
 
 import { useTrackedElements } from "./composables/useTrackedElements";
 const ute = useTrackedElements("", store);
-const { hideElementByName, showElementByName } = ute;
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -422,22 +443,28 @@ onMounted(() => {
 
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
-    
-    // We'll probably end up changing the WTML setup once we have the final images anyways
-    // so not worth trying to make this super-clean now
-    store.loadImageCollection({
-      url: wtmlUrl,
-      loadChildFolders: false,
-    }).then(resultFolder => {
-      folder.value = resultFolder; 
-      const children = resultFolder.get_children();
-      if (children !== null) {
-        children.forEach(item => {
+
+    // Add labeled places
+    [imageAPlacesURL, imageBPlacesURL].forEach(url => {
+      store.loadImageCollection({
+        url,
+        loadChildFolders: false,
+      }).then(loadedFolder => {
+        const children = loadedFolder.get_children();
+        children?.forEach((item, index) => {
           if (item instanceof Place) {
-            places.push(item);
+            if (index === 0) {
+              folder.value.addChildPlace(item);
+              topLevelPlaces.push(item);
+            } else {
+              if (item.get_names().length == 1) {
+                folder.value.addChildPlace(item);
+              }
+              lowerLevelPlaces.push(item);
+            }
           }
         });
-      } 
+      });
     });
     
     store.loadImageCollection({
@@ -476,7 +503,7 @@ function findClosest(places: Place[]): Place | null {
 }
 
 function updateClosestPlace() {
-  currentPlace.value = findClosest(places);
+  currentPlace.value = findClosest(atTopLevel.value ? topLevelPlaces : lowerLevelPlaces);
 }
 
 function updateCircle(place: Place | null) {
@@ -644,10 +671,6 @@ watch(showCircle, (_show: boolean) => updateCircle(currentPlace.value));
 watch(showConstellations, (show: boolean) => {
   store.applySetting(["showConstellationFigures", show]);
   store.applySetting(["showConstellationLabels", show]);
-});
-watch(showLabels, (show: boolean) => {
-  const updater = show ? showElementByName : hideElementByName;
-  places.forEach(place => updater(place.get_name()));
 });
 watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
@@ -1032,5 +1055,6 @@ video {
   position: fixed;
   left: 5px;
   bottom: 5px;
+  max-width: 50%;
 }
 </style>

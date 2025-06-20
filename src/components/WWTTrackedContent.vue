@@ -63,7 +63,7 @@ if (props.place) {
   } else {
     ra.value = (props.place.get_RA() as HourAngle) * 15 as Degree;
     dec.value = props.place.get_dec();
-    name.value = iset.get_name();
+    name.value = props.name ?? iset.get_name();
   }
 }
 
@@ -120,6 +120,7 @@ onMounted(() => {
       },
       name.value
     );
+    updateVisibility(props.visible);
   })
     .then(() => {
       ready.value = true;
@@ -129,15 +130,14 @@ onMounted(() => {
     });
 });
 
-watch(() => props.visible, (newValue) => {
-  if (trackedElement.value) {
-    if (newValue) {
-      trackedElement.value.style.visibility = 'visible';
-    } else {
-      trackedElement.value.style.visibility = 'hidden';
-    }
+function updateVisibility(visible: boolean) {
+  const element = trackedElement.value;
+  if (element) {
+    element.style.visibility = visible ? "visible" : "hidden";
   }
-});
+}
+
+watch(() => props.visible, updateVisibility);
 
 watch(() => [props.ra, props.dec], ([newRa, newDec]) => {
   if (!trackedElement.value) return;
