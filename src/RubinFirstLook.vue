@@ -193,6 +193,7 @@
     <infobox
       v-hide="fullscreen"
       :place="currentPlace"
+      :small="smallSize"
     >
     </infobox>
 
@@ -422,7 +423,7 @@ onMounted(() => {
 
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
-    
+
     // We'll probably end up changing the WTML setup once we have the final images anyways
     // so not worth trying to make this super-clean now
     store.loadImageCollection({

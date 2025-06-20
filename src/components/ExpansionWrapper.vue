@@ -33,7 +33,6 @@ withDefaults(defineProps<Props>(), {
 
 <style lang="less">
 details.expansion-panel {
-  border: none;
   background: #00000080;
   color: inherit;
   font: inherit;
