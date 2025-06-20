@@ -408,8 +408,8 @@ const tab = ref(0);
 const folder: Ref<Folder> = ref(new Folder());
 const domain = "http://localhost:12345";
 // const wtmlUrl = `${domain}/index.wtml`;
-const trifidPlacesUrl = `${domain}/trifid_places.wtml`;
-const virgoPlacesUrl = `${domain}/virgo_places.wtml`;
+const imageAPlacesURL = `${domain}/a_places.wtml`;
+const imageBPlacesURL= `${domain}/b_places.wtml`;
 const selectedItem = ref<Thumbnail | null>(null);
 
 const lowerLevelPlaces: Place[] = [];
@@ -450,7 +450,7 @@ onMounted(() => {
     layersLoaded.value = true;
 
     // Add labeled places
-    [trifidPlacesUrl, virgoPlacesUrl].forEach(url => {
+    [imageAPlacesURL, imageBPlacesURL].forEach(url => {
       store.loadImageCollection({
         url,
         loadChildFolders: false,
