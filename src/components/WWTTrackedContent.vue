@@ -57,11 +57,12 @@ const zoomDeg = computed(() => {
 
 if (props.place) {
   const iset = props.place.get_backgroundImageset() ?? props.place.get_studyImageset();
+  
   if (iset === null) {
     console.warn(`Place ${props.place.get_name()} does not have a background or study imageset.`);
   } else {
-    ra.value = iset.get_centerX();
-    dec.value = iset.get_centerY();
+    ra.value = (props.place.get_RA() as HourAngle) * 15 as Degree;
+    dec.value = props.place.get_dec();
     name.value = iset.get_name();
   }
 }
@@ -166,7 +167,7 @@ const slots = defineSlots<{
     >
     <slot :on="{'click': onClick, 'keydown.enter': onClick}" >
       <div 
-        class="default-wwt-tracked-content-content allow-pointer" 
+        :class="['default-wwt-tracked-content-content', { debug: debug }]" 
         @click="onClick" 
         @keydown.enter="onClick"
       >
@@ -184,6 +185,10 @@ const slots = defineSlots<{
   cursor: pointer;
 }
 
+.wwt-tracked-content.debug {
+  outline: 1px solid red;
+}
+
 .default-wwt-tracked-content-content {
   width: 100px;
   height: 100px;
@@ -192,11 +197,14 @@ const slots = defineSlots<{
 }
 
 .tracking-debug-circle {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 10px;
   height: 10px;
   border-radius: 50%;
   background-color: red;
-  transform: translate(-50%, -50%);
+  // transform: translate(-50%, -50%);
 }
 
 </style>
