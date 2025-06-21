@@ -374,7 +374,7 @@ import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { RUBIN_COLORS } from "../plugins/vuetify";
 import { useDisplay, useTheme } from "vuetify";
-import { type FolderViewSelectionType } from "./types";
+import { type ItemSelectionType } from "./types";
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
@@ -575,7 +575,7 @@ function placeInView(place: Place, fraction=1/3): boolean {
   return dist < curFov / 2;
 }
 
-function handleSelection(item: Thumbnail, selection: FolderViewSelectionType) {
+function handleSelection(item: Thumbnail, selection: ItemSelectionType) {
   if (item instanceof Imageset) {
     store.setForegroundImageByName(item.get_name());
     const type = item.get_dataSetType();
