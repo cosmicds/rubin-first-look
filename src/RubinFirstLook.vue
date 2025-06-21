@@ -416,8 +416,8 @@ const lowerLevelPlaces: Place[] = [];
 const topLevelPlaces: Place[] = [];
 const currentPlace = ref<Place | null>(null);
 
-type Mode = "galaxy" | "nebula";
-const mode = ref<Mode>("nebula");
+type Mode = "a" | "b";
+const mode = ref<Mode>("b");
 
 const INFOBOX_ZOOM_CUTOFF = 10;
 const SMALL_LABELS_ZOOM = 20;
@@ -464,6 +464,8 @@ onMounted(() => {
             }
           }
         });
+        console.log(topLevelPlaces);
+        console.log(store.gotoTarget);
       });
     });
     
@@ -659,13 +661,22 @@ function selectSheet(sheetType: SheetType | null) {
   }
 }
 
+function onMove() {
+  if (placeInView(topLevelPlaces[0])) {
+    mode.value = "a";
+  } else if (placeInView(topLevelPlaces[1])) {
+    mode.value = "b";
+  }
+  updateClosestPlace();
+}
+
 function onZoomChange(_zoomDeg: number) {
   updateClosestPlace();
   updateCircle(currentPlace.value);
 }
 
-watch(raRad, (_ra: number) => updateClosestPlace());
-watch(decRad, (_dec: number) => updateClosestPlace());
+watch(raRad, (_ra: number) => onMove());
+watch(decRad, (_dec: number) => onMove());
 watch(zoomDeg, onZoomChange);
 watch(showCircle, (_show: boolean) => updateCircle(currentPlace.value));
 watch(showConstellations, (show: boolean) => {
@@ -674,7 +685,7 @@ watch(showConstellations, (show: boolean) => {
 });
 watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
-  theme.global.name.value = newMode === "galaxy" ? "rubinGalaxy" : "rubinNebula";
+  theme.global.name.value = newMode === "b" ? "rubinGalaxy" : "rubinNebula";
 });
 </script>
 

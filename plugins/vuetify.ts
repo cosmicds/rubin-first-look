@@ -48,9 +48,9 @@ export default createVuetify({
   theme: {
     // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
 
-    defaultTheme: 'rubinNebula',
+    defaultTheme: 'rubinB',
     themes: {
-      rubinNebula: {
+      rubinB: {
         dark: true,
         colors: {
           // Core brand colors
@@ -74,7 +74,7 @@ export default createVuetify({
           ...RUBIN_COLORS,
         },
       },
-      rubinGalaxy: {
+      rubinA: {
       }
     },
   },
