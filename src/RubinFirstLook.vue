@@ -420,7 +420,7 @@ type Mode = "a" | "b";
 const mode = ref<Mode>("b");
 
 const INFOBOX_ZOOM_CUTOFF = 10;
-const SMALL_LABELS_ZOOM = 20;
+const SMALL_LABELS_ZOOM = 25;
 let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
