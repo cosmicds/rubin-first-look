@@ -10,35 +10,20 @@
       :wwt-namespace="wwtNamespace"
     ></WorldWideTelescope>
 
-    <wwt-tracked-content
-    :ra="18*15"
-    :dec="0"
-    name="Andromeda Galaxy"
-    :offsetX="offsetX"
-    :offsetY="offsetY"
-    :store="store"
-    center-on-click
-    v-slot="props"
-    :zoomDeg="8"
-  >
-    <div class="traked-places" v-on="props.on">
-      <p>Track Andromeda Galaxy</p>
-    </div>
-  </wwt-tracked-content>
     
     <wwt-tracked-content
       v-for="(place, index) in lowerLevelPlaces"
       :key="index"
       :place="place"
       :name="place.get_name()"
-      :offsetX="-(place.angularSize / 2) * (1+ 0.296)"
-      :offsetY="0"
+      :offset-ra="offsets[place.get_name()]?.raOff ?? 0"
+      :offset-dec="offsets[place.get_name()]?.decOff ?? 0"
       :store="store"
       :visible="showLabels && !atTopLevel"
       v-slot="props"
       debug
       @click="handleSelection(place)"
-    >
+    >   
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
 
@@ -47,6 +32,8 @@
       :key="index"
       :place="place"
       :name="place.get_name()"
+      :offset-ra="offsets[place.get_name()]?.raOff ?? 0"
+      :offset-dec="offsets[place.get_name()]?.decOff ?? 0"
       :store="store"
       :visible="showLabels && atTopLevel"
       v-slot="props"
@@ -200,29 +187,6 @@
       id="bottom-content"
       v-hide="fullscreen"
     >
-      <!-- x,y offsets, range -1, 1 -->
-      <v-slider
-        style="width:200px; pointer-events: auto;"
-        v-model="offsetX"
-        :max="1"
-        :min="-1"
-        :step="0.001"
-        :thumb-label="true"
-        color="info"
-        hide-details
-        density="compact"
-        />
-      <v-slider
-        style="width:200px; pointer-events: auto;"
-        v-model="offsetY"
-        :max="1"
-        :min="-1"
-        :step="0.001"
-        :thumb-label="true"
-        :color="accentColor"
-        hide-details
-        density="compact"
-        />
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
           :default-logos="['cosmicds', 'wwt']"
@@ -464,7 +428,49 @@ const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.
 const atTopLevel = computed(() => zoomDeg.value > SMALL_LABELS_ZOOM);
 
 import { useTrackedElements } from "./composables/useTrackedElements";
-const ute = useTrackedElements("", store);
+const _ute = useTrackedElements("", store);
+
+// Offsets are in RA/Dec 
+// If you passt them to :offset-x, or :offset-y instead
+// offset ra will be how left/right the label is offset and 
+// // offset dec will be how up/down the label is offset
+interface Offset {
+  raOff: number;
+  decOff: number;
+  rollRad: number; // then name of the top-level
+}
+
+type OffsetRecords = Record<string, Offset>;
+const offsets = ref<OffsetRecords>({});
+
+function rotateOffsetToScreen(offset: Offset): Offset {
+  // Rotate the offset to the screen orientation
+  const cosRoll = Math.cos(offset.rollRad);
+  const sinRoll = Math.sin(offset.rollRad);
+  return {
+    raOff: offset.raOff * cosRoll + offset.decOff * sinRoll,
+    decOff: -offset.raOff * sinRoll + offset.decOff * cosRoll,
+    rollRad: offset.rollRad
+  };
+}
+
+
+fetch(`${domain}/offsets.json`)
+  .then(response => response.json())
+  .then(data => {
+    const keys = Object.keys(data);
+    keys.forEach(key => {
+      const offset = data[key] as Offset;
+      // Rotate the offset to the screen orientation
+      data[key] = rotateOffsetToScreen(offset);
+    });
+    offsets.value = data as OffsetRecords;
+    
+  })
+  .catch(error => {
+    console.error("Error fetching offsets:", error);
+  });
+  
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -509,7 +515,6 @@ onMounted(() => {
         });
       });
     });
-
     
     store.loadImageCollection({
       url: "bg.wtml",
@@ -527,7 +532,7 @@ onMounted(() => {
     updateClosestPlace();
 
   }).then(() => {
-    ute.hideElementByName("JWST Carina MIRI");
+    
   });
 });
 
@@ -665,19 +670,7 @@ const cssVars = computed(() => {
   };
 });
 
-
-const offsetX = ref(0);
-const offsetY = ref(0);
-
-// const offsetRa = computed(() => {
-//   const rot = -store.rollRad;
-//   return offsetX.value * Math.cos(rot) - offsetY.value * Math.sin(rot);
-// });
-// const offsetDec = computed(() => {
-//   const rot = -store.rollRad;
-//   return offsetX.value * Math.sin(rot) + offsetY.value * Math.cos(rot);
-// });
-
+  
 /**
   Computed flags that control whether the relevant dialogs display.
   The `sheet` data member stores which sheet is open, so these are just

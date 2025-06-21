@@ -62,7 +62,7 @@ export type ScreenPosition = {
   y: number;
 };
 
-export type TrackedElementData = LocationDegrees & Record<string, string | number>;
+export type TrackedElementData = LocationDegrees & Record<string, string | number> & {ra: Degree; dec: Degree};
 
 export interface TrackedHTMLElement extends HTMLElement {
   trackedData: TrackedElementData;

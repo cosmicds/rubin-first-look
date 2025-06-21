@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/*  eslint-disable @typescript-eslint/no-unused-vars */
+//  eslint-disable @typescript-eslint/no-unused-vars 
 import { onMounted, ref, watch } from 'vue';
 import { useTrackedElements, UseTrackedElementsReturn, TrackedHTMLElement } from '@/composables/useTrackedElements';
 
@@ -12,21 +12,21 @@ interface WWTEngineStore extends ReturnType<typeof engineStore> {
 }
 
 type Degree = number;
-type Radian = number;
+// type Radian = number;
 type HourAngle = number;
-type Pixel = number;
+// type Pixel = number;
 const D2R = Math.PI / 180;
-const R2D = 180 / Math.PI;
+// const R2D = 180 / Math.PI;
 interface WWTTrackedContentProps {
   containerID?: string;
   ra?: Degree;
   dec?: Degree;
   name?: string
   place?: Place; // Optional place object, if needed
-  offsetRA?: Degree;
+  offsetRa?: Degree;
   offsetDec?: Degree;
-  offsetX?: Pixel; // Optional pixel offset in X direction
-  offsetY?: Pixel; // Optional pixel offset in Y direction
+  offsetX?: Degree; // Degree offset in the screen X direction
+  offsetY?: Degree; // Degree offset in the screen Y direction
   store: WWTEngineStore;
   visible?: boolean;
   centerOnClick?: boolean;
@@ -45,6 +45,7 @@ const props = withDefaults(defineProps<WWTTrackedContentProps>(), {
   place: undefined,
   goToPlace: false,
   debug: false,
+  name: 'default name',
 });
 
 const ra = ref<number>(props.ra as unknown as number);
@@ -103,26 +104,45 @@ function onClick() {
 
 const ute = ref<UseTrackedElementsReturn | null>(null);
 
-const rot = computed(() => {
+const _rot = computed(() => {
   return {'sin': Math.sin(props.store.rollRad), 'cos': Math.cos(props.store.rollRad)};
 });
 
-const offsetRA = computed(() => {
-  if (props.offsetX !== undefined && props.offsetY !== undefined ) {
-    return (props.offsetX)  * rot.value.cos + props.offsetY * rot.value.sin;
-  }
-  return props.offsetRA ?? 0;
-});
+if (props.offsetX !== undefined && props.offsetY !== undefined) {
+  console.error('While supported, I am not sure the he simple 2D rotation transforms for offsetX and offsetY are correct.');
+}
 
-const offsetDec = computed(() => {
-  if (props.offsetX !== undefined && props.offsetY !== undefined ) {
-    return -(props.offsetX) * rot.value.sin + props.offsetY * rot.value.cos;
-  }
-  return props.offsetDec ?? 0;
-});
+
+// This will get
+const offsetRA = ref<Degree>(props.offsetRa ?? 0);
+const offsetDec = ref<Degree>(props.offsetDec ?? 0);
+
+if (props.offsetX !== undefined && props.offsetY !== undefined ) {
+  // throw and error and return if offsetX and offsetY are provided
+  console.error('offsetX and offsetY ARE not setup. Rotate the coordinates before passing them to the component.');
+  throw new Error('offsetX and offsetY are not supported yet. Please use offsetRa and offsetDec instead.');
+}
+
+
+// If we want it maintain the same orientation relative to the Screen we need to use this
+// const offsetRA = computed(() => {
+//   if (props.offsetX !== undefined && props.offsetY !== undefined ) {
+//     return (props.offsetX)  * rot.value.cos + props.offsetY * rot.value.sin;
+//   }
+//   return props.offsetRa ?? 0;
+// });
+
+// const offsetDec = computed(() => {
+//   if (props.offsetX !== undefined && props.offsetY !== undefined ) {
+//     return -(props.offsetX) * rot.value.sin + props.offsetY * rot.value.cos;
+//   }
+//   return props.offsetDec ?? 0;
+// });
 
 onMounted(() => {
   props.store.waitForReady().then(() => {
+
+    
     ute.value = useTrackedElements(props.containerID, props.store) as unknown as typeof ute.value;
     if (!ute.value) {
       console.error('useTrackedElements returned null');
@@ -167,8 +187,14 @@ watch(() => [props.ra, props.dec, offsetRA.value, offsetDec.value], ([newRa, new
 }, { immediate: true });
 
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const slots = defineSlots<{
-  default: { on: Record<string, (event: Event) => void> };
+  default: { 
+    on: {
+      click: (event: MouseEvent) => void,
+      'keydown.enter': (event: KeyboardEvent) => void
+    },
+  };
 }>();
 
 
