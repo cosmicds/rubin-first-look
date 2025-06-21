@@ -126,7 +126,7 @@ function closeSplashScreen() {
 }
 
 #splash-screen {
-  color: var(--rubin-teal-1);
+  color: var(--rubin-gray-1);
 
   @media (max-width: 699px) {
     max-height: 80vh;
@@ -137,7 +137,6 @@ function closeSplashScreen() {
     max-height: 85vh;
     max-width: min(70vw, 800px);
   }
-
 
   background: var(--rubin-teal-7);
   justify-content: space-around;
@@ -164,10 +163,11 @@ function closeSplashScreen() {
     font-family: 'Source Sans 3', 'Roboto', sans-serif;
     font-weight: regular;
     vertical-align: middle;
+    color: var(--rubin-gray-1);
   }
     
   p.highlight {
-    color: rgb(var(--rubin-teal-2));
+    color: var(--rubin-turquoise);
     text-transform: uppercase;
     font-weight: bold;
   }
@@ -207,7 +207,7 @@ function closeSplashScreen() {
   .splash-get-started {
     border: 2px solid white;
     font-size: calc(1.8 * var(--default-font-size));
-    // margin-top: 5%;
+    margin-top: 1.2em;
     // margin-bottom: 2%;
     font-weight: bold !important;
   }
@@ -237,18 +237,19 @@ function closeSplashScreen() {
   }
 
   #splash-screen-logos {
-    margin-block: 0.75em;
+    margin-bottom: 1em;
 
     img {
     height: 60px;
     vertical-align: middle;
-    margin-inline: 1em;
-    margin-block: 1em;
+    margin: 1em;
     }
 
     @media only screen and (max-width: 600px) {
       img {
         height: 40px;
+        margin-inline: 0.5em;
+        margin-block: 1em;
       }
     }
 
@@ -268,14 +269,12 @@ function closeSplashScreen() {
     // align-items: center;
     // gap: calc(0.5 * var(--default-line-height));
     overflow: hidden;
-    color: var(--rubin-teal-1);
     
   #splash-screen-text {
     line-height: 75%;
   }
   
   .splash-get-started {
-    margin-top: 0;
     margin-bottom: 0;
   }
   
