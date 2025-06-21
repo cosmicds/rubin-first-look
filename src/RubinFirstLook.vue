@@ -395,15 +395,8 @@ const touchscreen = supportsTouchscreen();
 const display = useDisplay();
 const theme = useTheme();
 
-const props = withDefaults(defineProps<RubinFirstLookProps>(), {
+withDefaults(defineProps<RubinFirstLookProps>(), {
   wwtNamespace: "rubin-first-look",
-  initialCameraParams: () => {
-    return {
-      raRad: 0,
-      decRad: 0,
-      zoomDeg: 60
-    };
-  }
 });
 
 const backgroundImagesets = reactive<BackgroundImageset[]>([]);
@@ -448,10 +441,6 @@ const ute = useTrackedElements("", store);
 onMounted(() => {
   store.waitForReady().then(async () => {
     skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
-    store.gotoRADecZoom({
-      ...props.initialCameraParams,
-      instant: true
-    }).then(() => positionSet.value = true);
 
     const loadPromises = [imageAPlacesURL, imageBPlacesURL].map(url => {
       return store.loadImageCollection({
@@ -462,22 +451,28 @@ onMounted(() => {
     Promise.all(loadPromises).then(loadedFolders => {
       loadedFolders.forEach((loadedFolder, index) => {
         const children = loadedFolder.get_children();
-        const highlightsFolder = index === 0 ? highlightsA : highlightsB;
+        const highlightsFolder = new Folder();
         children?.forEach((item, index) => {
           if (item instanceof Place) {
             if (index === 0) {
-              highlightsFolder.value.addChildPlace(item);
+              highlightsFolder.addChildPlace(item);
               topLevelPlaces.push(item);
             } else {
               if (item.get_names().length == 1) {
-                highlightsFolder.value.addChildPlace(item);
+                highlightsFolder.addChildPlace(item);
               }
               lowerLevelPlaces.push(item);
             }
           }
         });
+        const highlightsRef = index === 0 ? highlightsA : highlightsB;
+        highlightsRef.value = highlightsFolder;
       });
-    }).then(() => layersLoaded.value = true);
+    }).then(() => {
+      positionSet.value = true;
+      layersLoaded.value = true;
+      gotoMainImage(mode.value, true);
+    });
     
     store.loadImageCollection({
       url: "bg.wtml",
