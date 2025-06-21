@@ -478,8 +478,8 @@ onMounted(() => {
       ...props.initialCameraParams,
       instant: true
     }).then(() => positionSet.value = true);
-    store.applySetting(["showGrid", true]);
-    store.applySetting(["showEquatorialGridText", true]);
+    // store.applySetting(["showGrid", true]);
+    // store.applySetting(["showEquatorialGridText", true]);
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
 
@@ -521,8 +521,6 @@ onMounted(() => {
 
     updateClosestPlace();
 
-  }).then(() => {
-    
   });
 });
 
