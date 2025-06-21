@@ -6,7 +6,7 @@ import FolderView from "./components/FolderView.vue";
 import ExpansionWrapper from "./components/ExpansionWrapper.vue";
 import Infobox from "./components/Infobox.vue";
 import SplashScreen from "./components/SplashScreen.vue";
-
+import WWTTrackedContent from "./components/WWTTrackedContent.vue";
 import vuetify from "../plugins/vuetify";
 
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -15,16 +15,22 @@ import { WWTComponent, wwtPinia } from "@wwtelescope/engine-pinia";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
-  faBookOpen,
   faChevronDown,
-  faGear,
+  faChevronUp,
+  faCompress,
+  faExpand,
+  faInfo,
+  faSliders,
   faTimes,
   faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 
-library.add(faBookOpen);
 library.add(faChevronDown);
-library.add(faGear);
+library.add(faChevronUp);
+library.add(faCompress);
+library.add(faExpand);
+library.add(faInfo);
+library.add(faSliders);
 library.add(faTimes);
 library.add(faVideo);
 
@@ -66,6 +72,7 @@ createApp(RubinFirstLook, {
   .component('folder-view', FolderView)
   .component('expansion-wrapper', ExpansionWrapper)
   .component('infobox', Infobox)
+  .component('wwt-tracked-content', WWTTrackedContent)
 
   // Mount
   .mount("#app");

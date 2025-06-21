@@ -9,14 +9,49 @@
     <WorldWideTelescope
       :wwt-namespace="wwtNamespace"
     ></WorldWideTelescope>
-    
-    <div id="marker-layer" ref="parent">
-      <!-- place makrers here -->
-      <div id="marker-container">
-      </div>
-      
-    </div>
 
+    <wwt-tracked-content
+    :ra="10.5"
+    :dec="41.3"
+    name="Andromeda Galaxy"
+    :store="store"
+    center-on-click
+    v-slot="props"
+    :zoomDeg="8"
+  >
+    <div class="custom-content" v-on="props.on">
+      <p>Track Andromeda Galaxy</p>
+    </div>
+  </wwt-tracked-content>
+    
+    <wwt-tracked-content
+      v-for="(place, index) in lowerLevelPlaces"
+      :key="index"
+      :place="place"
+      :name="place.get_name()"
+      :store="store"
+      :visible="showLabels && !atTopLevel"
+      v-slot="props"
+      debug
+      @click="handleSelection(place)"
+    >
+        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+    </wwt-tracked-content>
+
+    <wwt-tracked-content
+      v-for="(place, index) in topLevelPlaces"
+      :key="index"
+      :place="place"
+      :name="place.get_name()"
+      :store="store"
+      :visible="showLabels && atTopLevel"
+      v-slot="props"
+      debug
+      @click="handleSelection(place)"
+    >
+        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+    </wwt-tracked-content>
+    
 
     <splash-screen
       title="Rubin First Look"
@@ -37,65 +72,83 @@
       </div>
     </transition>
 
-
     <!-- This block contains the elements (e.g. icon buttons displayed at/near the top of the screen -->
 
     <div id="top-content">
-      <div id="left-buttons">
-        <icon-button
-          v-model="showVideoSheet"
-          fa-icon="video"
-          :color="buttonColor"
-          tooltip-text="Watch video"
-          tooltip-location="start"
-        >
-        </icon-button>
+      <div id="left-buttons" v-hide="fullscreen">
         <folder-view
-          v-if="folder"
+          v-if="folder.get_children()?.length ?? 0 > 0"
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
+          :background-color="accentColor"
           flex-direction="column"
           @select="handleSelection"
         >
+          <template #header="{ toggleExpanded, expanded }">
+            <div class="fv-header">
+              <span>Explore {{ mode.charAt(0).toUpperCase() + mode.slice(1) }}</span>
+              <font-awesome-icon
+                :icon="expanded ? 'chevron-up' : 'chevron-down'"
+                @click="toggleExpanded()"
+                @keyup.enter="toggleExpanded()"
+                tabindex="0"
+              >
+              </font-awesome-icon>
+            </div>
+          </template>
         </folder-view>
       </div>
-      <div id="center-buttons">
+      <div id="center-buttons" v-hide="fullscreen">
       </div>
       <div id="right-buttons">
-      </div>
-    </div>
-
-    <div
-      :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
-      v-show="showPlaceHighlights"
-    > 
-      <infobox
-        :place="currentPlace"
-        @read-more="showTextSheet = true"
-      >
-      </infobox>
-  </div>
-    
-
-    <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
-
-    <div id="bottom-content">
-      <div id="controls-row">
+        <div v-hide="fullscreen">
+          <icon-button
+            id="info-icon"
+            v-model="showTextSheet"
+            fa-icon="info"
+            :color="buttonColor"
+            tooltip-text="Show information"
+            tooltip-location="start"
+          >
+          </icon-button>
+        </div>
+        <div v-hide="fullscreen">
+          <icon-button
+            v-model="showVideoSheet"
+            fa-icon="video"
+            :color="buttonColor"
+            tooltip-text="Watch video"
+            tooltip-location="start"
+          >
+          </icon-button>
+        </div>
+        <icon-button
+          id="fullscreen-icon"
+          @activate="fullscreen = !fullscreen"
+          :fa-icon="fullscreen ? 'compress' : 'expand'"
+          :color="buttonColor"
+          :tooltip-text="`${fullscreen ? 'Exit' : 'Make'} fullscreen`"
+          tooltip-location="start"
+        >
+        </icon-button>
         <div
           id="options"
+          v-hide="fullscreen"
         >
           <div id="options-top-row">
             <icon-button
-              :fa-icon="showControls ? 'chevron-down' : 'gear'"
-              :color="accentColor"
-              @activate="showControls = !showControls"
+              id="options-toggle"
+              :fa-icon="showOptions ? 'chevron-up' : 'sliders'"
+              :color="buttonColor"
+              @activate="showOptions = !showOptions"
               tabindex="0"
               :border="false"
+              background-color="transparent"
             ></icon-button>
           </div>
           <div
             id="options-content"
-            v-if="showControls"
+            v-if="showOptions"
           >
             <v-checkbox
               v-model="showCircle"
@@ -120,7 +173,23 @@
             ></v-checkbox>
           </div>
         </div>
+
       </div>
+    </div>
+
+    <div
+      :class="['selected-info', smallSize ? 'selected-info-tall' : '']"
+      v-show="showPlaceHighlights"
+    > 
+  </div>
+    
+
+    <!-- This block contains the elements (e.g. the project icons) displayed along the bottom of the screen -->
+
+    <div
+      id="bottom-content"
+      v-hide="fullscreen"
+    >
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
           :default-logos="['cosmicds', 'wwt']"
@@ -136,6 +205,12 @@
       </div>
     </div>
 
+    <infobox
+      v-hide="fullscreen"
+      :place="currentPlace"
+      :small="smallSize"
+    >
+    </infobox>
 
     <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
@@ -282,12 +357,14 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
+import { useFullscreen } from "./composables/useFullscreen";
 import { D2R, distance, H2R } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
-import { useDisplay } from "vuetify";
+import { RUBIN_COLORS } from "../plugins/vuetify";
+import { useDisplay, useTheme } from "vuetify";
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
@@ -301,10 +378,12 @@ const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 useWWTKeyboardControls(store);
 
+const fullscreen = useFullscreen();
+
 const touchscreen = supportsTouchscreen();
 // TODO: Determine this in a better way
 const display = useDisplay();
-
+const theme = useTheme();
 
 const props = withDefaults(defineProps<RubinFirstLookProps>(), {
   wwtNamespace: "rubin-first-look",
@@ -322,62 +401,37 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
-const rubinTeal = "#05B8BC";
-const rubinTurquoise = "#00BABC";
-const rubinCharcoal = "#313333";
-const accentColor = ref(rubinTurquoise);
-const buttonColor = ref(rubinTeal);
+const accentColor = computed(() => theme.current.value.colors.primaryVariant);
+const buttonColor = computed(() => theme.global.current.value.colors.primary);
 const tab = ref(0);
 
-const folder: Ref<Folder | null> = ref(null);
-const wtmlUrl = "items.wtml";
+const folder: Ref<Folder> = ref(new Folder());
+const domain = "http://localhost:12345";
+// const wtmlUrl = `${domain}/index.wtml`;
+const imageAPlacesURL = `${domain}/a_places.wtml`;
+const imageBPlacesURL= `${domain}/b_places.wtml`;
 const selectedItem = ref<Thumbnail | null>(null);
 
-const places: Place[] = [];
+const lowerLevelPlaces: Place[] = [];
+const topLevelPlaces: Place[] = [];
 const currentPlace = ref<Place | null>(null);
 
+type Mode = "galaxy" | "nebula";
+const mode = ref<Mode>("nebula");
+
 const INFOBOX_ZOOM_CUTOFF = 10;
+const SMALL_LABELS_ZOOM = 20;
 let circle: Circle | null = null;
-const showControls = ref(false);
+const showOptions = ref(false);
 const showCircle = ref(true);
-const showLabels = ref(true);
+const showLabels = ref(false);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
+const atTopLevel = computed(() => zoomDeg.value > SMALL_LABELS_ZOOM);
 
 import { useTrackedElements } from "./composables/useTrackedElements";
-const ute = useTrackedElements("marker-container", store);
-const { hideElementByName, showElementByName } = ute;
-
-
-function createTrackedElementsFromPlace(place: Place) {
-  const iset = place.get_backgroundImageset() ?? place.get_studyImageset();
-  if (iset === null) {
-    console.warn(`Place ${place.get_name()} does not have a background or study imageset.`);
-    return;
-  }
-  
-  const ra = iset.get_centerX();
-  const dec = iset.get_centerY();
-  
-  if (ra === null || dec === null) {
-    console.warn(`Place ${place.get_name()} does not have a valid center position.`);
-    return;
-  }
-  
-  const el = ute.createTrackedElement(
-    {
-      ra: ra, 
-      dec: dec
-    },
-    'div',
-    place.get_name(),
-  );
-  el.classList.add("auto-tracked-element");
-  ute.getMarkerLayer()?.append(el);
-  return el;
-}
-
+const ute = useTrackedElements("", store);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -390,30 +444,27 @@ onMounted(() => {
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
 
-    // We'll probably end up changing the WTML setup once we have the final images anyways
-    // so not worth trying to make this super-clean now
-    store.loadImageCollection({
-      url: wtmlUrl,
-      loadChildFolders: false,
-    }).then(resultFolder => {
-      folder.value = resultFolder; 
-      const children = resultFolder.get_children();
-      if (children !== null) {
-        children.forEach(item => {
+    // Add labeled places
+    [imageAPlacesURL, imageBPlacesURL].forEach(url => {
+      store.loadImageCollection({
+        url,
+        loadChildFolders: false,
+      }).then(loadedFolder => {
+        const children = loadedFolder.get_children();
+        children?.forEach((item, index) => {
           if (item instanceof Place) {
-            places.push(item);
-            const el = createTrackedElementsFromPlace(item);
-            if (el) {
-              el.innerText = item.get_name();
-              el.tabIndex = 0;
-              // add a click handler to the element
-              el.addEventListener("click", () => {
-                console.log(`Clicked on place: ${item.get_name()}`);
-              });
+            if (index === 0) {
+              folder.value.addChildPlace(item);
+              topLevelPlaces.push(item);
+            } else {
+              if (item.get_names().length == 1) {
+                folder.value.addChildPlace(item);
+              }
+              lowerLevelPlaces.push(item);
             }
           }
         });
-      } 
+      });
     });
     
     store.loadImageCollection({
@@ -452,7 +503,7 @@ function findClosest(places: Place[]): Place | null {
 }
 
 function updateClosestPlace() {
-  currentPlace.value = findClosest(places);
+  currentPlace.value = findClosest(atTopLevel.value ? topLevelPlaces : lowerLevelPlaces);
 }
 
 function updateCircle(place: Place | null) {
@@ -545,11 +596,13 @@ const infoSheetTransition = computed(() => infoSheetLocation.value === "bottom" 
 
 /* This lets us inject component data into element CSS */
 const cssVars = computed(() => {
+  const rubinColors = Object.keys(RUBIN_COLORS).reduce((acc: Record<string, string>, key: string) => {
+    acc[`--${key}`] = RUBIN_COLORS[key];
+    return acc;
+  }, {});
   return {
+    ...rubinColors,
     "--accent-color": accentColor.value,
-    "--rubin-teal": rubinTeal,
-    "--rubin-turquoise": rubinTurquoise,
-    "--rubin-charcoal": rubinCharcoal,
     "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100vh",
     "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100vw",
     "--info-sheet-width": infoSheetWidth.value,
@@ -619,11 +672,10 @@ watch(showConstellations, (show: boolean) => {
   store.applySetting(["showConstellationFigures", show]);
   store.applySetting(["showConstellationLabels", show]);
 });
-watch(showLabels, (show: boolean) => {
-  const updater = show ? showElementByName : hideElementByName;
-  places.forEach(place => updater(place.get_name()));
-});
 watch(currentPlace, updateCircle);
+watch(mode, (newMode: Mode) => {
+  theme.global.name.value = newMode === "galaxy" ? "rubinGalaxy" : "rubinNebula";
+});
 </script>
 
 <style lang="less">
@@ -762,6 +814,10 @@ body {
   gap: 10px;
   align-items: flex-end;
   height: auto;
+}
+
+#info-icon-button {
+  padding: 5px 12px;
 }
 
 #bottom-content {
@@ -941,56 +997,34 @@ video {
   max-height: calc(var(--app-content-height) - 2rem - 2rem);
 }
 
-.auto-tracked-element {
+
+
+
+.tracked-element {
   pointer-events: auto;
+  transition: scale 0.2s ease-in-out;
 }
 
-.auto-tracked-element:hover {
-  background-color: red;
+.tracked-element:hover {
+  scale: 1.2;
+  z-index: 10;
 }
 
-#marker-layer {
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  contain: strict;
-}
-
-#marker-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-}
-
-
-.auto-tracked-element {
-  width: auto;
+.tracked-places {
+  width: max-content;
   padding: 0.5em;
   color: white;
   background-color: rgba(0, 0, 0, 0.51);
   backdrop-filter: blur(5px);
   border-radius: 5px;
-}
-
-#controls-row {
-  padding: 5px;
-  width: 100%;
-  display: flex;
-  flex-direction: row-reverse;
+  // transform: translate(-50%, -50%); // center on the point
+  position: absolute;
 }
 
 #options {
   background: black;
   border: 1px solid var(--accent-color);
-  border-radius: 2px;
-  align-self: flex-end;
+  border-radius: 20px;
   pointer-events: auto;
 
   .icon-wrapper {
@@ -1002,5 +1036,25 @@ video {
     flex-direction: row;
     justify-content: flex-end;
   }
+
+  #options-content {
+    padding: 5px;
+  }
+}
+
+.fv-header {
+  font-size: 10pt;
+
+  svg {
+    padding: 0px 5px;
+    cursor: pointer;
+  }
+}
+
+.infobox {
+  position: fixed;
+  left: 5px;
+  bottom: 5px;
+  max-width: 50%;
 }
 </style>
