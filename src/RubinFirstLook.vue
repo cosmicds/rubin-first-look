@@ -84,7 +84,7 @@
           :root-folder="folder"
           :background-color="accentColor"
           flex-direction="column"
-          @select="handleSelection"
+          @select="({ item, doubleClick }) => handleSelection(item, doubleClick)"
         >
           <template #header="{ toggleExpanded, expanded }">
             <div class="fv-header">
