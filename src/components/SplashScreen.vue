@@ -54,8 +54,15 @@
                 src: './rubin_white_2.png',
                 href: 'https://rubinobservatory.org/',
                 name: 'Rubin Observatory'
+              },
+                            {
+                alt: 'INTUITIVE Planetarium at the U.S. Space & Rocket Center',
+                src: './SpaceRocketCenterIntuitivePlanetarium-Logo-small.png',
+                href: 'https://www.rocketcenter.com/INTUITIVEPlanetarium',
+                name: 'INTUITIVE Planetarium at the U.S. Space & Rocket Center'
               }
             ]"
+            logo-margin="10vmin"  
           />
         </div>
         <span>
