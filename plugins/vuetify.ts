@@ -48,10 +48,10 @@ export default createVuetify({
   theme: {
     // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
 
-    defaultTheme: 'rubinNebula',
+    defaultTheme: 'rubinB',
     themes: {
-      rubinNebula: {
-        dark: true,
+      rubinB: {
+        dark: false,
         colors: {
           // Core brand colors
           primary: RUBIN_COLORS['rubin-turquoise'],
@@ -74,7 +74,30 @@ export default createVuetify({
           ...RUBIN_COLORS,
         },
       },
-      rubinGalaxy: {
+      // TODO: This is the same as B right now
+      rubinA: {
+        dark: false,
+        colors: {
+          // Core brand colors
+          primary: RUBIN_COLORS['rubin-turquoise'],
+          primaryVariant: RUBIN_COLORS['rubin-teal'],
+          secondary: RUBIN_COLORS['rubin-purple'],
+          accent: RUBIN_COLORS['rubin-highlight-gold'],
+
+          // Surface and backgrounds
+          background: RUBIN_COLORS['rubin-deep-charcoal'],
+          surface: RUBIN_COLORS['rubin-charcoal'],
+          surfaceVariant: RUBIN_COLORS['rubin-teal-6'],
+
+          // Text colors
+          onPrimary: RUBIN_COLORS["rubin-off-white"],
+          onSecondary: RUBIN_COLORS["rubin-off-white"],
+          onSurface: RUBIN_COLORS["rubin-off-white"],
+          textPrimary: RUBIN_COLORS["rubin-off-white"],
+          textMuted: RUBIN_COLORS['rubin-charcoal'],
+
+          ...RUBIN_COLORS,
+        }
       }
     },
   },
