@@ -421,7 +421,7 @@ const SMALL_LABELS_ZOOM = 25;
 let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
-const showLabels = ref(true);
+const showLabels = ref(false);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
@@ -501,15 +501,6 @@ onMounted(() => {
               }
               lowerLevelPlaces.push(item);
             }
-            const acircle = new Circle();
-            acircle.set_id("infobox");
-            acircle.set_lineWidth(3);
-            acircle.set_lineColor("#ffffff");
-            acircle.set_skyRelative(true);
-            store.addAnnotation(acircle);
-            acircle.set_opacity(1);
-            acircle.setCenter(item.get_RA() * 15, item.get_dec());
-            acircle.set_radius(item?.angularSize / 2);
           }
         });
       });
