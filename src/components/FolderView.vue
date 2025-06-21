@@ -22,8 +22,9 @@
         v-for="item of items"
         :key="item.get_name()"
         :title="item.get_name()"
-        @click="() => selectItem(item)"
-        @keydown.enter="() => selectItem(item)"
+        @click="() => selectItem(item, false)"
+        @dblclick="() => selectItem(item, true)"
+        @keydown.enter="() => selectItem(item, false)"
         tabindex="0"
         role="button"
         :aria-label="item.get_name()"
@@ -55,7 +56,7 @@ const props = withDefaults(defineProps<FolderViewProps>(), {
 });
 
 const emit = defineEmits<{
-  (event: "select", item: Thumbnail): void;
+  (event: "select", data: { item: Thumbnail, doubleClick: boolean}): void;
 }>();
 
 const expanded = ref(true);
@@ -79,13 +80,13 @@ onMounted(() => {
 });
 
 
-function selectItem(item: Thumbnail) {
+function selectItem(item: Thumbnail, doubleClick=false) {
   lastSelectedItem.value = item;
   if (item instanceof Folder || item instanceof FolderUp) {
     items.value = item.get_children();
   }
 
-  emit("select", item);
+  emit("select", { item, doubleClick });
 }
 
 const cssVars = computed(() => ({
