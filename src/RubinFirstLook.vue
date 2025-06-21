@@ -101,6 +101,12 @@
       <div id="center-buttons" v-hide="fullscreen">
       </div>
       <div id="right-buttons">
+        <div
+          id="goto-other-image"
+          @click="gotoMainImage((mode == 'a') ? 'b' : 'a')"
+        >
+          Go to Image {{ mode == 'a' ? 'B' : 'A' }}
+        </div>
         <div v-hide="fullscreen">
           <icon-button
             id="info-icon"
@@ -524,6 +530,16 @@ function updateCircle(place: Place | null) {
   circle.set_opacity(showCircle.value ? 1 : 0);
   circle.setCenter(place.get_RA() * 15, place.get_dec());
   circle.set_radius(place?.angularSize);
+}
+
+function gotoMainImage(image: Mode) {
+  const index = image === "a" ? 0 : 1;
+  store.gotoTarget({
+    place: topLevelPlaces[index],
+    noZoom: false,
+    instant: false,
+    trackObject: false,
+  });
 }
 
 function wwtSmallestFov() {
@@ -1065,5 +1081,15 @@ video {
   left: 5px;
   bottom: 5px;
   max-width: 50%;
+}
+
+#goto-other-image {
+  background: var(--accent-color);
+  border: 1px solid black;
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 16pt;
+  border-radius: 10px;
 }
 </style>
