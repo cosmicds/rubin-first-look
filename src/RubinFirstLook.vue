@@ -197,6 +197,10 @@
       id="bottom-content"
       v-hide="fullscreen"
     >
+      <scalebar
+        :max-deg="15"
+        :breakpoints="breakpoints"
+      ></scalebar>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
           :default-logos="['cosmicds', 'wwt']"
@@ -518,6 +522,14 @@ const theme = useTheme();
 withDefaults(defineProps<RubinFirstLookProps>(), {
   wwtNamespace: "rubin-first-look",
 });
+
+const breakpoints = [
+  [15, 1, "about 1 deg"],
+  [1, 0.5, "0.5 deg (~Full Moon)"],
+  [0.25, 1 / 60, "1 arcmin"],
+  [1 / 60, 1 / 120, "0.5 arcmin"],
+  [0, 1 / 3600, "1 arcsec"],
+];
 
 const backgroundImagesets = reactive<BackgroundImageset[]>([]);
 const sheet = ref<SheetType | null>(null);
@@ -1042,10 +1054,11 @@ body {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: calc(100% - 2rem);
+  width: fit-content;
+  align-items: flex-end;
   pointer-events: none;
-  align-items: center;
-  gap: 5px;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 #body-logos {

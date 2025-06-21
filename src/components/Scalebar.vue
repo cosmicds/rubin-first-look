@@ -1,18 +1,31 @@
 <template>
-  <div ref="root">
+  <div
+    v-show="show"
+    ref="root"
+    class="scalebar-root"
+    :style="cssVars"
+  >
     <canvas class="scalebar-canvas"></canvas>
+    <p>{{ text }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
+import { R2D } from "@wwtelescope/astro";
+import { WWTControl } from "@wwtelescope/engine";
 import { engineStore } from "@wwtelescope/engine-pinia";
 
+type Breakpoints = [number, number, string][];
+
 interface ScalebarProps {
-  breakpoints: [number, string][];
+  breakpoints: Breakpoints;
   height?: number;
   width?: number;
+  color?: string;
+  maxDeg?: number;
+  minDeg?: number;
 }
 
 const text = ref<string | null>(null);
@@ -24,47 +37,116 @@ const store = engineStore();
 const { raRad, decRad, zoomDeg, rollRad } = storeToRefs(store);
 
 const props = withDefaults(defineProps<ScalebarProps>(), {
-  height: 40,
-  width: 100,
+  height: 35,
+  width: 500,
+  color: "white",
 });
 
-let breakpoints = [...props.breakpoints].sort((first, second) => second[0] - first[0]);
+const show = computed(() => (props.maxDeg == null) || zoomDeg.value < props.maxDeg);
 
+let sortedBreakpoints: Breakpoints;
+updateBreakpoints(props.breakpoints);
 
-function update() {
-  const breakpoint = breakpoints.find(bkpt => bkpt[0] < zoomDeg.value);
-  text.value = breakpoint?.["1"] ?? null;
-
-  const worldDistance = breakpoint[0];
-  const screenPoint = store.findScreenPointForRADec({ ra: raRad.value + worldDistance, dec: decRad.value });
-  const screenDistance = Math.sqrt(screenPoint.x ** 2 + screenPoint.y ** 2);
-
-  const context = getContext();
-  context.clearRect(0, 0, canvas.width, canvas.height);
+function updateBreakpoints(newBreakpoints: Breakpoints) {
+  sortedBreakpoints = [...newBreakpoints];
+  sortedBreakpoints.sort((first, second) => second[0] - first[0]);
 }
 
-function getCanvas(): HTMLCanvasElement {
+function update() {
+  if (!show.value) {
+    return;
+  }
+  const breakpoint = sortedBreakpoints.find(bkpt => zoomDeg.value > bkpt[0]);
+  if (!breakpoint) {
+    return;
+  }
+
+  const worldDistance = breakpoint[1];
+  text.value = breakpoint[2];
+
+  const screenPoint = store.findScreenPointForRADec({ ra: raRad.value * R2D + worldDistance, dec: decRad.value * R2D });
+  const renderContext = WWTControl.singleton.renderContext;
+  const center = { x: 0.5 * renderContext.width, y: 0.5 * renderContext.height };
+  const screenDistance = Math.sqrt((screenPoint.x - center.x) ** 2 + (screenPoint.y - center.y) ** 2);
+
+  canvas = getCanvas();
+  context = getContext();
+  if (!(context && canvas)) {
+    return;
+  }
+
+  const end = canvas.width - 5;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.strokeStyle = props.color;
+  context.lineWidth = 2;
+
+  const endcapBottom = 0.9 * canvas.height;
+  const endcapTop = 0.1 * canvas.height;
+
+  context.beginPath();
+  context.moveTo(end, endcapBottom);
+  context.lineTo(end, endcapTop);
+  context.stroke();
+
+  context.beginPath();
+  context.moveTo(end - screenDistance, endcapBottom);
+  context.lineTo(end - screenDistance, endcapTop);
+  context.stroke();
+
+  const midpointY = 0.5 * canvas.height;
+  context.beginPath();
+  context.moveTo(end - screenDistance, midpointY);
+  context.lineTo(end, midpointY);
+  context.stroke();
+}
+
+function getCanvas(): HTMLCanvasElement | null {
   if (!canvas) {
     const rootElement = root.value;
-    canvas = rootElement.querySelector(".scalebar-canvas") as HTMLCanvasElement;
+    canvas = (rootElement?.querySelector(".scalebar-canvas") as HTMLCanvasElement) ?? null;
   }
   return canvas;
 }
 
-function getContext(): CanvasRenderingContext2D {
-  return context ?? getCanvas().getContext("2d");
+function getContext(): CanvasRenderingContext2D  | null {
+  return context ?? getCanvas()?.getContext("2d") ?? null;
 }
 
 function setCanvasDimensions() {
   canvas = getCanvas();
-  canvas.style.width = `${props.width}px`;
-  canvas.width = props.width;
-  canvas.style.height = `${props.height}px`;
-  canvas.height = props.height;
+  if (canvas) {
+    canvas.style.width = `${props.width}px`;
+    canvas.width = props.width;
+    canvas.style.height = `${props.height}px`;
+    canvas.height = props.height;
+  }
 }
+
+const cssVars = computed(() => ({
+  "--color": props.color,
+}));
 
 onMounted(() => {
   setCanvasDimensions();
   context = getContext();
 });
+
+watch(() => [raRad.value, decRad.value, zoomDeg.value, rollRad.value], (_position) => {
+  update();
+});
+
+watch(() => props.breakpoints, updateBreakpoints);
 </script>
+
+<style scoped lang="less">
+.scalebar-root {
+  display: flex;
+  flex-direction: column;
+
+  p {
+    background: transparent;
+    color: var(--color);
+  }
+
+}
+</style>
