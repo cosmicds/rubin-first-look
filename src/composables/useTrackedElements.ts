@@ -66,6 +66,7 @@ export type TrackedElementData = LocationDegrees & Record<string, string | numbe
 
 export interface TrackedHTMLElement extends HTMLElement {
   trackedData: TrackedElementData;
+  move: (pt: LocationDegrees) => void;
 }
 
 export type UseTrackedElementsReturn = {
@@ -80,6 +81,7 @@ export type UseTrackedElementsReturn = {
   getMarkerLayer: () => HTMLElement | null;
   hideElementByName: (name: string) => void;
   showElementByName: (name: string) => void;
+  moveElementByName: (name: string, pt: LocationDegrees) => void;
 };
 
 let wwtReady = false;
@@ -207,9 +209,20 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
     trackedElements.value.push(element);
   };
   
-  function applyUniformStyles(el: HTMLElement) {
+  function applyUniformStyles(el: TrackedHTMLElement) {
     el.style.position = 'absolute';
     el.style.transformOrigin = 'center center';
+    el.move = (pt: LocationDegrees) => {
+      if (!ready.value) {
+        console.warn('WWT Engine is not ready yet.');
+        return;
+      }
+      el.trackedData.ra = pt.ra;
+      el.trackedData.dec = pt.dec;
+      const screenPos = store.findScreenPointForRADec(pt);
+      updateElementScreenPosition(el as TrackedHTMLElement, screenPos);
+    };
+    
   }
 
   /**
@@ -218,7 +231,7 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
    * @param pt {ra: Degree, dec: Degree, ....} Other values will be added to the elements trackedData attribute
    */
   function placeElement(_el: HTMLElement | string | null, pt: TrackedElementData, name: string): TrackedHTMLElement {
-    const el = resolveElement(_el);
+    const el = resolveElement(_el) as TrackedHTMLElement;
     if (el === null) {
       console.warn('Element is null, cannot place it.');
       return null as unknown as TrackedHTMLElement;
@@ -227,17 +240,17 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
     applyUniformStyles(el);
 
     el.classList.add('tracked-element');
-    (el as TrackedHTMLElement).trackedData = pt as TrackedElementData;
+    el.trackedData = pt as TrackedElementData;
     el.dataset.name = name;
 
-    addTrackedElement(el as TrackedHTMLElement);
+    addTrackedElement(el);
 
-    return el as TrackedHTMLElement;
+    return el;
   } 
 
   function _createElement(pt: { x: number, y: number }, tag = "div"): HTMLElement {
     const marker = document.createElement(tag);
-    applyUniformStyles(marker);
+    applyUniformStyles(marker as TrackedHTMLElement);
     marker.style.left = `${pt.x}px`;
     marker.style.top = `${pt.y}px`;
     return marker;
@@ -285,11 +298,6 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
   function getScreenPositionAndVisibility(el: TrackedHTMLElement): [ScreenPosition, boolean] {
     const screen = store.findScreenPointForRADec({ra: el.trackedData.ra, dec: el.trackedData.dec});
     const visible = checkPointContainedByDiv(screen, parentElementRect.value);
-
-    // Update dataset entries for screen position
-    el.dataset.screenX = screen.x.toString();
-    el.dataset.screenY = screen.y.toString();
-
     return [screen, visible];
   }
 
@@ -344,6 +352,16 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
       el.style.visibility = 'visible';
     } else {
       elementVisibilityCache.set(name, 'visible');
+    }
+  }
+  
+  function moveElementByName(name: string, pt: LocationDegrees) {
+    const el = getElementByName(name);
+    if (el) {
+      const screenPos = store.findScreenPointForRADec(pt);
+      updateElementScreenPosition(el, screenPos);
+    } else {
+      console.warn(`Element with name '${name}' not found.`);
     }
   }
 
@@ -401,6 +419,7 @@ export function useTrackedElements(parentID: string | null, store: WWTEngineStor
     getMarkerLayer,
     hideElementByName,
     showElementByName,
+    moveElementByName,
   };
   
   return instance;

@@ -15,7 +15,8 @@ type Degree = number;
 type Radian = number;
 type HourAngle = number;
 type Pixel = number;
-
+const D2R = Math.PI / 180;
+const R2D = 180 / Math.PI;
 interface WWTTrackedContentProps {
   containerID?: string;
   ra?: Degree;
@@ -24,6 +25,8 @@ interface WWTTrackedContentProps {
   place?: Place; // Optional place object, if needed
   offsetRA?: Degree;
   offsetDec?: Degree;
+  offsetX?: Pixel; // Optional pixel offset in X direction
+  offsetY?: Pixel; // Optional pixel offset in Y direction
   store: WWTEngineStore;
   visible?: boolean;
   centerOnClick?: boolean;
@@ -34,8 +37,6 @@ interface WWTTrackedContentProps {
 }
 
 const props = withDefaults(defineProps<WWTTrackedContentProps>(), {
-  offsetRA: 0,
-  offsetDec: 0,
   visible: true,
   containerID: '',
   centerOnClick: false,
@@ -46,11 +47,9 @@ const props = withDefaults(defineProps<WWTTrackedContentProps>(), {
   debug: false,
 });
 
-const ra = ref(props.ra);
-const dec = ref(props.dec);
+const ra = ref<number>(props.ra as unknown as number);
+const dec = ref<number>(props.dec as unknown as number);
 const name = ref(props.name);
-const offsetRA = ref(props.offsetRA);
-const offsetDec = ref(props.offsetDec);
 const zoomDeg = computed(() => {
   return props.zoomDeg !== null ? props.zoomDeg : props.store.zoomDeg;
 });
@@ -86,8 +85,8 @@ function goTo() {
       
     } else if (ra.value && dec.value) {
       props.store.gotoRADecZoom({
-        raRad: ra.value * (Math.PI / 180), 
-        decRad: dec.value * (Math.PI / 180), 
+        raRad: ra.value * (D2R), 
+        decRad: dec.value * (D2R), 
         zoomDeg: zoomDeg.value,
         instant: false,
       });
@@ -104,6 +103,23 @@ function onClick() {
 
 const ute = ref<UseTrackedElementsReturn | null>(null);
 
+const rot = computed(() => {
+  return {'sin': Math.sin(props.store.rollRad), 'cos': Math.cos(props.store.rollRad)};
+});
+
+const offsetRA = computed(() => {
+  if (props.offsetX !== undefined && props.offsetY !== undefined ) {
+    return (props.offsetX)  * rot.value.cos + props.offsetY * rot.value.sin;
+  }
+  return props.offsetRA ?? 0;
+});
+
+const offsetDec = computed(() => {
+  if (props.offsetX !== undefined && props.offsetY !== undefined ) {
+    return -(props.offsetX) * rot.value.sin + props.offsetY * rot.value.cos;
+  }
+  return props.offsetDec ?? 0;
+});
 
 onMounted(() => {
   props.store.waitForReady().then(() => {
@@ -139,16 +155,16 @@ function updateVisibility(visible: boolean) {
 
 watch(() => props.visible, updateVisibility);
 
-watch(() => [props.ra, props.dec], ([newRa, newDec]) => {
+watch(() => [props.ra, props.dec, offsetRA.value, offsetDec.value], ([newRa, newDec, newOffsetRA, newOffsetDec]) => {
   if (!trackedElement.value) return;
-  trackedElement.value.trackedData.dec = newDec + offsetDec.value;
-  trackedElement.value.trackedData.ra = newRa + offsetRA.value;
+  trackedElement.value.move({
+    ra: (newRa ?? ra.value) + (newOffsetRA ?? offsetRA.value),
+    dec: (newDec ?? dec.value) + (newOffsetDec ?? offsetDec.value)
+  });
   if (ready.value && ute.value) {
     ute.value.updateElements();
   }
 }, { immediate: true });
-
-
 
 
 const slots = defineSlots<{
@@ -203,8 +219,9 @@ const slots = defineSlots<{
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: red;
-  // transform: translate(-50%, -50%);
+  background-color: transparent;
+  border: 2px solid red;
+  transform: translate(-50%, -50%);
 }
 
 </style>

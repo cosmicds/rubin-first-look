@@ -11,15 +11,17 @@
     ></WorldWideTelescope>
 
     <wwt-tracked-content
-    :ra="10.5"
-    :dec="41.3"
+    :ra="18*15"
+    :dec="0"
     name="Andromeda Galaxy"
+    :offsetX="offsetX"
+    :offsetY="offsetY"
     :store="store"
     center-on-click
     v-slot="props"
     :zoomDeg="8"
   >
-    <div class="custom-content" v-on="props.on">
+    <div class="traked-places" v-on="props.on">
       <p>Track Andromeda Galaxy</p>
     </div>
   </wwt-tracked-content>
@@ -29,6 +31,8 @@
       :key="index"
       :place="place"
       :name="place.get_name()"
+      :offsetX="-(place.angularSize / 2) * (1+ 0.296)"
+      :offsetY="0"
       :store="store"
       :visible="showLabels && !atTopLevel"
       v-slot="props"
@@ -190,6 +194,29 @@
       id="bottom-content"
       v-hide="fullscreen"
     >
+      <!-- x,y offsets, range -1, 1 -->
+      <v-slider
+        style="width:200px; pointer-events: auto;"
+        v-model="offsetX"
+        :max="1"
+        :min="-1"
+        :step="0.001"
+        :thumb-label="true"
+        color="info"
+        hide-details
+        density="compact"
+        />
+      <v-slider
+        style="width:200px; pointer-events: auto;"
+        v-model="offsetY"
+        :max="1"
+        :min="-1"
+        :step="0.001"
+        :thumb-label="true"
+        :color="accentColor"
+        hide-details
+        density="compact"
+        />
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
           :default-logos="['cosmicds', 'wwt']"
@@ -420,11 +447,11 @@ type Mode = "galaxy" | "nebula";
 const mode = ref<Mode>("nebula");
 
 const INFOBOX_ZOOM_CUTOFF = 10;
-const SMALL_LABELS_ZOOM = 20;
+const SMALL_LABELS_ZOOM = 60;
 let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
-const showLabels = ref(false);
+const showLabels = ref(true);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
@@ -440,7 +467,8 @@ onMounted(() => {
       ...props.initialCameraParams,
       instant: true
     }).then(() => positionSet.value = true);
-
+    store.applySetting(["showGrid", true]);
+    store.applySetting(["showEquatorialGridText", true]);
     // If there are layers to set up, do that here!
     layersLoaded.value = true;
 
@@ -462,10 +490,20 @@ onMounted(() => {
               }
               lowerLevelPlaces.push(item);
             }
+            const acircle = new Circle();
+            acircle.set_id("infobox");
+            acircle.set_lineWidth(3);
+            acircle.set_lineColor("#ffffff");
+            acircle.set_skyRelative(true);
+            store.addAnnotation(acircle);
+            acircle.set_opacity(1);
+            acircle.setCenter(item.get_RA() * 15, item.get_dec());
+            acircle.set_radius(item?.angularSize / 2);
           }
         });
       });
     });
+
     
     store.loadImageCollection({
       url: "bg.wtml",
@@ -611,6 +649,18 @@ const cssVars = computed(() => {
   };
 });
 
+
+const offsetX = ref(0);
+const offsetY = ref(0);
+
+// const offsetRa = computed(() => {
+//   const rot = -store.rollRad;
+//   return offsetX.value * Math.cos(rot) - offsetY.value * Math.sin(rot);
+// });
+// const offsetDec = computed(() => {
+//   const rot = -store.rollRad;
+//   return offsetX.value * Math.sin(rot) + offsetY.value * Math.cos(rot);
+// });
 
 /**
   Computed flags that control whether the relevant dialogs display.
@@ -1018,6 +1068,7 @@ video {
   backdrop-filter: blur(5px);
   border-radius: 5px;
   // transform: translate(-50%, -50%); // center on the point
+  transform: translateY(-50%);
   position: absolute;
 }
 
