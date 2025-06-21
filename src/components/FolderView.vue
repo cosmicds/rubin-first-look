@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, type Ref } from "vue";
+import { computed, onMounted, ref, watch, type Ref } from "vue";
 import { Folder, FolderUp, Place } from "@wwtelescope/engine";
 import { Thumbnail } from "@wwtelescope/engine-types";
 import { FolderViewProps } from "../types";
@@ -64,21 +64,14 @@ function toggleExpanded() {
   expanded.value = !expanded.value;
 }
 
-onMounted(() => {
-  const folderItems: Place[] = [];
-  const propItems = props.rootFolder.get_children() ?? [];
-  for (const c of propItems) {
-    if (c instanceof Place) {
-      folderItems.push(c); 
-    }
-  }
+function updateFolder(folder: Folder) {
+  const folderItems = folder.get_children()?.filter(item => item instanceof Place) ?? [];
   items.value = folderItems;
   const firstItem = items.value.find((item) => (!(item instanceof Folder) || (item instanceof FolderUp)));
   if (firstItem) {
     selectItem(firstItem);
   }
-});
-
+}
 
 function selectItem(item: Thumbnail, doubleClick=false) {
   lastSelectedItem.value = item;
@@ -88,6 +81,12 @@ function selectItem(item: Thumbnail, doubleClick=false) {
 
   emit("select", { item, doubleClick });
 }
+
+onMounted(() => {
+  updateFolder(props.rootFolder);
+});
+
+watch(() => props.rootFolder, updateFolder);
 
 const cssVars = computed(() => ({
   "--flex-direction": props.flexDirection,

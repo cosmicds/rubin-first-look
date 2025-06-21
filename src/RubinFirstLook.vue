@@ -79,7 +79,7 @@
     <div id="top-content">
       <div id="left-buttons" v-hide="fullscreen">
         <folder-view
-          v-if="folder.get_children()?.length ?? 0 > 0"
+          v-show="folder.get_children()?.length ?? 0 > 0"
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
           :background-color="accentColor"
@@ -365,7 +365,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
+import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 import { useFullscreen } from "./composables/useFullscreen";
 import { D2R, distance, H2R } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
@@ -414,7 +414,6 @@ const accentColor = computed(() => theme.global.current.value.colors.primaryVari
 const buttonColor = computed(() => theme.global.current.value.colors.primary);
 const tab = ref(0);
 
-const folder: Ref<Folder> = ref(new Folder());
 const domain = "http://localhost:12345";
 // const wtmlUrl = `${domain}/index.wtml`;
 const imageAPlacesURL = `${domain}/a_places.wtml`;
@@ -423,10 +422,13 @@ const selectedItem = ref<Thumbnail | null>(null);
 
 const lowerLevelPlaces: Place[] = [];
 const topLevelPlaces: Place[] = [];
+const highlightsA = ref(new Folder());
+const highlightsB = ref(new Folder());
 const currentPlace = ref<Place | null>(null);
 
 type Mode = "a" | "b";
 const mode = ref<Mode>("b");
+const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
 
 const INFOBOX_ZOOM_CUTOFF = 10;
 const SMALL_LABELS_ZOOM = 25;
@@ -450,37 +452,37 @@ onMounted(() => {
       instant: true
     }).then(() => positionSet.value = true);
 
-    // If there are layers to set up, do that here!
-    layersLoaded.value = true;
-
-    // Add labeled places
-    [imageAPlacesURL, imageBPlacesURL].forEach(url => {
-      store.loadImageCollection({
+    const loadPromises = [imageAPlacesURL, imageBPlacesURL].map(url => {
+      return store.loadImageCollection({
         url,
         loadChildFolders: false,
-      }).then(loadedFolder => {
+      });
+    });
+    Promise.all(loadPromises).then(loadedFolders => {
+      loadedFolders.forEach((loadedFolder, index) => {
         const children = loadedFolder.get_children();
+        const highlightsFolder = index === 0 ? highlightsA : highlightsB;
         children?.forEach((item, index) => {
           if (item instanceof Place) {
             if (index === 0) {
-              folder.value.addChildPlace(item);
+              highlightsFolder.value.addChildPlace(item);
               topLevelPlaces.push(item);
             } else {
               if (item.get_names().length == 1) {
-                folder.value.addChildPlace(item);
+                highlightsFolder.value.addChildPlace(item);
               }
               lowerLevelPlaces.push(item);
             }
           }
         });
       });
-    });
+    }).then(() => layersLoaded.value = true);
     
     store.loadImageCollection({
       url: "bg.wtml",
       loadChildFolders: false,
-    }).then(folder => {
-      const children = folder.get_children();
+    }).then(bgFolder => {
+      const children = bgFolder.get_children();
       if (children !== null) {
         const item = children[0];
         if (item instanceof Imageset) {
