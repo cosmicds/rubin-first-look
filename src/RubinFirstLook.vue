@@ -204,10 +204,16 @@
           :default-logos="['cosmicds', 'wwt']"
           :extra-logos = "[
               {
+                alt: 'INTUITIVE Planetarium at the U.S. Space & Rocket Center',
+                src: './SpaceRocketCenterIntuitivePlanetarium-Logo-small.png',
+                href: 'https://www.rocketcenter.com/INTUITIVEPlanetarium',
+                name: 'INTUITIVE'
+              },
+              {
                 alt: 'Vera C. Rubin Observatory',
                 src: './rubin_white_2.png',
                 href: 'https://rubinobservatory.org/',
-                name: 'Rubin Observatory'
+                name: 'RubinObservatory'
               }
             ]"
         />
@@ -862,6 +868,9 @@ body {
 
 #body-logos {
   align-self: flex-end;
+  img{
+    margin-inline: 1rem;
+  }
 }
 
 
