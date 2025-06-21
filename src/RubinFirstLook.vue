@@ -279,8 +279,8 @@
           id="tabs"
           dense
         >
-          <v-tab class="info-tabs" tabindex="0"><h3>About these Images</h3></v-tab>
-          <v-tab class="info-tabs" tabindex="0"><h3>Using This Interactive</h3></v-tab>
+          <v-tab class="info-tabs" tabindex="0"><h3>Rubin's Science</h3></v-tab>
+          <v-tab class="info-tabs" tabindex="0"><h3>Navigation</h3></v-tab>
         </v-tabs>
         <font-awesome-icon
           id="close-text-icon"
@@ -989,9 +989,9 @@ video {
   
     .v-card-text {
       font-size: ~"max(14px, calc(0.7em + 0.3vw))";
-      padding-top: ~"max(2vw, 16px)";
-      padding-left: ~"max(4vw, 16px)";
-      padding-right: ~"max(4vw, 16px)";
+      padding-top: 1em;
+      padding-left: 0.5em;
+      padding-right: 0.51em;
   
       .end-spacer {
         height: 25px;
