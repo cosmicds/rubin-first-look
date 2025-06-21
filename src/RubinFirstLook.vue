@@ -199,6 +199,7 @@
     >
       <scalebar
         :max-deg="15"
+        :width="1920"
         :breakpoints="breakpoints"
       ></scalebar>
       <div id="body-logos" v-if= "!smallSize">
