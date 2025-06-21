@@ -31,7 +31,8 @@ interface WWTTrackedContentProps {
   visible?: boolean;
   centerOnClick?: boolean;
   zoomDeg?: Degree | null; // Optional zoom level, if needed
-  instant?: boolean; // Optional, if you want to control the instant navigation
+  clickInstant?: boolean; // Optional, if you want to control the instant navigation
+  doubleClickInstant?: boolean; // Optional, if you want to control the instant navigation
   goToPlace?: boolean; // Optional, if you want it to go to the place and ignore zoomDeg
   debug?: boolean; // Optional, for debugging purposes
 }
@@ -41,7 +42,8 @@ const props = withDefaults(defineProps<WWTTrackedContentProps>(), {
   containerID: '',
   centerOnClick: false,
   zoomDeg: null, // use current zoom level if not provided
-  instant: false,
+  clickInstant: false,
+  doubleClickInstant: true,
   place: undefined,
   goToPlace: false,
   debug: false,
@@ -72,14 +74,14 @@ const ready = ref(false);
 const parent = ref<HTMLElement | null>(null);
 const trackedElement = ref<TrackedHTMLElement | null>(null);
 
-function goTo() {
+function goTo(instant=false) {
   if (ready.value && trackedElement.value !== null) {
     console.log("Current zoomDeg", zoomDeg.value);
     console.log("Current wwt zoomDeg", props.store.zoomDeg);
     if (props.place && props.goToPlace) {
       props.store.gotoTarget({
         place: props.place,
-        instant: props.instant,
+        instant,
         noZoom: false,
         trackObject: true,
       });
@@ -98,7 +100,13 @@ function goTo() {
 
 function onClick() {
   if (props.centerOnClick && ready.value && trackedElement.value !== null) {
-    goTo();
+    goTo(props.clickInstant);
+  }
+}
+
+function onDoubleClick() {
+  if (props.centerOnClick && ready.value && trackedElement.value !== null) {
+    goTo(props.doubleClickInstant);
   }
 }
 
@@ -207,10 +215,11 @@ const slots = defineSlots<{
     tabindex="0" 
 
     >
-    <slot :on="{'click': onClick, 'keydown.enter': onClick}" >
+    <slot :on="{'click': onClick, 'onDoubleClick': onDoubleClick, 'keydown.enter': onClick}" >
       <div 
         :class="['default-wwt-tracked-content-content', { debug: debug }]" 
         @click="onClick" 
+        @dblclick="onDoubleClick" 
         @keydown.enter="onClick"
       >
       </div>

@@ -22,8 +22,9 @@
       :visible="showLabels && !atTopLevel"
       v-slot="props"
       debug
-      @click="handleSelection(place)"
-    >   
+      @click="handleSelection(place, false)"
+      @dblclick="handleSelection(place, true)"
+    >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
 
@@ -38,7 +39,8 @@
       :visible="showLabels && atTopLevel"
       v-slot="props"
       debug
-      @click="handleSelection(place)"
+      @click="handleSelection(place, false)"
+      @dblclick="handleSelection(place, true)"
     >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -73,7 +75,7 @@
           :root-folder="folder"
           :background-color="accentColor"
           flex-direction="column"
-          @select="handleSelection"
+          @select="({ item, doubleClick }) => handleSelection(item, doubleClick)"
         >
           <template #header="{ toggleExpanded, expanded }">
             <div class="fv-header">
@@ -94,7 +96,8 @@
       <div id="right-buttons">
         <div
           id="goto-other-image"
-          @click="gotoMainImage((mode == 'a') ? 'b' : 'a')"
+          @click="gotoMainImage((mode == 'a') ? 'b' : 'a', false)"
+          @dblclick="gotoMainImage((mode == 'a') ? 'b' : 'a', true)"
         >
           Go to Image {{ mode == 'a' ? 'B' : 'A' }}
         </div>
@@ -579,12 +582,12 @@ function updateCircle(place: Place | null) {
   circle.set_radius(place?.angularSize);
 }
 
-function gotoMainImage(image: Mode) {
+function gotoMainImage(image: Mode, instant=false) {
   const index = image === "a" ? 0 : 1;
   store.gotoTarget({
     place: topLevelPlaces[index],
     noZoom: false,
-    instant: false,
+    instant,
     trackObject: false,
   });
 }
@@ -616,7 +619,7 @@ function placeInView(place: Place, fraction=1/3): boolean {
   return dist < curFov / 2;
 }
 
-function handleSelection(item: Thumbnail) {
+function handleSelection(item: Thumbnail, instant=true) {
   if (item instanceof Imageset) {
     store.setForegroundImageByName(item.get_name());
     const type = item.get_dataSetType();
@@ -632,7 +635,7 @@ function handleSelection(item: Thumbnail) {
     store.gotoTarget({
       place: item,
       noZoom: false,
-      instant: true,
+      instant,
       trackObject: true,
     });
   }
