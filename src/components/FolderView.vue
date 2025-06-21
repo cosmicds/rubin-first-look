@@ -22,9 +22,9 @@
         v-for="item of items"
         :key="item.get_name()"
         :title="item.get_name()"
-        @click="() => selectItem(item, false)"
-        @dblclick="() => selectItem(item, true)"
-        @keydown.enter="() => selectItem(item, false)"
+        @click="() => selectItem(item, 'click')"
+        @dblclick="() => selectItem(item, 'dblclick')"
+        @keydown.enter="() => selectItem(item, 'keyup')"
         tabindex="0"
         role="button"
         :aria-label="item.get_name()"
@@ -43,10 +43,11 @@
 import { computed, onMounted, ref, watch, type Ref } from "vue";
 import { Folder, FolderUp, Place } from "@wwtelescope/engine";
 import { Thumbnail } from "@wwtelescope/engine-types";
-import { FolderViewProps } from "../types";
+import { FolderViewProps, FolderViewSelectionType } from "../types";
 
 const items: Ref<Thumbnail[] | null> = ref<Thumbnail[]>([]);
 const lastSelectedItem: Ref<Thumbnail | null> = ref(null);
+
 
 const props = withDefaults(defineProps<FolderViewProps>(), {
   gap: "5px",
@@ -56,7 +57,7 @@ const props = withDefaults(defineProps<FolderViewProps>(), {
 });
 
 const emit = defineEmits<{
-  (event: "select", data: { item: Thumbnail, doubleClick: boolean}): void;
+  (event: "select", data: { item: Thumbnail, type: FolderViewSelectionType }): void;
 }>();
 
 const expanded = ref(true);
@@ -69,17 +70,17 @@ function updateFolder(folder: Folder) {
   items.value = folderItems;
   const firstItem = items.value.find((item) => (!(item instanceof Folder) || (item instanceof FolderUp)));
   if (firstItem) {
-    selectItem(firstItem);
+    selectItem(firstItem, "folder");
   }
 }
 
-function selectItem(item: Thumbnail, doubleClick=false) {
+function selectItem(item: Thumbnail, type: SelectionType) {
   lastSelectedItem.value = item;
   if (item instanceof Folder || item instanceof FolderUp) {
     items.value = item.get_children();
   }
 
-  emit("select", { item, doubleClick });
+  emit("select", { item, type });
 }
 
 onMounted(() => {

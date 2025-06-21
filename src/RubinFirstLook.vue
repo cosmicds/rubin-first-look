@@ -33,8 +33,8 @@
       :visible="showLabels && !atTopLevel"
       v-slot="props"
       debug
-      @click="handleSelection(place, false)"
-      @dblclick="handleSelection(place, true)"
+      @click="handleSelection(place, 'click')"
+      @dblclick="handleSelection(place, 'dblclick')"
     >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -48,8 +48,8 @@
       :visible="showLabels && atTopLevel"
       v-slot="props"
       debug
-      @click="handleSelection(place, false)"
-      @dblclick="handleSelection(place, true)"
+      @click="handleSelection(place, 'click')"
+      @dblclick="handleSelection(place, 'dblclick')"
     >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -84,7 +84,7 @@
           :root-folder="folder"
           :background-color="accentColor"
           flex-direction="column"
-          @select="({ item, doubleClick }) => handleSelection(item, doubleClick)"
+          @select="({ item, type }) => handleSelection(item, type)"
         >
           <template #header="{ toggleExpanded, expanded }">
             <div class="fv-header">
@@ -374,6 +374,7 @@ import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { RUBIN_COLORS } from "../plugins/vuetify";
 import { useDisplay, useTheme } from "vuetify";
+import { type FolderViewSelectionType } from "./types";
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
@@ -574,7 +575,7 @@ function placeInView(place: Place, fraction=1/3): boolean {
   return dist < curFov / 2;
 }
 
-function handleSelection(item: Thumbnail, instant=true) {
+function handleSelection(item: Thumbnail, selection: FolderViewSelectionType) {
   if (item instanceof Imageset) {
     store.setForegroundImageByName(item.get_name());
     const type = item.get_dataSetType();
@@ -587,13 +588,17 @@ function handleSelection(item: Thumbnail, instant=true) {
       store.setForegroundImageByName(imageset.get_name());
     }
 
-    store.gotoTarget({
-      place: item,
-      noZoom: false,
-      instant,
-      trackObject: true,
-    });
-  }
+    const instant = selection === "dblclick";
+    if (selection !== "folder") {
+
+      store.gotoTarget({
+        place: item,
+        noZoom: false,
+        instant,
+        trackObject: true,
+      });
+    }
+  }  
 
   selectedItem.value = item;
 }
