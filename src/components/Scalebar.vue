@@ -26,6 +26,7 @@ interface ScalebarProps {
   color?: string;
   maxDeg?: number;
   minDeg?: number;
+  visible?: boolean;
 }
 
 const text = ref<string | null>(null);
@@ -40,9 +41,10 @@ const props = withDefaults(defineProps<ScalebarProps>(), {
   height: 35,
   width: 1000,
   color: "white",
+  visible: true,
 });
 
-const show = computed(() => (props.maxDeg == null) || zoomDeg.value < props.maxDeg);
+const show = computed(() => props.visible && ((props.maxDeg == null) || zoomDeg.value < props.maxDeg));
 
 let sortedBreakpoints: Breakpoints;
 updateBreakpoints(props.breakpoints);
@@ -133,6 +135,12 @@ onMounted(() => {
 
 watch(() => [raRad.value, decRad.value, zoomDeg.value, rollRad.value], (_position) => {
   update();
+});
+
+watch(show, (value: boolean) => {
+  if (value) {
+    update();
+  }
 });
 
 watch(() => props.breakpoints, updateBreakpoints);

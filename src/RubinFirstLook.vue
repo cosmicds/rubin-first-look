@@ -172,6 +172,13 @@
               density="compact"
             ></v-checkbox>
             <v-checkbox
+              v-model="showScalebar"
+              label="Show scalebar"
+              :color="accentColor"
+              hide-details
+              density="compact"
+            ></v-checkbox>
+            <v-checkbox
               v-model="showConstellations"
               label="Constellations"
               :color="accentColor"
@@ -200,6 +207,7 @@
       <scalebar
         :width="1920"
         :breakpoints="breakpoints"
+        :visible="showScalebar"
       ></scalebar>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
@@ -563,6 +571,7 @@ let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
 const showLabels = ref(false);
+const showScalebar = ref(true);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
