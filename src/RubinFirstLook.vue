@@ -437,7 +437,7 @@ const _ute = useTrackedElements("", store);
 interface Offset {
   raOff: number;
   decOff: number;
-  rollRad: number; // then name of the top-level
+  rollDeg?: number; // then name of the top-level
 }
 
 type OffsetRecords = Record<string, Offset>;
@@ -445,12 +445,11 @@ const offsets = ref<OffsetRecords>({});
 
 function rotateOffsetToScreen(offset: Offset): Offset {
   // Rotate the offset to the screen orientation
-  const cosRoll = Math.cos(offset.rollRad);
-  const sinRoll = Math.sin(offset.rollRad);
+  const cosRoll = Math.cos((offset.rollDeg ?? 0) * D2R);
+  const sinRoll = Math.sin((offset.rollDeg ?? 0) * D2R);
   return {
     raOff: offset.raOff * cosRoll + offset.decOff * sinRoll,
     decOff: -offset.raOff * sinRoll + offset.decOff * cosRoll,
-    rollRad: offset.rollRad
   };
 }
 
