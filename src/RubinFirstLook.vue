@@ -105,6 +105,12 @@
       <div id="center-buttons" v-hide="fullscreen">
       </div>
       <div id="right-buttons">
+        <div
+          id="goto-other-image"
+          @click="gotoMainImage((mode == 'a') ? 'b' : 'a')"
+        >
+          Go to Image {{ mode == 'a' ? 'B' : 'A' }}
+        </div>
         <div v-hide="fullscreen">
           <icon-button
             id="info-icon"
@@ -428,7 +434,7 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
-const accentColor = computed(() => theme.current.value.colors.primaryVariant);
+const accentColor = computed(() => theme.global.current.value.colors.primaryVariant);
 const buttonColor = computed(() => theme.global.current.value.colors.primary);
 const tab = ref(0);
 
@@ -443,11 +449,11 @@ const lowerLevelPlaces: Place[] = [];
 const topLevelPlaces: Place[] = [];
 const currentPlace = ref<Place | null>(null);
 
-type Mode = "galaxy" | "nebula";
-const mode = ref<Mode>("nebula");
+type Mode = "a" | "b";
+const mode = ref<Mode>("b");
 
 const INFOBOX_ZOOM_CUTOFF = 10;
-const SMALL_LABELS_ZOOM = 60;
+const SMALL_LABELS_ZOOM = 25;
 let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
@@ -562,6 +568,16 @@ function updateCircle(place: Place | null) {
   circle.set_opacity(showCircle.value ? 1 : 0);
   circle.setCenter(place.get_RA() * 15, place.get_dec());
   circle.set_radius(place?.angularSize);
+}
+
+function gotoMainImage(image: Mode) {
+  const index = image === "a" ? 0 : 1;
+  store.gotoTarget({
+    place: topLevelPlaces[index],
+    noZoom: false,
+    instant: false,
+    trackObject: false,
+  });
 }
 
 function wwtSmallestFov() {
@@ -709,13 +725,22 @@ function selectSheet(sheetType: SheetType | null) {
   }
 }
 
+function onMove() {
+  if (placeInView(topLevelPlaces[0])) {
+    mode.value = "a";
+  } else if (placeInView(topLevelPlaces[1])) {
+    mode.value = "b";
+  }
+  updateClosestPlace();
+}
+
 function onZoomChange(_zoomDeg: number) {
   updateClosestPlace();
   updateCircle(currentPlace.value);
 }
 
-watch(raRad, (_ra: number) => updateClosestPlace());
-watch(decRad, (_dec: number) => updateClosestPlace());
+watch(raRad, (_ra: number) => onMove());
+watch(decRad, (_dec: number) => onMove());
 watch(zoomDeg, onZoomChange);
 watch(showCircle, (_show: boolean) => updateCircle(currentPlace.value));
 watch(showConstellations, (show: boolean) => {
@@ -724,7 +749,7 @@ watch(showConstellations, (show: boolean) => {
 });
 watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
-  theme.global.name.value = newMode === "galaxy" ? "rubinGalaxy" : "rubinNebula";
+  theme.global.name.value = newMode === "b" ? "rubinB" : "rubinA";
 });
 </script>
 
@@ -1107,5 +1132,15 @@ video {
   left: 5px;
   bottom: 5px;
   max-width: 50%;
+}
+
+#goto-other-image {
+  background: var(--accent-color);
+  border: 1px solid black;
+  pointer-events: auto;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 16pt;
+  border-radius: 10px;
 }
 </style>
