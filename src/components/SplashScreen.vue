@@ -53,20 +53,19 @@
                 alt: 'Vera C. Rubin Observatory',
                 src: './rubin_white_2.png',
                 href: 'https://rubinobservatory.org/',
-                name: 'Rubin Observatory'
+                name: 'RubinObservatory'
               },
                             {
                 alt: 'INTUITIVE Planetarium at the U.S. Space & Rocket Center',
                 src: './SpaceRocketCenterIntuitivePlanetarium-Logo-small.png',
                 href: 'https://www.rocketcenter.com/INTUITIVEPlanetarium',
-                name: 'INTUITIVE Planetarium at the U.S. Space & Rocket Center'
+                name: 'INTUITIVE'
               }
             ]"
-            logo-margin="10vmin"  
           />
         </div>
         <span>
-        Brought to you by <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a>.
+        Brought to you by <a href="https://rubinobservatory.org/" target="_blank" rel="noopener noreferrer">Rubin Observatory</a>, <a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer">INTUITIVE Planetarium at the U.S. Space & Rocket Center</a> , <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a>.
         </span>
       </div>
     </div>
@@ -127,7 +126,7 @@ function closeSplashScreen() {
 }
 
 #splash-screen {
-  color: #E0E0E0;
+  color: var(--rubin-teal-1);
 
   @media (max-width: 699px) {
     max-height: 80vh;
@@ -155,6 +154,10 @@ function closeSplashScreen() {
   div {
     margin-inline: auto;
     text-align: center;
+  }
+
+  a {
+    color: var(--rubin-teal-2);
   }
   // make a paragraph inside the div centered horizontally and vertically
   p {
@@ -237,14 +240,15 @@ function closeSplashScreen() {
     margin-block: 0.75em;
 
     img {
-    height: 5vmin;
+    height: 60px;
     vertical-align: middle;
-    margin: 2px;
+    margin-inline: 1em;
+    margin-block: 1em;
     }
 
     @media only screen and (max-width: 600px) {
       img {
-        height: 24px;
+        height: 40px;
       }
     }
 
@@ -264,7 +268,8 @@ function closeSplashScreen() {
     // align-items: center;
     // gap: calc(0.5 * var(--default-line-height));
     overflow: hidden;
-  
+    color: var(--rubin-teal-1);
+    
   #splash-screen-text {
     line-height: 75%;
   }

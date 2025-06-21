@@ -15,13 +15,15 @@ import '@mdi/font/css/materialdesignicons.css';
 
 // Rubin Specific Colors
 export const RUBIN_COLORS = {
-  'rubin-turquoise': '#00BABC',
-  'rubin-teal': '#058B8C',
-  'rubin-charcoal': '#313333',
-  'rubin-deep-charcoal': "#1F2121",
-  'rubin-off-white': '#F5F5F5',
+  'rubin-turquoise': '#00BABC', // on light and dark backgrounds
+  'rubin-teal': '#058B8C', // on light and dark backgrounds
+  'rubin-charcoal': '#313333', // on light backgrounds
+  'rubin-off-white': '#F5F5F5', // on dark backgrounds
   'rubin-purple': '#583671',
   'rubin-highlight-gold': '#C4A447',
+  'rubin-gray-1': '#DcE0E3',
+  'rubin-gray-2': '#6a6E6E',
+  'rubin-deep-charcoal': "#1F2121",
   'rubin-teal-1':  '#D9F7F6',
   'rubin-teal-2':  '#B1F2EF',
   'rubin-teal-3':  '#009FA1',

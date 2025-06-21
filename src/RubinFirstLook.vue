@@ -410,8 +410,8 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
-const accentColor = computed(() => theme.global.current.value.colors.primaryVariant);
-const buttonColor = computed(() => theme.global.current.value.colors.primary);
+const accentColor = computed(() => theme.global.current.value.colors.primary);
+const buttonColor = computed(() => theme.global.current.value.colors.primaryVariant);
 const tab = ref(0);
 
 const folder: Ref<Folder> = ref(new Folder());
