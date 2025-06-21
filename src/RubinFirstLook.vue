@@ -452,6 +452,19 @@ function rotateOffsetToScreen(offset: Offset): Offset {
     decOff: -offset.raOff * sinRoll + offset.decOff * cosRoll,
   };
 }
+const forceCircles = ref(false);
+function createCircleAnnotation(place: Place): Circle {
+  const newCircle = new Circle();
+  newCircle.set_id("infobox");
+  newCircle.set_lineWidth(3);
+  newCircle.set_lineColor("#4287f5");
+  newCircle.set_skyRelative(true);
+  newCircle.set_opacity(0.5);
+  newCircle.setCenter(place.get_RA() * 15, place.get_dec());
+  newCircle.set_radius(place?.angularSize / 2);
+  store.addAnnotation(newCircle);
+  return newCircle;
+}
 
 
 fetch(`${domain}/offsets.json`)
@@ -500,6 +513,9 @@ onMounted(() => {
                 folder.value.addChildPlace(item);
               }
               lowerLevelPlaces.push(item);
+            }
+            if (forceCircles.value) {
+              createCircleAnnotation(item);
             }
           }
         });
