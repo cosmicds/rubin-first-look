@@ -198,7 +198,6 @@
       v-hide="fullscreen"
     >
       <scalebar
-        :max-deg="15"
         :width="1920"
         :breakpoints="breakpoints"
       ></scalebar>
