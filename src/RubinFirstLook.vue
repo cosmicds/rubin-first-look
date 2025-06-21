@@ -401,7 +401,7 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
-const accentColor = computed(() => theme.current.value.colors.primaryVariant);
+const accentColor = computed(() => theme.global.current.value.colors.primaryVariant);
 const buttonColor = computed(() => theme.global.current.value.colors.primary);
 const tab = ref(0);
 
@@ -464,8 +464,6 @@ onMounted(() => {
             }
           }
         });
-        console.log(topLevelPlaces);
-        console.log(store.gotoTarget);
       });
     });
     
@@ -685,7 +683,7 @@ watch(showConstellations, (show: boolean) => {
 });
 watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
-  theme.global.name.value = newMode === "b" ? "rubinGalaxy" : "rubinNebula";
+  theme.global.name.value = newMode === "b" ? "rubinB" : "rubinA";
 });
 </script>
 

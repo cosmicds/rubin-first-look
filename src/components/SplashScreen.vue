@@ -133,7 +133,7 @@ function closeSplashScreen() {
   }
 
 
-  background-color: rgb(var(--v-theme-rubin-teal-7));
+  background: var(--rubin-teal-7);
   justify-content: space-around;
   align-content: center;
   padding-top: 2rem;
@@ -157,7 +157,7 @@ function closeSplashScreen() {
   }
     
   p.highlight {
-    color: rgb(var(--v-theme-rubin-teal-2));
+    color: rgb(var(--rubin-teal-2));
     text-transform: uppercase;
     font-weight: bold;
   }
