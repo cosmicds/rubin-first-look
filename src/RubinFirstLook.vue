@@ -100,6 +100,7 @@
       </div>
       <div id="right-buttons">
         <div
+          v-if="!fullscreen"
           :class="[{'go-to-a': mode == 'b', 'go-to-b': mode == 'a'}]"
           id="goto-other-image"
           @click="gotoMainImage((mode == 'a') ? 'b' : 'a', false)"
@@ -107,7 +108,7 @@
         >
           Go to Image {{ mode == 'a' ? 'B' : 'A' }}
         </div>
-        <div v-hide="fullscreen">
+        <div v-if="!fullscreen">
           <icon-button
             id="info-icon"
             v-model="showTextSheet"
@@ -118,7 +119,7 @@
           >
           </icon-button>
         </div>
-        <div v-hide="fullscreen">
+        <div v-if="!fullscreen">
           <icon-button
             v-model="showVideoSheet"
             fa-icon="video"
