@@ -321,6 +321,7 @@
                       Vera Rubin Image Credit: Carnegie Institution for Science/NOIRLab. <a href="https://noirlab.edu/public/images/VeraRubin-6-enlarged-CC/" target="_blank" rel="noopener noreferrer">Link to original</a>
                     </cite>
                   </p>
+                  <v-spacer class="end-spacer"></v-spacer>
                 </v-container>
                   
                 <!-- <a href="https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0" target="_blank" rel="noopener noreferrer">Rubin Visual Identity</a>
