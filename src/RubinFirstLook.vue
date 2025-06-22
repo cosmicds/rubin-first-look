@@ -98,7 +98,7 @@
       </div>
       <div id="center-buttons" v-hide="fullscreen">
         <v-slider
-          v-if="!smallSize"
+          v-if="showSlider && !smallSize"
           v-model="opacity"
           label="Opacity"
           :min="0"
@@ -182,6 +182,14 @@
             <v-checkbox
               v-model="showScalebar"
               label="Scale Bar"
+              :color="accentColor"
+              hide-details
+              density="compact"
+            ></v-checkbox>
+            <v-checkbox
+              v-if="!smallSize"
+              v-model="showSlider"
+              label="Opacity Slider"
               :color="accentColor"
               hide-details
               density="compact"
@@ -593,6 +601,7 @@ const showOptions = ref(false);
 const showCircle = ref(true);
 const showLabels = ref(false);
 const showScalebar = ref(!smallSize.value);
+const showSlider = ref(true);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
