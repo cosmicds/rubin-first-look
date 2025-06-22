@@ -98,6 +98,7 @@
       </div>
       <div id="center-buttons" v-hide="fullscreen">
         <v-slider
+          v-if="!smallSize"
           v-model="opacity"
           label="Opacity"
           :min="0"
