@@ -79,6 +79,13 @@ function update() {
 
   const end = canvas.width - 5;
   context.clearRect(0, 0, canvas.width, canvas.height);
+  
+  context.fillStyle = "rgba(0, 0, 0, 0.7)";
+  const endPadding = 5;
+  context.fillRect(end-screenDistance - endPadding, 0, screenDistance + endPadding, canvas.height);
+  context.fill();
+  context.fillStyle = "transparent";
+
   context.strokeStyle = props.color;
   context.lineWidth = 2;
 

@@ -1427,7 +1427,6 @@ h4 {
 .scalebar {
   display: inline-block;
   width: fit-content;
-  background:rgba(30, 30, 30, 0.4);
   border-radius: 5px;
   padding: 0.5em;
 }
