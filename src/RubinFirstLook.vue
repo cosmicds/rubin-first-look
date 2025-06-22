@@ -542,6 +542,11 @@ const breakpoints = [
   [0, 1 / 3600, "1 arcsec"],
 ];
 
+/* Properties related to device/screen characteristics */
+const smallSize = computed(() => {
+  return display.smAndDown.value && (display.height.value > 1.2 * display.width.value);
+});
+
 const backgroundImagesets = reactive<BackgroundImageset[]>([]);
 const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
@@ -576,7 +581,7 @@ let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
 const showLabels = ref(false);
-const showScalebar = ref(false);
+const showScalebar = ref(!smallSize.value);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
@@ -809,11 +814,6 @@ const ready = computed(() => layersLoaded.value && positionSet.value);
 
 /* `isLoading` is a bit redundant here, but it could potentially have independent logic */
 const isLoading = computed(() => !ready.value);
-
-/* Properties related to device/screen characteristics */
-const smallSize = computed(() => {
-  return display.smAndDown.value && (display.height.value > 1.2 * display.width.value);
-});
 
 const infoFraction = 34;
 const infoSheetLocation = computed(() => smallSize.value ? "bottom" : "right");
