@@ -27,11 +27,8 @@
       class="infobox-content"
       v-else-if="place != null"
       :normally-open="false"
+      :title="place.get_name()"
     >
-      <template #title>
-        <strong>{{ place?.get_name() }}</strong>
-      </template>
-      
       <template #content>
         <div v-html="place.htmlDescription"></div> 
       </template>

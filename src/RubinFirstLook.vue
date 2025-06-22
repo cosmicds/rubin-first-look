@@ -1387,6 +1387,12 @@ video {
   left: 5px;
   bottom: 5px;
   max-width: 50%;
+  max-height: 50dvh;
+  overflow-y: auto;
+}
+#app details.expansion-panel[open] > summary > strong {
+  font-size: 1.2em;
+
 }
 
 #goto-other-image {
