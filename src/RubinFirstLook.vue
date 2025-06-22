@@ -545,7 +545,7 @@ const highlightsB = ref(new Folder());
 const currentPlace = ref<Place | null>(null);
 
 type Mode = "a" | "b";
-const mode = ref<Mode>("b");
+const mode = ref<Mode>("a");
 const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
 
 const INFOBOX_ZOOM_CUTOFF = 10;
