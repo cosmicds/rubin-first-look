@@ -45,7 +45,7 @@ const props = withDefaults(defineProps<ScalebarProps>(), {
   width: 1000,
   color: "white",
   visible: true,
-  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  backgroundColor: "rgba(33, 33, 33, 0.7)",
 });
 
 const show = computed(() => props.visible && ((props.maxDeg == null) || zoomDeg.value < props.maxDeg));
@@ -168,7 +168,7 @@ watch(() => [props.color, props.backgroundColor], (_values) => update());
   padding: 5px;
   margin-right: 10px;
   margin-bottom: 5px;
-
+  
   p {
     background: transparent;
     color: var(--color);
@@ -187,7 +187,7 @@ watch(() => [props.color, props.backgroundColor], (_values) => update());
     top: 0;
     right: 0;
     z-index: 0;
-    border-radius: 5px;
+    border-radius: 11px;
   }
 
 }
