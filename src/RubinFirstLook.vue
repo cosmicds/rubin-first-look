@@ -601,7 +601,7 @@ const showOptions = ref(false);
 const showCircle = ref(true);
 const showLabels = ref(false);
 const showScalebar = ref(!smallSize.value);
-const showSlider = ref(true);
+const showSlider = ref(false);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
