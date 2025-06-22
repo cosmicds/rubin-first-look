@@ -294,7 +294,7 @@
               <v-card-text class="info-text no-bottom-border-radius">
                 <v-container class="pa-0">
                   <p>
-                    This text is excerted from the <a href="https://noirlab.edu/public/news/noirlab2521/" target="_blank" rel="noopener noreferrer">Rubin First Look Press Release</a>. See the full release for more information.
+                    This text is excerpted from the <a href="https://noirlab.edu/public/news/noirlab2521/" target="_blank" rel="noopener noreferrer">Rubin First Look Press Release</a>. See the full release for more information.
                   </p>
                   <h4 class="user-guide-header">About Rubin Observatory</h4>  
                   <p>
