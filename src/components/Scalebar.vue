@@ -85,7 +85,7 @@ function update() {
   context.clearRect(0, 0, canvas.width, canvas.height);
   
   const textElement = root.value?.querySelector("p");
-  const width = Math.max(screenDistance, textElement?.clientWidth ?? 0) + 20;
+  const width = Math.max(screenDistance, textElement?.clientWidth || 200) + 20;
   contentWidth.value = width;
 
   context.strokeStyle = props.color;
@@ -142,7 +142,6 @@ const cssVars = computed(() => ({
 onMounted(() => {
   setCanvasDimensions();
   context = getContext();
-  update();
 });
 
 watch(() => [raRad.value, decRad.value, zoomDeg.value, rollRad.value], (_position) => {
