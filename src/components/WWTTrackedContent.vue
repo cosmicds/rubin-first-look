@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/*  eslint-disable @typescript-eslint/no-unused-vars */
+//  eslint-disable @typescript-eslint/no-unused-vars 
 import { onMounted, ref, watch } from 'vue';
 import { useTrackedElements, UseTrackedElementsReturn, TrackedHTMLElement } from '@/composables/useTrackedElements';
 
@@ -12,18 +12,21 @@ interface WWTEngineStore extends ReturnType<typeof engineStore> {
 }
 
 type Degree = number;
-type Radian = number;
+// type Radian = number;
 type HourAngle = number;
-type Pixel = number;
-
+// type Pixel = number;
+const D2R = Math.PI / 180;
+// const R2D = 180 / Math.PI;
 interface WWTTrackedContentProps {
   containerID?: string;
   ra?: Degree;
   dec?: Degree;
   name?: string
   place?: Place; // Optional place object, if needed
-  offsetRA?: Degree;
+  offsetRa?: Degree;
   offsetDec?: Degree;
+  offsetX?: Degree; // Degree offset in the screen X direction
+  offsetY?: Degree; // Degree offset in the screen Y direction
   store: WWTEngineStore;
   visible?: boolean;
   centerOnClick?: boolean;
@@ -35,8 +38,6 @@ interface WWTTrackedContentProps {
 }
 
 const props = withDefaults(defineProps<WWTTrackedContentProps>(), {
-  offsetRA: 0,
-  offsetDec: 0,
   visible: true,
   containerID: '',
   centerOnClick: false,
@@ -46,13 +47,12 @@ const props = withDefaults(defineProps<WWTTrackedContentProps>(), {
   place: undefined,
   goToPlace: false,
   debug: false,
+  name: 'default name',
 });
 
-const ra = ref(props.ra);
-const dec = ref(props.dec);
+const ra = ref<number>(props.ra as unknown as number);
+const dec = ref<number>(props.dec as unknown as number);
 const name = ref(props.name);
-const offsetRA = ref(props.offsetRA);
-const offsetDec = ref(props.offsetDec);
 const zoomDeg = computed(() => {
   return props.zoomDeg !== null ? props.zoomDeg : props.store.zoomDeg;
 });
@@ -88,8 +88,8 @@ function goTo(instant=false) {
       
     } else if (ra.value && dec.value) {
       props.store.gotoRADecZoom({
-        raRad: ra.value * (Math.PI / 180), 
-        decRad: dec.value * (Math.PI / 180), 
+        raRad: ra.value * (D2R), 
+        decRad: dec.value * (D2R), 
         zoomDeg: zoomDeg.value,
         instant: false,
       });
@@ -112,9 +112,45 @@ function onDoubleClick() {
 
 const ute = ref<UseTrackedElementsReturn | null>(null);
 
+const _rot = computed(() => {
+  return {'sin': Math.sin(props.store.rollRad), 'cos': Math.cos(props.store.rollRad)};
+});
+
+if (props.offsetX !== undefined && props.offsetY !== undefined) {
+  console.error('While supported, I am not sure the he simple 2D rotation transforms for offsetX and offsetY are correct.');
+}
+
+
+// This will get
+const offsetRA = ref<Degree>(props.offsetRa ?? 0);
+const offsetDec = ref<Degree>(props.offsetDec ?? 0);
+
+if (props.offsetX !== undefined && props.offsetY !== undefined ) {
+  // throw and error and return if offsetX and offsetY are provided
+  console.error('offsetX and offsetY ARE not setup. Rotate the coordinates before passing them to the component.');
+  throw new Error('offsetX and offsetY are not supported yet. Please use offsetRa and offsetDec instead.');
+}
+
+
+// If we want it maintain the same orientation relative to the Screen we need to use this
+// const offsetRA = computed(() => {
+//   if (props.offsetX !== undefined && props.offsetY !== undefined ) {
+//     return (props.offsetX)  * rot.value.cos + props.offsetY * rot.value.sin;
+//   }
+//   return props.offsetRa ?? 0;
+// });
+
+// const offsetDec = computed(() => {
+//   if (props.offsetX !== undefined && props.offsetY !== undefined ) {
+//     return -(props.offsetX) * rot.value.sin + props.offsetY * rot.value.cos;
+//   }
+//   return props.offsetDec ?? 0;
+// });
 
 onMounted(() => {
   props.store.waitForReady().then(() => {
+
+    
     ute.value = useTrackedElements(props.containerID, props.store) as unknown as typeof ute.value;
     if (!ute.value) {
       console.error('useTrackedElements returned null');
@@ -147,20 +183,26 @@ function updateVisibility(visible: boolean) {
 
 watch(() => props.visible, updateVisibility);
 
-watch(() => [props.ra, props.dec], ([newRa, newDec]) => {
+watch(() => [props.ra, props.dec, offsetRA.value, offsetDec.value], ([newRa, newDec, newOffsetRA, newOffsetDec]) => {
   if (!trackedElement.value) return;
-  trackedElement.value.trackedData.dec = newDec + offsetDec.value;
-  trackedElement.value.trackedData.ra = newRa + offsetRA.value;
+  trackedElement.value.move({
+    ra: (newRa ?? ra.value) + (newOffsetRA ?? offsetRA.value),
+    dec: (newDec ?? dec.value) + (newOffsetDec ?? offsetDec.value)
+  });
   if (ready.value && ute.value) {
     ute.value.updateElements();
   }
 }, { immediate: true });
 
 
-
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const slots = defineSlots<{
-  default: { on: Record<string, (event: Event) => void> };
+  default: { 
+    on: {
+      click: (event: MouseEvent) => void,
+      'keydown.enter': (event: KeyboardEvent) => void
+    },
+  };
 }>();
 
 
@@ -212,8 +254,9 @@ const slots = defineSlots<{
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: red;
-  // transform: translate(-50%, -50%);
+  background-color: transparent;
+  border: 2px solid red;
+  transform: translate(-50%, -50%);
 }
 
 </style>
