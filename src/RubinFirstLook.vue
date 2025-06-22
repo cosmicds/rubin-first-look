@@ -487,7 +487,7 @@
 import { storeToRefs } from "pinia";
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 import { useFullscreen } from "./composables/useFullscreen";
-import { D2R, distance, H2R } from "@wwtelescope/astro";
+import { D2R, H2R, distance } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
@@ -674,10 +674,11 @@ onMounted(() => {
 
 function findClosest(places: Place[]): Place | null {
   let closest = currentPlace.value;
-  let closestDist = closest === null ? null : distance(closest.get_RA() * H2R, closest.get_dec() * D2R, raRad.value, decRad.value);
+  let closestDist = closest === null ? null : distanceFromCenter(closest);
 
   places.forEach(place => {
-    const dist = distance(place.get_RA() * H2R, place.get_dec() * D2R, raRad.value, decRad.value);
+    const dist = distanceFromCenter(place);
+    console.log(place.get_name(), dist);
     if ((!isNaN(dist)) && ((closestDist === null) || (dist < closestDist))) {
       closest = place;
       closestDist = dist;
@@ -728,11 +729,15 @@ function wwtSmallestFov() {
   return Math.min(fovW, fovH);
 }
 
-function placeInView(place: Place, fraction=1/3): boolean {
+function distanceFromCenter(place: Place): number {
+  return distance(place.get_RA() * H2R, place.get_dec() * D2R, raRad.value, decRad.value);
+}
+
+function placeInView(place: Place, fraction=0.5): boolean {
   // checks if the center of place is in the current field of view
   // Assume the Zoom level corresponds to the size of the image
-  // fraction_of_place is ~fraction of the place that must be in the current FOV
-  // by default, allow 1/3 of the place to be visible and still be considered in view
+  // fraction is ~fraction of the place that must be in the current FOV
+  // by default, allow 1/2 of the place to be visible and still be considered in view
   if (place == null) {
     return false;
   }
@@ -741,13 +746,11 @@ function placeInView(place: Place, fraction=1/3): boolean {
     return false;
   }
 
-  const isetRa = iset.get_centerX() * D2R;
-  const isetDec = iset.get_centerY() * D2R;
+  let dist = distanceFromCenter(place);
   const isetFov = (place.get_zoomLevel() / 6) * D2R;
-  
   const curFov = wwtSmallestFov();
 
-  const dist = distance(isetRa, isetDec, raRad.value, decRad.value) + (fraction - 0.5) * isetFov;
+  dist += (fraction - 0.5) * isetFov;
   return dist < curFov / 2;
 }
 
