@@ -207,7 +207,7 @@
       <scalebar
         :width="1920"
         :breakpoints="breakpoints"
-        :visible="showScalebar"
+        :visible="showScalebar && !zooming"
       ></scalebar>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
@@ -543,6 +543,8 @@ const backgroundImagesets = reactive<BackgroundImageset[]>([]);
 const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
+const zooming = ref(false);
+let zoomTimeout: ReturnType<typeof setTimeout> | null = null;
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
 const accentColor = computed(() => theme.global.current.value.colors.primary);
 const buttonColor = computed(() => theme.global.current.value.colors.primaryVariant);
@@ -892,9 +894,18 @@ function onMove() {
   updateClosestPlace();
 }
 
-function onZoomChange(_zoomDeg: number) {
+function onZoomChange(newZoom: number, oldZoom: number) {
+  zooming.value = Math.abs((newZoom - oldZoom) / oldZoom) > 0.01;
   updateClosestPlace();
   updateCircle(currentPlace.value);
+  if (zooming.value) {
+    zoomTimeout = setTimeout(() => {
+      zooming.value = false;
+    }, 100);
+  } else if (zoomTimeout) {
+    clearTimeout(zoomTimeout);
+  }
+
 }
 
 watch(raRad, (_ra: number) => onMove());
