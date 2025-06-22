@@ -21,11 +21,12 @@
       :store="store"
       :visible="showLabels && !atTopLevel"
       v-slot="props"
-      debug
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
+      @mouseenter="onMarkerHover(place, true)"
+      @mouseleave="onMarkerHover(place, false)"
     >
-        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+        <div :class='["tracked-places", {"star": place.angularSize < 0.02}]' v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
 
     <wwt-tracked-content
@@ -38,11 +39,12 @@
       :store="store"
       :visible="showLabels && atTopLevel"
       v-slot="props"
-      debug
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
+      @mouseenter="onMarkerHover(place, true)"
+      @mouseleave="onMarkerHover(place, false)"
     >
-        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+        <div class="tracked-places top-level-place" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
     
 
@@ -100,13 +102,13 @@
       </div>
       <div id="right-buttons">
         <div
-          v-if="!fullscreen"
+          v-if="!fullscreen && topLevelPlaces.length > 1"
           :class="[{'go-to-a': mode == 'b', 'go-to-b': mode == 'a'}]"
           id="goto-other-image"
           @click="gotoMainImage((mode == 'a') ? 'b' : 'a', false)"
           @dblclick="gotoMainImage((mode == 'a') ? 'b' : 'a', true)"
         >
-          Go to Image {{ mode == 'a' ? 'B' : 'A' }}
+          Go to {{ mode == 'a' ? 'the' : '' }} {{ topLevelPlaces[mode=='a'? 1 : 0]?.get_name() }}
         </div>
         <div v-if="!fullscreen">
           <icon-button
@@ -573,7 +575,7 @@ const highlightsB = ref(new Folder());
 const currentPlace = ref<Place | null>(null);
 
 type Mode = "a" | "b";
-const mode = ref<Mode>("b");
+const mode = ref<Mode>("a");
 const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
 
 const INFOBOX_ZOOM_CUTOFF = 10;
@@ -613,19 +615,7 @@ function rotateOffsetToScreen(offset: Offset): Offset {
     decOff: -offset.raOff * sinRoll + offset.decOff * cosRoll,
   };
 }
-const forceCircles = ref(false);
-function createCircleAnnotation(place: Place): Circle {
-  const newCircle = new Circle();
-  newCircle.set_id("infobox");
-  newCircle.set_lineWidth(3);
-  newCircle.set_lineColor("#4287f5");
-  newCircle.set_skyRelative(true);
-  newCircle.set_opacity(0.5);
-  newCircle.setCenter(place.get_RA() * 15, place.get_dec());
-  newCircle.set_radius(place?.angularSize / 2);
-  store.addAnnotation(newCircle);
-  return newCircle;
-}
+
 
 
 fetch(`${domain}/offsets.json`)
@@ -644,7 +634,6 @@ fetch(`${domain}/offsets.json`)
     console.error("Error fetching offsets:", error);
   });
   
-
 onMounted(() => {
   store.waitForReady().then(async () => {
     // window.addEventListener('contextmenu', function(event) {
@@ -671,9 +660,6 @@ onMounted(() => {
                 highlightsFolder.addChildPlace(item);
               }
               lowerLevelPlaces.push(item);
-            }
-            if (forceCircles.value) {
-              createCircleAnnotation(item);
             }
           }
         });
@@ -719,14 +705,24 @@ function findClosest(places: Place[]): Place | null {
   return closest !== null && placeInView(closest) ? closest : null;
 }
 
+const closestPlace = ref<Place | null>(null);
 function updateClosestPlace() {
   currentPlace.value = findClosest(atTopLevel.value ? topLevelPlaces : lowerLevelPlaces);
+  closestPlace.value = currentPlace.value;
 }
+
+const forceShowCircle = ref(false);
+const onMarkerHover = (place: Place, show: boolean) => {
+  forceShowCircle.value = show;
+  currentPlace.value = show ? place : (place.get_name() !== closestPlace.value?.get_name() && highlightPlaceFromZoom.value) ? closestPlace.value : null;
+};
 
 function updateCircle(place: Place | null) {
   if (!highlightPlaceFromZoom.value || place === null) {
-    circle?.set_opacity(0);
-    return;
+    if (!forceShowCircle.value) {
+      circle?.set_opacity(0);
+      return;
+    }
   }
 
   if (circle === null) {
@@ -1318,15 +1314,44 @@ video {
 
 .tracked-places {
   width: max-content;
-  padding: 0.5em;
+  font-size: 0.8em;
+  padding: 0.25em 0.5em;
   color: white;
   background-color: rgba(0, 0, 0, 0.51);
+  border: 0.5px solid rgb(var(--v-theme-rubin-teal-4));
   backdrop-filter: blur(5px);
   border-radius: 5px;
   // transform: translate(-50%, -50%); // center on the point
-  transform: translateY(-50%);
+  transform: translateY(-50%) translateX(1.5em);
   position: absolute;
 }
+
+.tracked-places.top-level-place {
+  font-size: 1em;
+  padding: 0.5em 1em;
+  color: rgb(var(--v-theme-rubin-teal-2));
+  transform: translate(-50%, -100%); 
+}
+
+
+.tracked-places.star {
+  transform: translateY(-50%) translateX(0.5em);
+}
+
+// .tracked-places:not(.star):before {
+//   position: absolute;
+//   content:'';
+//   box-shadow: 0px 0px 0px 2px black, 0px 0px 0px 4px white;
+//   width: 0.5em;
+//   height: 0px;
+//   border-radius: 50%;
+//   top: 50%;
+//   left: -1em;
+//   transform: translateY(-50%) translateX(-50%);
+// }
+
+
+
 
 #options {
   background: black;

@@ -10,6 +10,7 @@ import SplashScreen from "./components/SplashScreen.vue";
 import WWTTrackedContent from "./components/WWTTrackedContent.vue";
 import vuetify from "../plugins/vuetify";
 
+
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 import { WWTComponent, wwtPinia } from "@wwtelescope/engine-pinia";
