@@ -17,15 +17,12 @@ withDefaults(defineProps<Props>(), {
     <summary>
       <slot name="title">{{ title }}</slot>
     </summary>
-    
-    <slot name="content">
-      <div v-html="content"></div>
-    </slot>
-    
-    <div class="footer">
-      <slot name="footer">
-        <span style="color: #fff;">{{ title }}</span>
+    <article>
+      <slot name="content">
+        <div v-html="content"></div>
       </slot>
+    </article>
+    <div class="footer">
     <slot name="actions"></slot>
     </div>
   </details>
@@ -34,6 +31,7 @@ withDefaults(defineProps<Props>(), {
 <style lang="less">
 details.expansion-panel {
   background: #00000080;
+  background: rgba(var(--v-theme-surface-variant), .7);
   color: inherit;
   font: inherit;
   cursor: pointer;

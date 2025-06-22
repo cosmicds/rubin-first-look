@@ -33,8 +33,8 @@
       :visible="showLabels && !atTopLevel"
       v-slot="props"
       debug
-      @click="handleSelection(place, false)"
-      @dblclick="handleSelection(place, true)"
+      @click="handleSelection(place, 'click')"
+      @dblclick="handleSelection(place, 'dblclick')"
     >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -48,8 +48,8 @@
       :visible="showLabels && atTopLevel"
       v-slot="props"
       debug
-      @click="handleSelection(place, false)"
-      @dblclick="handleSelection(place, true)"
+      @click="handleSelection(place, 'click')"
+      @dblclick="handleSelection(place, 'dblclick')"
     >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -79,12 +79,13 @@
     <div id="top-content">
       <div id="left-buttons" v-hide="fullscreen">
         <folder-view
-          v-if="folder.get_children()?.length ?? 0 > 0"
+          v-show="folder.get_children()?.length ?? 0 > 0"
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
           :background-color="accentColor"
+          :text-color="textColor"
           flex-direction="column"
-          @select="({ item, doubleClick }) => handleSelection(item, doubleClick)"
+          @select="({ item, type }) => handleSelection(item, type)"
         >
           <template #header="{ toggleExpanded, expanded }">
             <div class="fv-header">
@@ -94,6 +95,10 @@
                 @click="toggleExpanded()"
                 @keyup.enter="toggleExpanded()"
                 tabindex="0"
+                aria-role="button"
+                :aria-pressed="expanded"
+                aria-hidden="false"
+                aria-label="Toggle folder view"
               >
               </font-awesome-icon>
             </div>
@@ -104,6 +109,7 @@
       </div>
       <div id="right-buttons">
         <div
+          :class="[{'go-to-a': mode == 'b', 'go-to-b': mode == 'a'}]"
           id="goto-other-image"
           @click="gotoMainImage((mode == 'a') ? 'b' : 'a', false)"
           @dblclick="gotoMainImage((mode == 'a') ? 'b' : 'a', true)"
@@ -274,8 +280,8 @@
         <v-tabs
           v-model="tab"
           height="32px"
-          :color="accentColor"
-          :slider-color="accentColor"
+          color="rubin-turquoise"
+          slider-color="rubin-teal"
           id="tabs"
           dense
         >
@@ -296,6 +302,7 @@
             <v-card class="no-bottom-border-radius scrollable">
               <v-card-text class="info-text no-bottom-border-radius">
                 Information goes here
+                <a href="https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0" target="_blank" rel="noopener noreferrer">Rubin Visual Identity</a>
                 <v-spacer class="end-spacer"></v-spacer>
               </v-card-text>
             </v-card>
@@ -371,7 +378,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
+import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 import { useFullscreen } from "./composables/useFullscreen";
 import { D2R, distance, H2R } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
@@ -380,6 +387,7 @@ import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { RUBIN_COLORS } from "../plugins/vuetify";
 import { useDisplay, useTheme } from "vuetify";
+import { type ItemSelectionType } from "./types";
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
@@ -400,15 +408,8 @@ const touchscreen = supportsTouchscreen();
 const display = useDisplay();
 const theme = useTheme();
 
-const props = withDefaults(defineProps<RubinFirstLookProps>(), {
+withDefaults(defineProps<RubinFirstLookProps>(), {
   wwtNamespace: "rubin-first-look",
-  initialCameraParams: () => {
-    return {
-      raRad: 0,
-      decRad: 0,
-      zoomDeg: 60
-    };
-  }
 });
 
 const backgroundImagesets = reactive<BackgroundImageset[]>([]);
@@ -418,9 +419,9 @@ const positionSet = ref(false);
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
 const accentColor = computed(() => theme.global.current.value.colors.primary);
 const buttonColor = computed(() => theme.global.current.value.colors.primaryVariant);
+const textColor = computed(() => theme.global.current.value.colors["on-background"]);
 const tab = ref(0);
 
-const folder: Ref<Folder> = ref(new Folder());
 const domain = "http://localhost:12345";
 // const wtmlUrl = `${domain}/index.wtml`;
 const imageAPlacesURL = `${domain}/a_places.wtml`;
@@ -429,10 +430,13 @@ const selectedItem = ref<Thumbnail | null>(null);
 
 const lowerLevelPlaces: Place[] = [];
 const topLevelPlaces: Place[] = [];
+const highlightsA = ref(new Folder());
+const highlightsB = ref(new Folder());
 const currentPlace = ref<Place | null>(null);
 
 type Mode = "a" | "b";
 const mode = ref<Mode>("b");
+const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
 
 const INFOBOX_ZOOM_CUTOFF = 10;
 const SMALL_LABELS_ZOOM = 25;
@@ -450,43 +454,47 @@ const ute = useTrackedElements("", store);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
+    // window.addEventListener('contextmenu', function(event) {
+    //   event.stopImmediatePropagation();
+    // }, true);
     skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
-    store.gotoRADecZoom({
-      ...props.initialCameraParams,
-      instant: true
-    }).then(() => positionSet.value = true);
-
-    // If there are layers to set up, do that here!
-    layersLoaded.value = true;
-
-    // Add labeled places
-    [imageAPlacesURL, imageBPlacesURL].forEach(url => {
-      store.loadImageCollection({
+    const loadPromises = [imageAPlacesURL, imageBPlacesURL].map(url => {
+      return store.loadImageCollection({
         url,
         loadChildFolders: false,
-      }).then(loadedFolder => {
+      });
+    });
+    Promise.all(loadPromises).then(loadedFolders => {
+      loadedFolders.forEach((loadedFolder, index) => {
         const children = loadedFolder.get_children();
+        const highlightsFolder = new Folder();
         children?.forEach((item, index) => {
           if (item instanceof Place) {
             if (index === 0) {
-              folder.value.addChildPlace(item);
+              highlightsFolder.addChildPlace(item);
               topLevelPlaces.push(item);
             } else {
               if (item.get_names().length == 1) {
-                folder.value.addChildPlace(item);
+                highlightsFolder.addChildPlace(item);
               }
               lowerLevelPlaces.push(item);
             }
           }
         });
+        const highlightsRef = index === 0 ? highlightsA : highlightsB;
+        highlightsRef.value = highlightsFolder;
       });
+    }).then(() => {
+      positionSet.value = true;
+      layersLoaded.value = true;
+      gotoMainImage(mode.value, true);
     });
     
     store.loadImageCollection({
       url: "bg.wtml",
       loadChildFolders: false,
-    }).then(folder => {
-      const children = folder.get_children();
+    }).then(bgFolder => {
+      const children = bgFolder.get_children();
       if (children !== null) {
         const item = children[0];
         if (item instanceof Imageset) {
@@ -578,7 +586,7 @@ function placeInView(place: Place, fraction=1/3): boolean {
   return dist < curFov / 2;
 }
 
-function handleSelection(item: Thumbnail, instant=true) {
+function handleSelection(item: Thumbnail, selection: ItemSelectionType) {
   if (item instanceof Imageset) {
     store.setForegroundImageByName(item.get_name());
     const type = item.get_dataSetType();
@@ -591,13 +599,17 @@ function handleSelection(item: Thumbnail, instant=true) {
       store.setForegroundImageByName(imageset.get_name());
     }
 
-    store.gotoTarget({
-      place: item,
-      noZoom: false,
-      instant,
-      trackObject: true,
-    });
-  }
+    const instant = selection === "dblclick";
+    if (selection !== "folder") {
+
+      store.gotoTarget({
+        place: item,
+        noZoom: false,
+        instant,
+        trackObject: true,
+      });
+    }
+  }  
 
   selectedItem.value = item;
 }
@@ -628,6 +640,7 @@ const cssVars = computed(() => {
   return {
     ...rubinColors,
     "--accent-color": accentColor.value,
+    "--button-color": buttonColor.value,
     "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100vh",
     "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100vw",
     "--info-sheet-width": infoSheetWidth.value,
@@ -742,9 +755,10 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-
+  
   font-family: "Source Sans 3", Helvetica, sans-serif;
   font-weight: regular;
+  color: rgb(var(--v-theme-on-background));
 }
 
 #main-content {
@@ -836,10 +850,16 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-
   .icon-wrapper {
     width: fit-content;
   }
+}
+
+.icon-wrapper {
+  border-radius: 0.75em;
+}
+.svg-inline--fa {
+  aspect-ratio: 1.3 / 1;
 }
 
 #right-buttons {
@@ -850,9 +870,6 @@ body {
   height: auto;
 }
 
-#info-icon-button {
-  padding: 5px 12px;
-}
 
 #bottom-content {
   display: flex;
@@ -962,6 +979,9 @@ video {
     & a {
       text-decoration: none;
     }
+    & a:hover {
+      text-decoration: underline;
+    }
   }
   
   .close-icon {
@@ -1060,8 +1080,8 @@ video {
 
 #options {
   background: black;
-  border: 1px solid var(--accent-color);
-  border-radius: 20px;
+  border: 1px solid rgb(var(--v-theme-primaryVariant));
+  border-radius: 0.75em;
   pointer-events: auto;
 
   .icon-wrapper {
@@ -1085,6 +1105,7 @@ video {
   svg {
     padding: 0px 5px;
     cursor: pointer;
+    float: right;
   }
 }
 
@@ -1096,12 +1117,62 @@ video {
 }
 
 #goto-other-image {
-  background: var(--accent-color);
-  border: 1px solid black;
   pointer-events: auto;
   cursor: pointer;
   padding: 5px 10px;
   font-size: 16pt;
   border-radius: 10px;
+  user-select: none;
 }
+
+// when in mode-a we want to show the button with mode-b colors
+#goto-other-image.go-to-b {
+  --bg: var(--v-theme-rubin-teal);
+  // background-color: rgb(var(--v-theme-rubin-teal)); // fallback
+  background: radial-gradient(circle, rgba(var(--bg), 0.9) 0%, rgba(var(--bg), 0.8) 100%);
+  color: rgb(var(--v-theme-rubin-off-white));
+  border: 1px solid rgb(var(--v-theme-rubin-off-white));
+}
+
+// when in mode-b we want to show the button with mode-a colors
+#goto-other-image.go-to-a {
+  --bg: var(--v-theme-rubin-deep-charcoal);
+  // background-color: rgb(var(--bg)); // fallback
+  background: radial-gradient(circle, rgba(var(--bg), 0.8) 0%, rgba(var(--bg), 0.6) 100%);
+  backdrop-filter: blur(5px); 
+  color: rgb(var(--v-theme-rubin-off-white));
+  border: 1px solid rgb(var(--v-theme-rubin-teal));
+}
+
+#app details.expansion-panel {
+  border-radius: 0.75em;
+}
+#app .fv-root.folder-view {
+  border-radius: 0.75em;
+  padding: calc(0.75em / 2);
+  
+  .item-name {
+    font-size: 0.9em;
+  }
+}
+
+.infobox-content {
+  
+  p {
+    margin-bottom: 0.5em;
+  }
+  
+}
+
+a {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: underline;
+  font-weight: regular;
+}
+
+a:visited {
+  color: rgb(var(--v-theme-primary));
+}
+
+
 </style>

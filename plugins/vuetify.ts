@@ -24,9 +24,9 @@ export const RUBIN_COLORS = {
   'rubin-gray-1': '#DcE0E3',
   'rubin-gray-2': '#6a6E6E',
   'rubin-deep-charcoal': "#1F2121",
-  'rubin-teal-1':  '#D9F7F6',
-  'rubin-teal-2':  '#B1F2EF',
-  'rubin-teal-3':  '#009FA1',
+  'rubin-teal-1': '#D9F7F6',
+  'rubin-teal-2': '#B1F2EF',
+  'rubin-teal-3': '#009FA1',
   'rubin-teal-4': '#12726D',
   'rubin-teal-5': '#0C4A47',
   'rubin-teal-6': '#062E2C',
@@ -56,23 +56,28 @@ export default createVuetify({
         dark: false,
         colors: {
           // Core brand colors
-          primary: RUBIN_COLORS['rubin-turquoise'],
-          primaryVariant: RUBIN_COLORS['rubin-teal'],
-          secondary: RUBIN_COLORS['rubin-purple'],
-          accent: RUBIN_COLORS['rubin-highlight-gold'],
+          // Lighter button color
+          primaryVariant: RUBIN_COLORS['rubin-turquoise'],
+          // Darker accent color
+          primary: RUBIN_COLORS['rubin-teal'],
 
           // Surface and backgrounds
+          // Main "v-application" background color
           background: RUBIN_COLORS['rubin-deep-charcoal'],
-          surface: RUBIN_COLORS['rubin-charcoal'],
-          surfaceVariant: RUBIN_COLORS['rubin-teal-6'],
+          // Info Drawer background color (set by Vuetify default)
+          surface: RUBIN_COLORS['rubin-deep-charcoal'],
 
-          // Text colors
-          onPrimary: RUBIN_COLORS["rubin-off-white"],
-          onSecondary: RUBIN_COLORS["rubin-off-white"],
-          onSurface: RUBIN_COLORS["rubin-off-white"],
-          textPrimary: RUBIN_COLORS["rubin-off-white"],
-          textMuted: RUBIN_COLORS['rubin-charcoal'],
-          
+          // "On-color" colors. These are only used by default on Vuetify components.
+          // when you have set the color using color="blah", then the text color
+          // will be "on-blah".
+          "on-surface": RUBIN_COLORS['rubin-off-white'],
+          "on-background": RUBIN_COLORS['rubin-off-white'],
+          "on-primary": RUBIN_COLORS['rubin-off-white'],
+
+          // Custom properties
+          // Infobox background color
+          "surface-variant": RUBIN_COLORS['rubin-deep-charcoal'],
+
           ...RUBIN_COLORS,
         },
       },
@@ -81,22 +86,27 @@ export default createVuetify({
         dark: false,
         colors: {
           // Core brand colors
-          primary: RUBIN_COLORS['rubin-turquoise'],
-          primaryVariant: RUBIN_COLORS['rubin-teal'],
-          secondary: RUBIN_COLORS['rubin-purple'],
-          accent: RUBIN_COLORS['rubin-highlight-gold'],
+          // Button color
+          primaryVariant: RUBIN_COLORS['rubin-turquoise'],
+          // Accent color
+          primary: RUBIN_COLORS['rubin-deep-charcoal'],
 
           // Surface and backgrounds
+          // Main "v-application" background color
           background: RUBIN_COLORS['rubin-deep-charcoal'],
-          surface: RUBIN_COLORS['rubin-charcoal'],
-          surfaceVariant: RUBIN_COLORS['rubin-teal-6'],
+          // Info Drawer background color (set by Vuetify default)
+          surface: RUBIN_COLORS['rubin-deep-charcoal'],
 
-          // Text colors
-          onPrimary: RUBIN_COLORS["rubin-off-white"],
-          onSecondary: RUBIN_COLORS["rubin-off-white"],
-          onSurface: RUBIN_COLORS["rubin-off-white"],
-          textPrimary: RUBIN_COLORS["rubin-off-white"],
-          textMuted: RUBIN_COLORS['rubin-charcoal'],
+          // "On-color" colors. These are only used by default on Vuetify components.
+          // when you have set the color using color="blah", then the text color
+          // will be "on-blah".
+          "on-surface": RUBIN_COLORS['rubin-off-white'],
+          "on-background": RUBIN_COLORS['rubin-off-white'],
+          "on-primary": RUBIN_COLORS['rubin-off-white'],
+
+          // Custom properties
+          // Infobox background color
+          "surface-variant": RUBIN_COLORS['rubin-deep-charcoal'],
 
           ...RUBIN_COLORS,
         }
