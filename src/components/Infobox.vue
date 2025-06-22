@@ -16,14 +16,15 @@
         </strong>
       </template>
       <template #default>
-        <div
+        <article
           class="infobox-mobile infobox-content"
           v-html="place?.htmlDescription"
         >
-        </div>
+        </article>
       </template>
     </v-overlay>
     <expansion-wrapper
+      class="infobox-content"
       v-else-if="place != null"
       :normally-open="true"
     >
@@ -62,16 +63,20 @@ withDefaults(defineProps<Props>(), {
 
 .infobox-mobile {
   background: #00000080;
+  background: rgba(var(--v-theme-surface-variant), .9);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 5px;
   padding: 5px;
 }
 
-.infobox-mobile.infobox-content {
+.infobox-content {
   pointer-events: auto;
+  overflow-y: scroll;
+}
+
+.infobox-mobile.infobox-content {
   margin: auto;
   max-width: 75%;
   max-height: 75vh;
-  overflow-y: scroll;
 }
 </style>
