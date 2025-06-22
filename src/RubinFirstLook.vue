@@ -611,6 +611,9 @@ function placeInView(place: Place, fraction=1/3): boolean {
   // Assume the Zoom level corresponds to the size of the image
   // fraction_of_place is ~fraction of the place that must be in the current FOV
   // by default, allow 1/3 of the place to be visible and still be considered in view
+  if (place == null) {
+    return false;
+  }
   const iset = place.get_studyImageset() ?? place.get_backgroundImageset();
   if (iset == null) {
     return false;
