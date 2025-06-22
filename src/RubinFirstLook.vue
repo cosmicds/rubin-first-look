@@ -102,13 +102,13 @@
       </div>
       <div id="right-buttons">
         <div
-          v-if="!fullscreen"
+          v-if="!fullscreen && topLevelPlaces.length > 1"
           :class="[{'go-to-a': mode == 'b', 'go-to-b': mode == 'a'}]"
           id="goto-other-image"
           @click="gotoMainImage((mode == 'a') ? 'b' : 'a', false)"
           @dblclick="gotoMainImage((mode == 'a') ? 'b' : 'a', true)"
         >
-          Go to Image {{ mode == 'a' ? 'B' : 'A' }}
+          Go to {{ mode == 'a' ? 'the' : '' }} {{ topLevelPlaces[mode=='a'? 1 : 0]?.get_name() }}
         </div>
         <div v-if="!fullscreen">
           <icon-button
