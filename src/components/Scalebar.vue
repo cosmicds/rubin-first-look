@@ -84,8 +84,9 @@ function update() {
   const end = canvas.width - 5;
   context.clearRect(0, 0, canvas.width, canvas.height);
   
-  contentWidth.value = screenDistance + 20;
-  console.log(contentWidth.value);
+  const textElement = root.value?.querySelector("p");
+  const width = Math.max(screenDistance, textElement?.clientWidth ?? 0) + 20;
+  contentWidth.value = width;
 
   context.strokeStyle = props.color;
   context.lineWidth = 2;
