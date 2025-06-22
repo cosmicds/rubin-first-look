@@ -172,6 +172,13 @@
               density="compact"
             ></v-checkbox>
             <v-checkbox
+              v-model="showScalebar"
+              label="Scale Bar"
+              :color="accentColor"
+              hide-details
+              density="compact"
+            ></v-checkbox>
+            <v-checkbox
               v-model="showConstellations"
               label="Constellations"
               :color="accentColor"
@@ -197,6 +204,12 @@
       id="bottom-content"
       v-hide="fullscreen"
     >
+      <scalebar
+        :width="1920"
+        :breakpoints="breakpoints"
+        :visible="showScalebar && !zooming"
+        class="scalebar"
+      ></scalebar>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
           :default-logos="['cosmicds', 'wwt']"
@@ -434,13 +447,13 @@
                         </li>
                         <li>
                           <strong>Region Markers</strong>: Display or hide the boxes that roughly delineate the labeled objects.
+                        </li>
+                        <li>
+                          <strong>Scale Bar</strong>: Display or hide the scale bar that contextualizes how much of the sky you are seeing.
                         </li>                        
                         <li>
                           <strong>Constellations</strong>: Display or hide the constellation lines and labels to orient yourself in the sky.
-                        </li> 
-                        <li>
-                          <strong>Scalebar</strong>: Display or hide the scalebar that contextualizes how much of the sky you are seeing.
-                        </li>         
+                        </li>          
                       </ul>
                     </v-col>
                   </v-row>
@@ -520,10 +533,27 @@ withDefaults(defineProps<RubinFirstLookProps>(), {
   wwtNamespace: "rubin-first-look",
 });
 
+const breakpoints = [
+  [15, 3.5, "~ Rubin Field of View (3.5 degrees)"],
+  [4, 3.5, "Rubin Field of View (3.5 degrees)"],
+  [1, 0.5, "Full Moon (0.5 degrees)"],
+  [0.25, 5 / 60, "JWST Field of View (5 arcmin)"],
+  [5 / 60, 1 / 60, "1 arcmin"],
+  [1 / 60, 30 / 3600, "0.5 arcmin"],
+  [0, 1 / 3600, "1 arcsec"],
+];
+
+/* Properties related to device/screen characteristics */
+const smallSize = computed(() => {
+  return display.smAndDown.value && (display.height.value > 1.2 * display.width.value);
+});
+
 const backgroundImagesets = reactive<BackgroundImageset[]>([]);
 const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
+const zooming = ref(false);
+let zoomTimeout: ReturnType<typeof setTimeout> | null = null;
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
 const accentColor = computed(() => theme.global.current.value.colors.primary);
 const buttonColor = computed(() => theme.global.current.value.colors.primaryVariant);
@@ -552,6 +582,7 @@ let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
 const showLabels = ref(false);
+const showScalebar = ref(!smallSize.value);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
@@ -785,11 +816,6 @@ const ready = computed(() => layersLoaded.value && positionSet.value);
 /* `isLoading` is a bit redundant here, but it could potentially have independent logic */
 const isLoading = computed(() => !ready.value);
 
-/* Properties related to device/screen characteristics */
-const smallSize = computed(() => {
-  return display.smAndDown.value && (display.height.value > 1.2 * display.width.value);
-});
-
 const infoFraction = 34;
 const infoSheetLocation = computed(() => smallSize.value ? "bottom" : "right");
 const infoSheetHeight = computed(() => infoSheetLocation.value === "bottom" ? `${infoFraction}%` : "100%");
@@ -807,8 +833,8 @@ const cssVars = computed(() => {
     ...rubinColors,
     "--accent-color": accentColor.value,
     "--button-color": buttonColor.value,
-    "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100vh",
-    "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100vw",
+    "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100dvh",
+    "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100dvw",
     "--info-sheet-width": infoSheetWidth.value,
     "--info-sheet-height": infoSheetHeight.value,
     "--info-text-height": infoTextHeight.value,
@@ -872,9 +898,18 @@ function onMove() {
   updateClosestPlace();
 }
 
-function onZoomChange(_zoomDeg: number) {
+function onZoomChange(newZoom: number, oldZoom: number) {
+  zooming.value = Math.abs((newZoom - oldZoom) / oldZoom) > 0.01;
   updateClosestPlace();
   updateCircle(currentPlace.value);
+  if (zooming.value) {
+    zoomTimeout = setTimeout(() => {
+      zooming.value = false;
+    }, 100);
+  } else if (zoomTimeout) {
+    clearTimeout(zoomTimeout);
+  }
+
 }
 
 watch(raRad, (_ra: number) => onMove());
@@ -1043,10 +1078,11 @@ body {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: calc(100% - 2rem);
+  width: fit-content;
+  align-items: flex-end;
   pointer-events: none;
-  align-items: center;
-  gap: 5px;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 #body-logos {
@@ -1389,5 +1425,9 @@ h4 {
   font-weight: bold;
 }
 
-
+.scalebar {
+  display: inline-block;
+  width: fit-content;
+  border-radius: 5px;
+}
 </style>
