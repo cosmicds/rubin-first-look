@@ -157,22 +157,22 @@
             v-if="showOptions"
           >
             <v-checkbox
-              v-model="showCircle"
-              label="Show circle"
+              v-model="showLabels"
+              label="Object Labels"
               :color="accentColor"
               hide-details
               density="compact"
             ></v-checkbox>
             <v-checkbox
-              v-model="showLabels"
-              label="Show labels"
+              v-model="showCircle"
+              label="Region Markers"
               :color="accentColor"
               hide-details
               density="compact"
             ></v-checkbox>
             <v-checkbox
               v-model="showConstellations"
-              label="Show constellations"
+              label="Constellations"
               :color="accentColor"
               hide-details
               density="compact"
@@ -277,7 +277,7 @@
           dense
         >
           <v-tab class="info-tabs" tabindex="0"><h3>Rubin's Science</h3></v-tab>
-          <v-tab class="info-tabs" tabindex="0"><h3>Navigation</h3></v-tab>
+          <v-tab class="info-tabs" tabindex="0"><h3>User Guide</h3></v-tab>
         </v-tabs>
         <font-awesome-icon
           id="close-text-icon"
@@ -301,9 +301,18 @@
           <v-window-item>
             <v-card class="no-bottom-border-radius scrollable">
               <v-card-text class="info-text no-bottom-border-radius">
-                <v-container>
-                  <v-row align="center">
-                  <v-col cols="4">
+                <v-container class="pa-0">
+                  <p>
+                    This WorldWide Telescope (WWT) interactive visualization provides a contextual, deep dive into the stunning new imagery from the Rubin Observatory.
+                  </p>    
+                  <h4 class="user-guide-header">Navigation & Information</h4>  
+                  <ul class="text-list mx-5">
+                    <li>
+                      To navigate the WWT view, use the following controls:
+                    </li>
+                  </ul>            
+                  <v-row align="center" class="mt-2 mx-3">
+                    <v-col cols="4">
                       <v-chip
                         label
                         outlined
@@ -312,10 +321,10 @@
                       </v-chip>
                     </v-col>
                     <v-col cols="8" class="pt-1">
-                      <strong>{{ touchscreen ? "press + drag" : "click + drag" }}</strong>  {{ touchscreen ? ":" : "or" }}  <strong>{{ touchscreen ? ":" : "W-A-S-D" }}</strong> {{ touchscreen ? ":" : "keys" }}<br>
+                      <strong>{{ touchscreen ? "press + drag" : "click + drag" }}</strong>  {{ touchscreen ? "" : "or" }}  <strong>{{ touchscreen ? "" : "W-A-S-D" }}</strong> {{ touchscreen ? "" : "keys" }}<br>
                     </v-col>
                   </v-row>
-                  <v-row align="center">
+                  <v-row align="center" class="mx-3">
                     <v-col cols="4">
                       <v-chip
                         label
@@ -325,27 +334,101 @@
                       </v-chip>
                     </v-col>
                     <v-col cols="8" class="pt-1">
-                      <strong>{{ touchscreen ? "pinch in and out" : "scroll in and out" }}</strong> {{ touchscreen ? ":" : "or" }} <strong>{{ touchscreen ? ":" : "I-O" }}</strong> {{ touchscreen ? ":" : "keys" }}<br>
+                      <strong>{{ touchscreen ? "pinch in and out" : "scroll in and out" }}</strong> {{ touchscreen ? "" : "or" }} <strong>{{ touchscreen ? "" : "I-O" }}</strong> {{ touchscreen ? "" : "keys" }}<br>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col class="pt-0">
+                      <ul class="text-list mx-5">
+                        <li>
+                          <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> the <strong>Go to Image {{ mode == 'a' ? 'B' : 'A' }}</strong> button in the upper right to switch the view to that image.
+                        </li>
+                        <li>
+                          <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> on an object <strong>Image Thumbnail</strong> or <strong>Label</strong> to pan to that object.
+                        </li>
+                        <li>
+                          <strong>Double-{{ touchscreen ? "tap" : "click" }}</strong> on an object <strong>Image Thumbnail</strong> or <strong>Label</strong> to move instantly to that object.
+                        </li>
+                        <li>
+                          <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> on the object <strong>Information Box</strong> in the lower left to learn more about it.
+                        </li>
+                      </ul>   
+                    </v-col>  
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <h4 class="user-guide-header">Main View Buttons</h4>
+                      <ul class="text-list mx-5">
+                        <li>
+                          <font-awesome-icon
+                            class="bullet-icon"
+                            icon="info"
+                            size="lg" 
+                          ></font-awesome-icon>
+                           open or close this information panel
+                        </li>
+                        <li><font-awesome-icon
+                            class="bullet-icon"
+                            icon="video"
+                            size="lg" 
+                          ></font-awesome-icon>
+                          view a video tutorial about this visualization
+                        </li>
+                        <li><font-awesome-icon
+                            class="bullet-icon"
+                            icon="expand"
+                            size="lg" 
+                          ></font-awesome-icon>
+                          toggle fullscreen mode ( view only the imagery with no user interface.)
+                        </li>
+                        <li> <font-awesome-icon
+                            class="bullet-icon"
+                            icon="compress"
+                            size="lg" 
+                          ></font-awesome-icon>
+                          return to the normal user interface.
+                        </li>
+                        <li><font-awesome-icon
+                            class="bullet-icon"
+                            icon="sliders"
+                            size="lg" 
+                          ></font-awesome-icon>
+                          open more control options
+                        </li>
+                      </ul>
+                      <h4 class="user-guide-header mt-5">Controls</h4>
+                      <ul class="text-list mx-5">
+                        <li>
+                          <strong>Object Labels</strong>: Display or hide the names of objects in the view.
+                        </li>
+                        <li>
+                          <strong>Region Markers</strong>: Display or hide the boxes that roughly delineate the labeled objects.
+                        </li>                        
+                        <li>
+                          <strong>Constellations</strong>: Display or hide the constellation lines and labels to orient yourself in the sky.
+                        </li> 
+                        <li>
+                          <strong>Scalebar</strong>: Display or hide the scalebar that contextualizes how much of the sky you are seeing.
+                        </li>         
+                      </ul>
                     </v-col>
                   </v-row>
                   <v-row>
                     <v-col cols="12">
                       <div class="credits">
-                      <h3>Credits:</h3>
-                      <h4><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">CosmicDS</a> Vue Data Stories Team:</h4>
-                      John Lewis<br>
-                      Jon Carifio<br>
-                      Pat Udomprasert<br>
-                      Alyssa Goodman<br>
-                      Mary Dussault<br>
-                      Harry Houghton<br>
-                      Anna Nolin<br>
-                      Evaluator: Sue Sunbury<br>
-                      <br>
-                      <h4>WorldWide Telescope Team:</h4>
-                      Peter Williams<br>
-                      A. David Weigel<br>
-                      Jon Carifio<br>
+                      <h4>Credits:</h4>
+                      <h5><a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer"><em>INTUITIVE</em>&reg; Planetarium at the U.S. Space & Rocket Center</a></h5>
+                      <p>David Weigel</p>
+                      <h5><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">CosmicDS</a></h5>
+                      <p>John Lewis</p>
+                      <p>Jon Carifio</p>
+                      <p>Pat Udomprasert</p>
+                      <p>Alyssa Goodman</p>
+
+                      <h5><a href="https://www.worldwidetelescope.org/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a></h5>
+                      <p>Peter Williams</p>
+                      <p>Jon Carifio</p>
+                      <p>David Weigel</p>
                       </div>
                       <v-spacer class="end-spacer"></v-spacer>
                     </v-col>
@@ -1021,13 +1104,35 @@ video {
   .info-text {
     height: var(--info-text-height);
     padding-bottom: 25px;
-  
-    & a {
-      text-decoration: none;
+
+    p {
+      margin-block: 0.5em;
     }
-    & a:hover {
-      text-decoration: underline;
+
+    a {
+      color: var(--rubin-teal-2)
     }
+
+
+    h4 {
+      font-size: 1.2em;
+    }
+
+    h5 {
+      font-size: 1em;
+      font-weight: bold;
+      margin-top: 1em;
+    }
+
+    li {
+      margin-block: 0.5em;
+    }
+  }
+
+  .bullet-icon {
+    color: var(--button-color);
+    width: 1.6em;
+    padding-right: 0.5em;
   }
   
   .close-icon {
@@ -1055,9 +1160,7 @@ video {
   
     .v-card-text {
       font-size: ~"max(14px, calc(0.7em + 0.3vw))";
-      padding-top: 1em;
-      padding-left: 0.5em;
-      padding-right: 0.51em;
+      padding: 1em;
   
       .end-spacer {
         height: 25px;
@@ -1204,21 +1307,24 @@ video {
 }
 
 .infobox-content {
-  
   p {
-    margin-bottom: 0.5em;
+    margin-bottom: 1em;
   }
-  
 }
 
 a {
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--rubin-teal-2));
   text-decoration: underline;
   font-weight: regular;
 }
 
 a:visited {
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--rubin-teal-2));
+}
+
+h4 {
+  color: var(--rubin-gray-1);
+  font-weight: bold;
 }
 
 
