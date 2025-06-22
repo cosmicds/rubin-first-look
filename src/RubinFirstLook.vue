@@ -22,8 +22,8 @@
       :visible="showLabels && !atTopLevel"
       v-slot="props"
       debug
-      @click="handleSelection(place, false)"
-      @dblclick="handleSelection(place, true)"
+      @click="handleSelection(place, 'click')"
+      @dblclick="handleSelection(place, 'dblclick')"
     >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -39,8 +39,8 @@
       :visible="showLabels && atTopLevel"
       v-slot="props"
       debug
-      @click="handleSelection(place, false)"
-      @dblclick="handleSelection(place, true)"
+      @click="handleSelection(place, 'click')"
+      @dblclick="handleSelection(place, 'dblclick')"
     >
         <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -70,12 +70,12 @@
     <div id="top-content">
       <div id="left-buttons" v-hide="fullscreen">
         <folder-view
-          v-if="folder.get_children()?.length ?? 0 > 0"
+          v-show="folder.get_children()?.length ?? 0 > 0"
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
           :background-color="accentColor"
           flex-direction="column"
-          @select="({ item, doubleClick }) => handleSelection(item, doubleClick)"
+          @select="({ item, type }) => handleSelection(item, type)"
         >
           <template #header="{ toggleExpanded, expanded }">
             <div class="fv-header">
@@ -356,7 +356,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { ref, reactive, computed, watch, onMounted, nextTick, type Ref } from "vue";
+import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 import { useFullscreen } from "./composables/useFullscreen";
 import { D2R, distance, H2R } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
@@ -365,6 +365,7 @@ import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
 import { RUBIN_COLORS } from "../plugins/vuetify";
 import { useDisplay, useTheme } from "vuetify";
+import { type ItemSelectionType } from "./types";
 
 type SheetType = "text" | "video";
 type CameraParams = Omit<GotoRADecZoomParams, "instant">;
@@ -385,15 +386,8 @@ const touchscreen = supportsTouchscreen();
 const display = useDisplay();
 const theme = useTheme();
 
-const props = withDefaults(defineProps<RubinFirstLookProps>(), {
+withDefaults(defineProps<RubinFirstLookProps>(), {
   wwtNamespace: "rubin-first-look",
-  initialCameraParams: () => {
-    return {
-      raRad: 0,
-      decRad: 0,
-      zoomDeg: 60
-    };
-  }
 });
 
 const backgroundImagesets = reactive<BackgroundImageset[]>([]);
@@ -405,7 +399,6 @@ const accentColor = computed(() => theme.global.current.value.colors.primaryVari
 const buttonColor = computed(() => theme.global.current.value.colors.primary);
 const tab = ref(0);
 
-const folder: Ref<Folder> = ref(new Folder());
 const domain = "http://localhost:12345";
 // const wtmlUrl = `${domain}/index.wtml`;
 const imageAPlacesURL = `${domain}/a_places.wtml`;
@@ -414,10 +407,13 @@ const selectedItem = ref<Thumbnail | null>(null);
 
 const lowerLevelPlaces: Place[] = [];
 const topLevelPlaces: Place[] = [];
+const highlightsA = ref(new Folder());
+const highlightsB = ref(new Folder());
 const currentPlace = ref<Place | null>(null);
 
 type Mode = "a" | "b";
 const mode = ref<Mode>("b");
+const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
 
 const INFOBOX_ZOOM_CUTOFF = 10;
 const SMALL_LABELS_ZOOM = 25;
@@ -490,30 +486,25 @@ fetch(`${domain}/offsets.json`)
 onMounted(() => {
   store.waitForReady().then(async () => {
     skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
-    store.gotoRADecZoom({
-      ...props.initialCameraParams,
-      instant: true
-    }).then(() => positionSet.value = true);
-    // store.applySetting(["showGrid", true]);
-    // store.applySetting(["showEquatorialGridText", true]);
-    // If there are layers to set up, do that here!
-    layersLoaded.value = true;
 
-    // Add labeled places
-    [imageAPlacesURL, imageBPlacesURL].forEach(url => {
-      store.loadImageCollection({
+    const loadPromises = [imageAPlacesURL, imageBPlacesURL].map(url => {
+      return store.loadImageCollection({
         url,
         loadChildFolders: false,
-      }).then(loadedFolder => {
+      });
+    });
+    Promise.all(loadPromises).then(loadedFolders => {
+      loadedFolders.forEach((loadedFolder, index) => {
         const children = loadedFolder.get_children();
+        const highlightsFolder = new Folder();
         children?.forEach((item, index) => {
           if (item instanceof Place) {
             if (index === 0) {
-              folder.value.addChildPlace(item);
+              highlightsFolder.addChildPlace(item);
               topLevelPlaces.push(item);
             } else {
               if (item.get_names().length == 1) {
-                folder.value.addChildPlace(item);
+                highlightsFolder.addChildPlace(item);
               }
               lowerLevelPlaces.push(item);
             }
@@ -522,14 +513,20 @@ onMounted(() => {
             }
           }
         });
+        const highlightsRef = index === 0 ? highlightsA : highlightsB;
+        highlightsRef.value = highlightsFolder;
       });
+    }).then(() => {
+      positionSet.value = true;
+      layersLoaded.value = true;
+      gotoMainImage(mode.value, true);
     });
     
     store.loadImageCollection({
       url: "bg.wtml",
       loadChildFolders: false,
-    }).then(folder => {
-      const children = folder.get_children();
+    }).then(bgFolder => {
+      const children = bgFolder.get_children();
       if (children !== null) {
         const item = children[0];
         if (item instanceof Imageset) {
@@ -619,7 +616,7 @@ function placeInView(place: Place, fraction=1/3): boolean {
   return dist < curFov / 2;
 }
 
-function handleSelection(item: Thumbnail, instant=true) {
+function handleSelection(item: Thumbnail, selection: ItemSelectionType) {
   if (item instanceof Imageset) {
     store.setForegroundImageByName(item.get_name());
     const type = item.get_dataSetType();
@@ -632,13 +629,17 @@ function handleSelection(item: Thumbnail, instant=true) {
       store.setForegroundImageByName(imageset.get_name());
     }
 
-    store.gotoTarget({
-      place: item,
-      noZoom: false,
-      instant,
-      trackObject: true,
-    });
-  }
+    const instant = selection === "dblclick";
+    if (selection !== "folder") {
+
+      store.gotoTarget({
+        place: item,
+        noZoom: false,
+        instant,
+        trackObject: true,
+      });
+    }
+  }  
 
   selectedItem.value = item;
 }
