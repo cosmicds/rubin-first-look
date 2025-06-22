@@ -10,25 +10,14 @@
       :wwt-namespace="wwtNamespace"
     ></WorldWideTelescope>
 
-    <wwt-tracked-content
-    :ra="10.5"
-    :dec="41.3"
-    name="Andromeda Galaxy"
-    :store="store"
-    center-on-click
-    v-slot="props"
-    :zoomDeg="8"
-  >
-    <div class="custom-content" v-on="props.on">
-      <p>Track Andromeda Galaxy</p>
-    </div>
-  </wwt-tracked-content>
     
     <wwt-tracked-content
       v-for="(place, index) in lowerLevelPlaces"
       :key="index"
       :place="place"
       :name="place.get_name()"
+      :offset-ra="offsets[place.get_name()]?.raOff ?? 0"
+      :offset-dec="offsets[place.get_name()]?.decOff ?? 0"
       :store="store"
       :visible="showLabels && !atTopLevel"
       v-slot="props"
@@ -44,6 +33,8 @@
       :key="index"
       :place="place"
       :name="place.get_name()"
+      :offset-ra="offsets[place.get_name()]?.raOff ?? 0"
+      :offset-dec="offsets[place.get_name()]?.decOff ?? 0"
       :store="store"
       :visible="showLabels && atTopLevel"
       v-slot="props"
@@ -450,7 +441,61 @@ const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.
 const atTopLevel = computed(() => zoomDeg.value > SMALL_LABELS_ZOOM);
 
 import { useTrackedElements } from "./composables/useTrackedElements";
-const ute = useTrackedElements("", store);
+const _ute = useTrackedElements("", store);
+
+// Offsets are in RA/Dec 
+// If you passt them to :offset-x, or :offset-y instead
+// offset ra will be how left/right the label is offset and 
+// // offset dec will be how up/down the label is offset
+interface Offset {
+  raOff: number;
+  decOff: number;
+  rollDeg?: number; // then name of the top-level
+}
+
+type OffsetRecords = Record<string, Offset>;
+const offsets = ref<OffsetRecords>({});
+
+function rotateOffsetToScreen(offset: Offset): Offset {
+  // Rotate the offset to the screen orientation
+  const cosRoll = Math.cos((offset.rollDeg ?? 0) * D2R);
+  const sinRoll = Math.sin((offset.rollDeg ?? 0) * D2R);
+  return {
+    raOff: offset.raOff * cosRoll + offset.decOff * sinRoll,
+    decOff: -offset.raOff * sinRoll + offset.decOff * cosRoll,
+  };
+}
+const forceCircles = ref(false);
+function createCircleAnnotation(place: Place): Circle {
+  const newCircle = new Circle();
+  newCircle.set_id("infobox");
+  newCircle.set_lineWidth(3);
+  newCircle.set_lineColor("#4287f5");
+  newCircle.set_skyRelative(true);
+  newCircle.set_opacity(0.5);
+  newCircle.setCenter(place.get_RA() * 15, place.get_dec());
+  newCircle.set_radius(place?.angularSize / 2);
+  store.addAnnotation(newCircle);
+  return newCircle;
+}
+
+
+fetch(`${domain}/offsets.json`)
+  .then(response => response.json())
+  .then(data => {
+    const keys = Object.keys(data);
+    keys.forEach(key => {
+      const offset = data[key] as Offset;
+      // Rotate the offset to the screen orientation
+      data[key] = rotateOffsetToScreen(offset);
+    });
+    offsets.value = data as OffsetRecords;
+    
+  })
+  .catch(error => {
+    console.error("Error fetching offsets:", error);
+  });
+  
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -479,6 +524,9 @@ onMounted(() => {
               }
               lowerLevelPlaces.push(item);
             }
+            if (forceCircles.value) {
+              createCircleAnnotation(item);
+            }
           }
         });
         const highlightsRef = index === 0 ? highlightsA : highlightsB;
@@ -505,8 +553,6 @@ onMounted(() => {
 
     updateClosestPlace();
 
-  }).then(() => {
-    ute.hideElementByName("JWST Carina MIRI");
   });
 });
 
@@ -649,7 +695,7 @@ const cssVars = computed(() => {
   };
 });
 
-
+  
 /**
   Computed flags that control whether the relevant dialogs display.
   The `sheet` data member stores which sheet is open, so these are just
@@ -1075,6 +1121,7 @@ video {
   backdrop-filter: blur(5px);
   border-radius: 5px;
   // transform: translate(-50%, -50%); // center on the point
+  transform: translateY(-50%);
   position: absolute;
 }
 
