@@ -1428,6 +1428,5 @@ h4 {
   display: inline-block;
   width: fit-content;
   border-radius: 5px;
-  padding: 0.5em;
 }
 </style>

@@ -7,6 +7,7 @@
   >
     <canvas class="scalebar-canvas"></canvas>
     <p>{{ text }}</p>
+    <div class="scalebar-bg"></div>
   </div>
 </template>
 
@@ -34,6 +35,7 @@ const text = ref<string | null>(null);
 const root = ref<HTMLElement | null>(null);
 let canvas: HTMLCanvasElement | null = null;
 let context: CanvasRenderingContext2D | null = null;
+const contentWidth = ref(0);
 
 const store = engineStore();
 const { raRad, decRad, zoomDeg, rollRad } = storeToRefs(store);
@@ -82,11 +84,8 @@ function update() {
   const end = canvas.width - 5;
   context.clearRect(0, 0, canvas.width, canvas.height);
   
-  context.fillStyle = props.backgroundColor;
-  const endPadding = 5;
-  context.fillRect(end-screenDistance - endPadding, 0, screenDistance + endPadding, canvas.height);
-  context.fill();
-  context.fillStyle = "transparent";
+  contentWidth.value = screenDistance + 20;
+  console.log(contentWidth.value);
 
   context.strokeStyle = props.color;
   context.lineWidth = 2;
@@ -135,6 +134,8 @@ function setCanvasDimensions() {
 
 const cssVars = computed(() => ({
   "--color": props.color,
+  "--bg-color": props.backgroundColor,
+  "--content-width": `${contentWidth.value}px`,
 }));
 
 onMounted(() => {
@@ -158,15 +159,32 @@ watch(() => [props.color, props.backgroundColor], (_values) => update());
 
 <style scoped lang="less">
 .scalebar-root {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  padding: 5px;
   margin-right: 10px;
   margin-bottom: 5px;
 
   p {
     background: transparent;
     color: var(--color);
+    z-index: 1;
+  }
+
+  canvas {
+    z-index: 1;
+  }
+
+  .scalebar-bg {
+    background: var(--bg-color);
+    width: var(--content-width);
+    height: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 0;
   }
 
 }
