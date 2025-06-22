@@ -97,6 +97,13 @@
         </folder-view>
       </div>
       <div id="center-buttons" v-hide="fullscreen">
+        <v-slider
+          v-model="opacity"
+          label="Opacity"
+          :min="0"
+          :max="100"
+          color="secondary"
+        ></v-slider>
       </div>
       <div id="right-buttons">
         <div
@@ -553,6 +560,8 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 const zooming = ref(false);
+const opacity = ref(100);
+
 let zoomTimeout: ReturnType<typeof setTimeout> | null = null;
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
 const accentColor = computed(() => theme.global.current.value.colors.primary);
@@ -924,6 +933,7 @@ watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
   theme.global.name.value = newMode === "b" ? "rubinB" : "rubinA";
 });
+watch(opacity, store.setForegroundOpacity);
 </script>
 
 <style lang="less">
@@ -1429,5 +1439,14 @@ h4 {
   display: inline-block;
   width: fit-content;
   border-radius: 5px;
+}
+
+#center-buttons {
+  width: 50%;
+}
+
+.v-slider {
+  width: 100% !important;
+  pointer-events: auto;
 }
 </style>
