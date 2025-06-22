@@ -932,6 +932,7 @@ watch(showConstellations, (show: boolean) => {
 watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
   theme.global.name.value = newMode === "b" ? "rubinB" : "rubinA";
+  opacity.value = 100;
 });
 watch(opacity, store.setForegroundOpacity);
 </script>
