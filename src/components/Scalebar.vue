@@ -27,6 +27,7 @@ interface ScalebarProps {
   maxDeg?: number;
   minDeg?: number;
   visible?: boolean;
+  backgroundColor?: string;
 }
 
 const text = ref<string | null>(null);
@@ -42,6 +43,7 @@ const props = withDefaults(defineProps<ScalebarProps>(), {
   width: 1000,
   color: "white",
   visible: true,
+  backgroundColor: "rgba(0, 0, 0, 0.7)",
 });
 
 const show = computed(() => props.visible && ((props.maxDeg == null) || zoomDeg.value < props.maxDeg));
@@ -80,7 +82,7 @@ function update() {
   const end = canvas.width - 5;
   context.clearRect(0, 0, canvas.width, canvas.height);
   
-  context.fillStyle = "rgba(0, 0, 0, 0.7)";
+  context.fillStyle = props.backgroundColor;
   const endPadding = 5;
   context.fillRect(end-screenDistance - endPadding, 0, screenDistance + endPadding, canvas.height);
   context.fill();
@@ -151,6 +153,7 @@ watch(show, (value: boolean) => {
 });
 
 watch(() => props.breakpoints, updateBreakpoints);
+watch(() => [props.color, props.backgroundColor], (_values) => update());
 </script>
 
 <style scoped lang="less">
