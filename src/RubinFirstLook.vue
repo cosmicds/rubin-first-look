@@ -532,10 +532,12 @@ withDefaults(defineProps<RubinFirstLookProps>(), {
 });
 
 const breakpoints = [
-  [15, 1, "about 1 deg"],
-  [1, 0.5, "0.5 deg (~Full Moon)"],
-  [0.25, 1 / 60, "1 arcmin"],
-  [1 / 60, 1 / 120, "0.5 arcmin"],
+  [15, 3.5, "~ Rubin Field of View (3.5 degrees)"],
+  [4, 3.5, "Rubin Field of View (3.5 degrees)"],
+  [1, 0.5, "Full Moon (0.5 degrees)"],
+  [0.25, 5 / 60, "JWST Field of View (5 arcmin)"],
+  [5 / 60, 1 / 60, "1 arcmin"],
+  [1 / 60, 30 / 3600, "0.5 arcmin"],
   [0, 1 / 3600, "1 arcsec"],
 ];
 
