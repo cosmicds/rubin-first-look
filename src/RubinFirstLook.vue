@@ -1370,6 +1370,10 @@ video {
   #options-content {
     padding: 5px;
   }
+  
+  input[type="checkbox"] {
+    color: rgb(var(--v-theme-rubin-teal-2));
+  }
 }
 
 .fv-header {
