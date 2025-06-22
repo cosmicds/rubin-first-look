@@ -297,6 +297,7 @@
                     This text is excerpted from the <a href="https://noirlab.edu/public/news/noirlab2521/" target="_blank" rel="noopener noreferrer">Rubin First Look Press Release</a>. See the full release for more information.
                   </p>
                   <h4 class="user-guide-header">About Rubin Observatory</h4>  
+                  <div class="background-header-image"></div>
                   <p>
                     The NSF–DOE Vera C. Rubin Observatory, a major new scientific facility jointly funded by the U.S. National Science Foundation and the U.S. Department of Energy's Office of Science, released its first imagery on June 23, 2025 at an event in Washington, D.C. The imagery shows cosmic phenomena captured at an unprecedented scale. In just over 10 hours of test observations, NSF–DOE Rubin Observatory has already captured millions of galaxies and Milky Way stars and thousands of asteroids. The imagery is a small preview of Rubin Observatory's upcoming 10-year scientific mission to explore and understand some of the Universe's biggest mysteries. 
                   </p>
@@ -309,6 +310,15 @@
                   <h4 class="user-guide-header">Who was Vera Rubin?</h4>
                   <p class="pb-5">
                     Rubin Observatory is named in honor of trailblazing U.S. astronomer Vera C. Rubin, who found conclusive evidence of vast quantities of invisible material known as dark matter. Understanding the nature of dark matter, dark energy and other large-scale cosmic mysteries is a central focus of Rubin Observatory's mission. Dark energy is what scientists call the mysterious and colossally powerful force that appears to be causing galaxies in the Universe to move away from each other at an accelerating rate. Although dark matter and dark energy collectively comprise 95% of the Universe, their properties remain unknown.
+                  </p>
+                  <div class="background-rubin-image"></div>
+                  <p>
+                    <cite>
+                      Observatory Image Credit: RubinObs/NOIRLab/SLAC/NSF/DOE/AURA/B. Quint <a href="https://noirlab.edu/public/images/iotw2229a/" target="_blank" rel="noopener noreferrer">Link to original</a>
+                    </cite><br/>
+                    <cite>
+                      Vera Rubin Image Credit: Carnegie Institution for Science/NOIRLab. <a href="https://noirlab.edu/public/images/VeraRubin-6-enlarged-CC/" target="_blank" rel="noopener noreferrer">Link to original</a>
+                    </cite>
                   </p>
                 </v-container>
                   
@@ -442,10 +452,10 @@
                       <h5><a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer"><em>INTUITIVE</em>&reg; Planetarium at the U.S. Space & Rocket Center</a></h5>
                       <p>David Weigel</p>
                       <h5><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">CosmicDS</a></h5>
-                      <p>John Lewis</p>
-                      <p>Jon Carifio</p>
-                      <p>Pat Udomprasert</p>
                       <p>Alyssa Goodman</p>
+                      <p>Pat Udomprasert</p>
+                      <p>Jon Carifio</p>
+                      <p>John Lewis</p>
 
                       <h5><a href="https://www.worldwidetelescope.org/home" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a></h5>
                       <p>Peter Williams</p>
@@ -1121,6 +1131,31 @@ video {
   #tabs {
     width: calc(100% - 3em);
     align-self: left;
+  }
+  
+  div.background-header-image {
+    width: 100%;
+    height: 100px;
+    background-image: url("https://storage.noirlab.edu/media/archives/images/screen/iotw2229a.jpg");
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    margin-bottom: 2em;
+  }
+  
+  div.background-rubin-image {
+    width: 80%;
+    aspect-ratio: 1 / 1;;
+    background-image: url("@/assets/Vera_Rubin_measuring_spectra.jpg");
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    margin-bottom: 2em;
+  }
+  
+  cite {
+      color: rgb(var(--v-theme-rubin-teal-3));
+      font-size:10pt;
   }
   
   .info-text {
