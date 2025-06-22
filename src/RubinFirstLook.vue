@@ -1395,7 +1395,8 @@ video {
   bottom: 5px;
   max-width: 50%;
   max-height: 50dvh;
-  overflow-y: auto;
+  overflow-y: scroll;
+  scrollbar-color: rgb(var(--v-theme-rubin-teal-2)) transparent;
 }
 #app details.expansion-panel[open] > summary > strong {
   font-size: 1.2em;
