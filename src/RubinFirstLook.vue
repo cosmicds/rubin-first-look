@@ -714,7 +714,8 @@ function updateClosestPlace() {
 const forceShowCircle = ref(false);
 const onMarkerHover = (place: Place, show: boolean) => {
   forceShowCircle.value = show;
-  currentPlace.value = show ? place : (place.get_name() !== closestPlace.value?.get_name() && highlightPlaceFromZoom.value) ? closestPlace.value : null;
+  console.log(place.get_name(), closestPlace.value?.get_name());
+  currentPlace.value = show ? place : closestPlace.value; 
 };
 
 function updateCircle(place: Place | null) {
