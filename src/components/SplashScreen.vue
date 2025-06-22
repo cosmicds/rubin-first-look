@@ -186,7 +186,7 @@ function closeSplashScreen() {
     top: 20px;
     right: 20px;
     text-align: end;
-    color: var(--accent-color);
+    color: var(--button-color);
     font-size: min(5vw, 4vh);
     padding: 0.25rem;
     margin: -0.25rem;
