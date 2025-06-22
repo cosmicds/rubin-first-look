@@ -108,14 +108,14 @@
       <div id="center-buttons" v-hide="fullscreen">
       </div>
       <div id="right-buttons">
-        <v-container
+        <div
           :class="[{'go-to-a': mode == 'b', 'go-to-b': mode == 'a'}]"
           id="goto-other-image"
           @click="gotoMainImage((mode == 'a') ? 'b' : 'a', false)"
           @dblclick="gotoMainImage((mode == 'a') ? 'b' : 'a', true)"
         >
           Go to Image {{ mode == 'a' ? 'B' : 'A' }}
-        </v-container>
+        </div>
         <div v-hide="fullscreen">
           <icon-button
             id="info-icon"
