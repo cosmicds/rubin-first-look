@@ -100,6 +100,7 @@
       </div>
       <div id="right-buttons">
         <div
+          v-hide="fullscreen"
           :class="[{'go-to-a': mode == 'b', 'go-to-b': mode == 'a'}]"
           id="goto-other-image"
           @click="gotoMainImage((mode == 'a') ? 'b' : 'a', false)"
