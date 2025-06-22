@@ -448,9 +448,9 @@ const ute = useTrackedElements("", store);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
-    window.addEventListener('contextmenu', function(event) {
-      event.stopImmediatePropagation();
-    }, true);
+    // window.addEventListener('contextmenu', function(event) {
+    //   event.stopImmediatePropagation();
+    // }, true);
     skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
     const loadPromises = [imageAPlacesURL, imageBPlacesURL].map(url => {
       return store.loadImageCollection({
