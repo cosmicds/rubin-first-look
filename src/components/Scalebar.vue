@@ -58,7 +58,7 @@ function update() {
   if (!show.value) {
     return;
   }
-  const breakpoint = sortedBreakpoints.find(bkpt => zoomDeg.value > bkpt[0]);
+  const breakpoint = sortedBreakpoints.find(bkpt => zoomDeg.value / 6 > bkpt[0]);
   if (!breakpoint) {
     return;
   }
