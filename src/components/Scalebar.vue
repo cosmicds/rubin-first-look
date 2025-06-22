@@ -142,6 +142,7 @@ const cssVars = computed(() => ({
 onMounted(() => {
   setCanvasDimensions();
   context = getContext();
+  update();
 });
 
 watch(() => [raRad.value, decRad.value, zoomDeg.value, rollRad.value], (_position) => {
