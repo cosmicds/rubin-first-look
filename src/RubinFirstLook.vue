@@ -173,7 +173,7 @@
             ></v-checkbox>
             <v-checkbox
               v-model="showScalebar"
-              label="Show scalebar"
+              label="Scale Bar"
               :color="accentColor"
               hide-details
               density="compact"
@@ -446,13 +446,13 @@
                         </li>
                         <li>
                           <strong>Region Markers</strong>: Display or hide the boxes that roughly delineate the labeled objects.
+                        </li>
+                        <li>
+                          <strong>Scale Bar</strong>: Display or hide the scale bar that contextualizes how much of the sky you are seeing.
                         </li>                        
                         <li>
                           <strong>Constellations</strong>: Display or hide the constellation lines and labels to orient yourself in the sky.
-                        </li> 
-                        <li>
-                          <strong>Scalebar</strong>: Display or hide the scalebar that contextualizes how much of the sky you are seeing.
-                        </li>         
+                        </li>          
                       </ul>
                     </v-col>
                   </v-row>
