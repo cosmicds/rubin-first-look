@@ -436,6 +436,9 @@
                     <v-col cols="12">
                       <div class="credits">
                       <h4>Credits:</h4>
+                      <p>
+                        Rubin imagery and informational text provided by <strong><a href="https://noirlab.edu/">NOIRLab</a></strong>.
+                      </p>
                       <h5><a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer"><em>INTUITIVE</em>&reg; Planetarium at the U.S. Space & Rocket Center</a></h5>
                       <p>David Weigel</p>
                       <h5><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">CosmicDS</a></h5>
