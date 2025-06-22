@@ -26,7 +26,7 @@
     <expansion-wrapper
       class="infobox-content"
       v-else-if="place != null"
-      :normally-open="true"
+      :normally-open="false"
     >
       <template #title>
         <strong>{{ place?.get_name() }}</strong>

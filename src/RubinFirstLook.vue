@@ -21,11 +21,10 @@
       :store="store"
       :visible="showLabels && !atTopLevel"
       v-slot="props"
-      debug
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
     >
-        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+        <div :class='["tracked-places", {"star": place.get_name().includes("*")}]' v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
 
     <wwt-tracked-content
@@ -507,6 +506,17 @@ const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 useWWTKeyboardControls(store);
 
+document.addEventListener("click", (event) => {
+  // print out he screen coordinates of the click to console
+  console.log(`Click at: (${event.clientX}, ${event.clientY})`);
+  const radec = store.findRADecForScreenPoint({
+    x: event.clientX,
+    y: event.clientY,
+  });
+  console.log(`RADec: (${radec.ra}, ${radec.dec})`);
+  
+});
+
 const fullscreen = useFullscreen();
 
 const touchscreen = supportsTouchscreen();
@@ -545,11 +555,11 @@ const mode = ref<Mode>("b");
 const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
 
 const INFOBOX_ZOOM_CUTOFF = 10;
-const SMALL_LABELS_ZOOM = 25;
+const SMALL_LABELS_ZOOM = 50;
 let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
-const showLabels = ref(false);
+const showLabels = ref(true);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
@@ -580,12 +590,12 @@ function rotateOffsetToScreen(offset: Offset): Offset {
     decOff: -offset.raOff * sinRoll + offset.decOff * cosRoll,
   };
 }
-const forceCircles = ref(false);
+const forceCircles = ref(true);
 function createCircleAnnotation(place: Place): Circle {
   const newCircle = new Circle();
   newCircle.set_id("infobox");
   newCircle.set_lineWidth(3);
-  newCircle.set_lineColor("#4287f5");
+  newCircle.set_lineColor("#6ff542");
   newCircle.set_skyRelative(true);
   newCircle.set_opacity(0.5);
   newCircle.setCenter(place.get_RA() * 15, place.get_dec());
@@ -1275,15 +1285,34 @@ video {
 
 .tracked-places {
   width: max-content;
-  padding: 0.5em;
+  padding: 0.25em 0.5em;
   color: white;
   background-color: rgba(0, 0, 0, 0.51);
   backdrop-filter: blur(5px);
   border-radius: 5px;
   // transform: translate(-50%, -50%); // center on the point
-  transform: translateY(-50%);
+  transform: translateY(-50%) translateX(1.5em);
   position: absolute;
 }
+
+.tracked-places.star {
+  transform: translateY(-50%) translateX(0.5em);
+}
+
+.tracked-places:not(.star):before {
+  position: absolute;
+  content:'';
+  box-shadow: 0px 0px 0px 2px black, 0px 0px 0px 4px white, 0px 0px 0px 6px black;
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  top: 50%;
+  left: -1em;
+  transform: translateY(-50%) translateX(-50%);
+}
+
+
+
 
 #options {
   background: black;
