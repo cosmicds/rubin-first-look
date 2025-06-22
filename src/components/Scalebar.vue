@@ -186,6 +186,7 @@ watch(() => [props.color, props.backgroundColor], (_values) => update());
     top: 0;
     right: 0;
     z-index: 0;
+    border-radius: 5px;
   }
 
 }
