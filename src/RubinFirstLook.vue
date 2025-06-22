@@ -208,6 +208,7 @@
         :width="1920"
         :breakpoints="breakpoints"
         :visible="showScalebar && !zooming"
+        class="scalebar"
       ></scalebar>
       <div id="body-logos" v-if= "!smallSize">
         <credit-logos
@@ -1423,5 +1424,11 @@ h4 {
   font-weight: bold;
 }
 
-
+.scalebar {
+  display: inline-block;
+  width: fit-content;
+  background:rgba(30, 30, 30, 0.4);
+  border-radius: 5px;
+  padding: 0.5em;
+}
 </style>

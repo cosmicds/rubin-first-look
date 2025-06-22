@@ -38,7 +38,7 @@ const store = engineStore();
 const { raRad, decRad, zoomDeg, rollRad } = storeToRefs(store);
 
 const props = withDefaults(defineProps<ScalebarProps>(), {
-  height: 35,
+  height: 20,
   width: 1000,
   color: "white",
   visible: true,
@@ -151,6 +151,8 @@ watch(() => props.breakpoints, updateBreakpoints);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  margin-right: 10px;
+  margin-bottom: 5px;
 
   p {
     background: transparent;
