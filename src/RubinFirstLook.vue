@@ -83,6 +83,7 @@
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
           :background-color="accentColor"
+          :text-color="textColor"
           flex-direction="column"
           @select="({ item, type }) => handleSelection(item, type)"
         >
@@ -94,6 +95,10 @@
                 @click="toggleExpanded()"
                 @keyup.enter="toggleExpanded()"
                 tabindex="0"
+                aria-role="button"
+                :aria-pressed="expanded"
+                aria-hidden="false"
+                aria-label="Toggle folder view"
               >
               </font-awesome-icon>
             </div>
@@ -104,6 +109,7 @@
       </div>
       <div id="right-buttons">
         <div
+          :class="[{'go-to-a': mode == 'b', 'go-to-b': mode == 'a'}]"
           id="goto-other-image"
           @click="gotoMainImage((mode == 'a') ? 'b' : 'a', false)"
           @dblclick="gotoMainImage((mode == 'a') ? 'b' : 'a', true)"
@@ -268,8 +274,8 @@
         <v-tabs
           v-model="tab"
           height="32px"
-          :color="accentColor"
-          :slider-color="accentColor"
+          color="rubin-turquoise"
+          slider-color="rubin-teal"
           id="tabs"
           dense
         >
@@ -290,6 +296,7 @@
             <v-card class="no-bottom-border-radius scrollable">
               <v-card-text class="info-text no-bottom-border-radius">
                 Information goes here
+                <a href="https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0" target="_blank" rel="noopener noreferrer">Rubin Visual Identity</a>
                 <v-spacer class="end-spacer"></v-spacer>
               </v-card-text>
             </v-card>
@@ -404,8 +411,9 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
-const accentColor = computed(() => theme.global.current.value.colors.primaryVariant);
-const buttonColor = computed(() => theme.global.current.value.colors.primary);
+const accentColor = computed(() => theme.global.current.value.colors.primary);
+const buttonColor = computed(() => theme.global.current.value.colors.primaryVariant);
+const textColor = computed(() => theme.global.current.value.colors["on-background"]);
 const tab = ref(0);
 
 const domain = "http://localhost:12345";
@@ -440,8 +448,10 @@ const ute = useTrackedElements("", store);
 
 onMounted(() => {
   store.waitForReady().then(async () => {
+    // window.addEventListener('contextmenu', function(event) {
+    //   event.stopImmediatePropagation();
+    // }, true);
     skyBackgroundImagesets.forEach(iset => backgroundImagesets.push(iset));
-
     const loadPromises = [imageAPlacesURL, imageBPlacesURL].map(url => {
       return store.loadImageCollection({
         url,
@@ -624,6 +634,7 @@ const cssVars = computed(() => {
   return {
     ...rubinColors,
     "--accent-color": accentColor.value,
+    "--button-color": buttonColor.value,
     "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100vh",
     "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100vw",
     "--info-sheet-width": infoSheetWidth.value,
@@ -738,9 +749,10 @@ body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-
+  
   font-family: "Source Sans 3", Helvetica, sans-serif;
   font-weight: regular;
+  color: rgb(var(--v-theme-on-background));
 }
 
 #main-content {
@@ -832,10 +844,16 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-
   .icon-wrapper {
     width: fit-content;
   }
+}
+
+.icon-wrapper {
+  border-radius: 0.75em;
+}
+.svg-inline--fa {
+  aspect-ratio: 1.3 / 1;
 }
 
 #right-buttons {
@@ -846,9 +864,6 @@ body {
   height: auto;
 }
 
-#info-icon-button {
-  padding: 5px 12px;
-}
 
 #bottom-content {
   display: flex;
@@ -955,6 +970,9 @@ video {
     & a {
       text-decoration: none;
     }
+    & a:hover {
+      text-decoration: underline;
+    }
   }
   
   .close-icon {
@@ -1053,8 +1071,8 @@ video {
 
 #options {
   background: black;
-  border: 1px solid var(--accent-color);
-  border-radius: 20px;
+  border: 1px solid rgb(var(--v-theme-primaryVariant));
+  border-radius: 0.75em;
   pointer-events: auto;
 
   .icon-wrapper {
@@ -1078,6 +1096,7 @@ video {
   svg {
     padding: 0px 5px;
     cursor: pointer;
+    float: right;
   }
 }
 
@@ -1089,12 +1108,62 @@ video {
 }
 
 #goto-other-image {
-  background: var(--accent-color);
-  border: 1px solid black;
   pointer-events: auto;
   cursor: pointer;
   padding: 5px 10px;
   font-size: 16pt;
   border-radius: 10px;
+  user-select: none;
 }
+
+// when in mode-a we want to show the button with mode-b colors
+#goto-other-image.go-to-b {
+  --bg: var(--v-theme-rubin-teal);
+  // background-color: rgb(var(--v-theme-rubin-teal)); // fallback
+  background: radial-gradient(circle, rgba(var(--bg), 0.9) 0%, rgba(var(--bg), 0.8) 100%);
+  color: rgb(var(--v-theme-rubin-off-white));
+  border: 1px solid rgb(var(--v-theme-rubin-off-white));
+}
+
+// when in mode-b we want to show the button with mode-a colors
+#goto-other-image.go-to-a {
+  --bg: var(--v-theme-rubin-deep-charcoal);
+  // background-color: rgb(var(--bg)); // fallback
+  background: radial-gradient(circle, rgba(var(--bg), 0.8) 0%, rgba(var(--bg), 0.6) 100%);
+  backdrop-filter: blur(5px); 
+  color: rgb(var(--v-theme-rubin-off-white));
+  border: 1px solid rgb(var(--v-theme-rubin-teal));
+}
+
+#app details.expansion-panel {
+  border-radius: 0.75em;
+}
+#app .fv-root.folder-view {
+  border-radius: 0.75em;
+  padding: calc(0.75em / 2);
+  
+  .item-name {
+    font-size: 0.9em;
+  }
+}
+
+.infobox-content {
+  
+  p {
+    margin-bottom: 0.5em;
+  }
+  
+}
+
+a {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: underline;
+  font-weight: regular;
+}
+
+a:visited {
+  color: rgb(var(--v-theme-primary));
+}
+
+
 </style>

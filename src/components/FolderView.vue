@@ -1,8 +1,10 @@
 <template>
-  <div
+  <nav
     class="fv-root"
     v-if="items !== null"
     :style="cssVars"
+    aria-role="navigation"
+    aria-label="Available Locations"
   >
     <div
       class="fv-header-container"
@@ -36,14 +38,14 @@
         >{{item.get_name()}}</div>
       </div>
     </div>
-  </div>
+  </nav>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch, type Ref } from "vue";
 import { Folder, FolderUp, Place } from "@wwtelescope/engine";
 import { Thumbnail } from "@wwtelescope/engine-types";
-import { FolderViewProps, FolderViewSelectionType } from "../types";
+import { FolderViewProps, ItemSelectionType } from "../types";
 
 const items: Ref<Thumbnail[] | null> = ref<Thumbnail[]>([]);
 const lastSelectedItem: Ref<Thumbnail | null> = ref(null);
@@ -57,7 +59,7 @@ const props = withDefaults(defineProps<FolderViewProps>(), {
 });
 
 const emit = defineEmits<{
-  (event: "select", data: { item: Thumbnail, type: FolderViewSelectionType }): void;
+  (event: "select", data: { item: Thumbnail, type: ItemSelectionType }): void;
 }>();
 
 const expanded = ref(true);
@@ -74,7 +76,7 @@ function updateFolder(folder: Folder) {
   }
 }
 
-function selectItem(item: Thumbnail, type: SelectionType) {
+function selectItem(item: Thumbnail, type: ItemSelectionType) {
   lastSelectedItem.value = item;
   if (item instanceof Folder || item instanceof FolderUp) {
     items.value = item.get_children();
@@ -178,7 +180,7 @@ const cssVars = computed(() => ({
 }
 
 .item-name {
-  color: white;
+  color: var(--text-color);
   width: 100%;
   font-size: 7pt;
   text-overflow: ellipsis;
