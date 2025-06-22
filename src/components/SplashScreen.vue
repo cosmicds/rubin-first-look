@@ -50,16 +50,22 @@
             :default-logos="['cosmicds', 'wwt']"
             :extra-logos = "[
               {
+                alt: 'INTUITIVE Planetarium at the U.S. Space & Rocket Center',
+                src: './SpaceRocketCenterIntuitivePlanetarium-Logo-small.png',
+                href: 'https://www.rocketcenter.com/INTUITIVEPlanetarium',
+                name: 'INTUITIVE'
+              },
+              {
                 alt: 'Vera C. Rubin Observatory',
                 src: './rubin_white_2.png',
                 href: 'https://rubinobservatory.org/',
-                name: 'Rubin Observatory'
-              }
+                name: 'RubinObservatory'
+              },
             ]"
           />
         </div>
         <span>
-        Brought to you by <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a>.
+        Brought to you by <a href="https://rubinobservatory.org/" target="_blank" rel="noopener noreferrer">Rubin Observatory</a>, <a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer"><em>INTUITIVE</em>&reg; Planetarium at the U.S. Space & Rocket Center</a> , <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a>.
         </span>
       </div>
     </div>
@@ -120,7 +126,7 @@ function closeSplashScreen() {
 }
 
 #splash-screen {
-  color: #E0E0E0;
+  color: var(--rubin-gray-1);
 
   @media (max-width: 699px) {
     max-height: 80vh;
@@ -131,7 +137,6 @@ function closeSplashScreen() {
     max-height: 85vh;
     max-width: min(70vw, 800px);
   }
-
 
   background: var(--rubin-teal-7);
   justify-content: space-around;
@@ -149,15 +154,20 @@ function closeSplashScreen() {
     margin-inline: auto;
     text-align: center;
   }
+
+  a {
+    color: var(--rubin-teal-2);
+  }
   // make a paragraph inside the div centered horizontally and vertically
   p {
     font-family: 'Source Sans 3', 'Roboto', sans-serif;
     font-weight: regular;
     vertical-align: middle;
+    color: var(--rubin-gray-1);
   }
     
   p.highlight {
-    color: rgb(var(--rubin-teal-2));
+    color: var(--rubin-turquoise);
     text-transform: uppercase;
     font-weight: bold;
   }
@@ -176,7 +186,7 @@ function closeSplashScreen() {
     top: 20px;
     right: 20px;
     text-align: end;
-    color: var(--accent-color);
+    color: var(--button-color);
     font-size: min(5vw, 4vh);
     padding: 0.25rem;
     margin: -0.25rem;
@@ -197,7 +207,7 @@ function closeSplashScreen() {
   .splash-get-started {
     border: 2px solid white;
     font-size: calc(1.8 * var(--default-font-size));
-    // margin-top: 5%;
+    margin-top: 1.2em;
     // margin-bottom: 2%;
     font-weight: bold !important;
   }
@@ -227,17 +237,19 @@ function closeSplashScreen() {
   }
 
   #splash-screen-logos {
-    margin-block: 0.75em;
+    margin-bottom: 1em;
 
     img {
-    height: 5vmin;
+    height: 60px;
     vertical-align: middle;
-    margin: 2px;
+    margin: 1em;
     }
 
     @media only screen and (max-width: 600px) {
       img {
-        height: 24px;
+        height: 40px;
+        margin-inline: 0.5em;
+        margin-block: 1em;
       }
     }
 
@@ -257,13 +269,12 @@ function closeSplashScreen() {
     // align-items: center;
     // gap: calc(0.5 * var(--default-line-height));
     overflow: hidden;
-  
+    
   #splash-screen-text {
     line-height: 75%;
   }
   
   .splash-get-started {
-    margin-top: 0;
     margin-bottom: 0;
   }
   

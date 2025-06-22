@@ -157,22 +157,22 @@
             v-if="showOptions"
           >
             <v-checkbox
-              v-model="showCircle"
-              label="Show circle"
+              v-model="showLabels"
+              label="Object Labels"
               :color="accentColor"
               hide-details
               density="compact"
             ></v-checkbox>
             <v-checkbox
-              v-model="showLabels"
-              label="Show labels"
+              v-model="showCircle"
+              label="Region Markers"
               :color="accentColor"
               hide-details
               density="compact"
             ></v-checkbox>
             <v-checkbox
               v-model="showConstellations"
-              label="Show constellations"
+              label="Constellations"
               :color="accentColor"
               hide-details
               density="compact"
@@ -201,10 +201,16 @@
           :default-logos="['cosmicds', 'wwt']"
           :extra-logos = "[
               {
+                alt: 'INTUITIVE Planetarium at the U.S. Space & Rocket Center',
+                src: './SpaceRocketCenterIntuitivePlanetarium-Logo-small.png',
+                href: 'https://www.rocketcenter.com/INTUITIVEPlanetarium',
+                name: 'INTUITIVE'
+              },
+              {
                 alt: 'Vera C. Rubin Observatory',
                 src: './rubin_white_2.png',
                 href: 'https://rubinobservatory.org/',
-                name: 'Rubin Observatory'
+                name: 'RubinObservatory'
               }
             ]"
         />
@@ -270,8 +276,8 @@
           id="tabs"
           dense
         >
-          <v-tab class="info-tabs" tabindex="0"><h3>Information</h3></v-tab>
-          <v-tab class="info-tabs" tabindex="0"><h3>Using WWT</h3></v-tab>
+          <v-tab class="info-tabs" tabindex="0"><h3>Rubin's Science</h3></v-tab>
+          <v-tab class="info-tabs" tabindex="0"><h3>User Guide</h3></v-tab>
         </v-tabs>
         <font-awesome-icon
           id="close-text-icon"
@@ -286,18 +292,46 @@
           <v-window-item>
             <v-card class="no-bottom-border-radius scrollable">
               <v-card-text class="info-text no-bottom-border-radius">
-                Information goes here
-                <a href="https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0" target="_blank" rel="noopener noreferrer">Rubin Visual Identity</a>
-                <v-spacer class="end-spacer"></v-spacer>
+                <v-container class="pa-0">
+                  <p>
+                    This text is excerpted from the <a href="https://noirlab.edu/public/news/noirlab2521/" target="_blank" rel="noopener noreferrer">Rubin First Look Press Release</a>. See the full release for more information.
+                  </p>
+                  <h4 class="user-guide-header">About Rubin Observatory</h4>  
+                  <p>
+                    The NSF–DOE Vera C. Rubin Observatory, a major new scientific facility jointly funded by the U.S. National Science Foundation and the U.S. Department of Energy's Office of Science, released its first imagery on June 23, 2025 at an event in Washington, D.C. The imagery shows cosmic phenomena captured at an unprecedented scale. In just over 10 hours of test observations, NSF–DOE Rubin Observatory has already captured millions of galaxies and Milky Way stars and thousands of asteroids. The imagery is a small preview of Rubin Observatory's upcoming 10-year scientific mission to explore and understand some of the Universe's biggest mysteries. 
+                  </p>
+                  <p>
+                    The result of more than two decades of work, Rubin Observatory is perched at the summit of Cerro Pachón in Chile, where dry air and dark skies provide one of the world's best observing locations. Rubin's innovative 8.4-meter telescope has the largest digital camera ever built, which feeds a powerful data processing system. Later in 2025, Rubin will begin its primary mission, the Legacy Survey of Space and Time, in which it will ceaselessly scan the sky nightly for 10 years to precisely capture every visible change.
+                  </p>
+                  <p>
+                    The result will be an ultrawide, ultra-high-definition time-lapse record of the Universe. It will bring the sky to life with a treasure trove of billions of scientific discoveries. The images will reveal asteroids and comets, pulsating stars, supernova explosions, far-off galaxies and perhaps cosmic phenomena that no one has seen before.
+                  </p>
+                  <h4 class="user-guide-header">Who was Vera Rubin?</h4>
+                  <p class="pb-5">
+                    Rubin Observatory is named in honor of trailblazing U.S. astronomer Vera C. Rubin, who found conclusive evidence of vast quantities of invisible material known as dark matter. Understanding the nature of dark matter, dark energy and other large-scale cosmic mysteries is a central focus of Rubin Observatory's mission. Dark energy is what scientists call the mysterious and colossally powerful force that appears to be causing galaxies in the Universe to move away from each other at an accelerating rate. Although dark matter and dark energy collectively comprise 95% of the Universe, their properties remain unknown.
+                  </p>
+                </v-container>
+                  
+                <!-- <a href="https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0" target="_blank" rel="noopener noreferrer">Rubin Visual Identity</a>
+                <v-spacer class="end-spacer"></v-spacer> -->
               </v-card-text>
             </v-card>
           </v-window-item>
           <v-window-item>
             <v-card class="no-bottom-border-radius scrollable">
               <v-card-text class="info-text no-bottom-border-radius">
-                <v-container>
-                  <v-row align="center">
-                  <v-col cols="4">
+                <v-container class="pa-0">
+                  <p>
+                    This <a href="https://www.worldwidetelescope.org/home" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a> (WWT) interactive visualization provides a contextual, deep dive into the stunning new imagery from the Rubin Observatory.
+                  </p>    
+                  <h4 class="user-guide-header">Navigation & Information</h4>  
+                  <ul class="text-list mx-5">
+                    <li>
+                      To navigate the WWT view, use the following controls:
+                    </li>
+                  </ul>            
+                  <v-row align="center" class="mt-2 mx-3">
+                    <v-col cols="4">
                       <v-chip
                         label
                         outlined
@@ -306,10 +340,10 @@
                       </v-chip>
                     </v-col>
                     <v-col cols="8" class="pt-1">
-                      <strong>{{ touchscreen ? "press + drag" : "click + drag" }}</strong>  {{ touchscreen ? ":" : "or" }}  <strong>{{ touchscreen ? ":" : "W-A-S-D" }}</strong> {{ touchscreen ? ":" : "keys" }}<br>
+                      <strong>{{ touchscreen ? "press + drag" : "click + drag" }}</strong>  {{ touchscreen ? "" : "or" }}  <strong>{{ touchscreen ? "" : "W-A-S-D" }}</strong> {{ touchscreen ? "" : "keys" }}<br>
                     </v-col>
                   </v-row>
-                  <v-row align="center">
+                  <v-row align="center" class="mx-3">
                     <v-col cols="4">
                       <v-chip
                         label
@@ -319,27 +353,104 @@
                       </v-chip>
                     </v-col>
                     <v-col cols="8" class="pt-1">
-                      <strong>{{ touchscreen ? "pinch in and out" : "scroll in and out" }}</strong> {{ touchscreen ? ":" : "or" }} <strong>{{ touchscreen ? ":" : "I-O" }}</strong> {{ touchscreen ? ":" : "keys" }}<br>
+                      <strong>{{ touchscreen ? "pinch in and out" : "scroll in and out" }}</strong> {{ touchscreen ? "" : "or" }} <strong>{{ touchscreen ? "" : "I-O" }}</strong> {{ touchscreen ? "" : "keys" }}<br>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col class="pt-0">
+                      <ul class="text-list mx-5">
+                        <li>
+                          <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> the <strong>Go to Image {{ mode == 'a' ? 'B' : 'A' }}</strong> button in the upper right to switch the view to that image.
+                        </li>
+                        <li>
+                          <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> on an object <strong>Image Thumbnail</strong> or <strong>Label</strong> to pan to that object.
+                        </li>
+                        <li>
+                          <strong>Double-{{ touchscreen ? "tap" : "click" }}</strong> on an object <strong>Image Thumbnail</strong> or <strong>Label</strong> to move instantly to that object.
+                        </li>
+                        <li>
+                          <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> on the object <strong>Information Box</strong> in the lower left to learn more about it.
+                        </li>
+                      </ul>   
+                    </v-col>  
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12">
+                      <h4 class="user-guide-header">Main View Buttons</h4>
+                      <ul class="text-list mx-5">
+                        <li>
+                          <font-awesome-icon
+                            class="bullet-icon"
+                            icon="info"
+                            size="lg" 
+                          ></font-awesome-icon>
+                           open or close this information panel
+                        </li>
+                        <li><font-awesome-icon
+                            class="bullet-icon"
+                            icon="video"
+                            size="lg" 
+                          ></font-awesome-icon>
+                          view a video tutorial about this visualization
+                        </li>
+                        <li><font-awesome-icon
+                            class="bullet-icon"
+                            icon="expand"
+                            size="lg" 
+                          ></font-awesome-icon>
+                          toggle fullscreen mode ( view only the imagery with no user interface.)
+                        </li>
+                        <li> <font-awesome-icon
+                            class="bullet-icon"
+                            icon="compress"
+                            size="lg" 
+                          ></font-awesome-icon>
+                          return to the normal user interface.
+                        </li>
+                        <li><font-awesome-icon
+                            class="bullet-icon"
+                            icon="sliders"
+                            size="lg" 
+                          ></font-awesome-icon>
+                          open more control options
+                        </li>
+                      </ul>
+                      <h4 class="user-guide-header mt-5">Controls</h4>
+                      <ul class="text-list mx-5">
+                        <li>
+                          <strong>Object Labels</strong>: Display or hide the names of objects in the view.
+                        </li>
+                        <li>
+                          <strong>Region Markers</strong>: Display or hide the boxes that roughly delineate the labeled objects.
+                        </li>                        
+                        <li>
+                          <strong>Constellations</strong>: Display or hide the constellation lines and labels to orient yourself in the sky.
+                        </li> 
+                        <li>
+                          <strong>Scalebar</strong>: Display or hide the scalebar that contextualizes how much of the sky you are seeing.
+                        </li>         
+                      </ul>
                     </v-col>
                   </v-row>
                   <v-row>
                     <v-col cols="12">
                       <div class="credits">
-                      <h3>Credits:</h3>
-                      <h4><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">CosmicDS</a> Vue Data Stories Team:</h4>
-                      John Lewis<br>
-                      Jon Carifio<br>
-                      Pat Udomprasert<br>
-                      Alyssa Goodman<br>
-                      Mary Dussault<br>
-                      Harry Houghton<br>
-                      Anna Nolin<br>
-                      Evaluator: Sue Sunbury<br>
-                      <br>
-                      <h4>WorldWide Telescope Team:</h4>
-                      Peter Williams<br>
-                      A. David Weigel<br>
-                      Jon Carifio<br>
+                      <h4>Credits:</h4>
+                      <p>
+                        Rubin imagery and informational text provided by <strong><a href="https://noirlab.edu/">NOIRLab</a></strong>.
+                      </p>
+                      <h5><a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer"><em>INTUITIVE</em>&reg; Planetarium at the U.S. Space & Rocket Center</a></h5>
+                      <p>David Weigel</p>
+                      <h5><a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">CosmicDS</a></h5>
+                      <p>John Lewis</p>
+                      <p>Jon Carifio</p>
+                      <p>Pat Udomprasert</p>
+                      <p>Alyssa Goodman</p>
+
+                      <h5><a href="https://www.worldwidetelescope.org/home" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a></h5>
+                      <p>Peter Williams</p>
+                      <p>Jon Carifio</p>
+                      <p>David Weigel</p>
                       </div>
                       <v-spacer class="end-spacer"></v-spacer>
                     </v-col>
@@ -925,6 +1036,9 @@ body {
 
 #body-logos {
   align-self: flex-end;
+  img{
+    margin-inline: 1rem;
+  }
 }
 
 
@@ -1012,13 +1126,35 @@ video {
   .info-text {
     height: var(--info-text-height);
     padding-bottom: 25px;
-  
-    & a {
-      text-decoration: none;
+
+    p {
+      margin-block: 0.5em;
     }
-    & a:hover {
-      text-decoration: underline;
+
+    a {
+      color: var(--rubin-teal-2)
     }
+
+
+    h4 {
+      font-size: 1.2em;
+    }
+
+    h5 {
+      font-size: 1em;
+      font-weight: bold;
+      margin-top: 1em;
+    }
+
+    li {
+      margin-block: 0.5em;
+    }
+  }
+
+  .bullet-icon {
+    color: var(--button-color);
+    width: 1.6em;
+    padding-right: 0.5em;
   }
   
   .close-icon {
@@ -1046,9 +1182,7 @@ video {
   
     .v-card-text {
       font-size: ~"max(14px, calc(0.7em + 0.3vw))";
-      padding-top: ~"max(2vw, 16px)";
-      padding-left: ~"max(4vw, 16px)";
-      padding-right: ~"max(4vw, 16px)";
+      padding: 1em;
   
       .end-spacer {
         height: 25px;
@@ -1195,21 +1329,24 @@ video {
 }
 
 .infobox-content {
-  
   p {
-    margin-bottom: 0.5em;
+    margin-bottom: 1em;
   }
-  
 }
 
 a {
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--rubin-teal-2));
   text-decoration: underline;
   font-weight: regular;
 }
 
 a:visited {
-  color: rgb(var(--v-theme-primary));
+  color: rgb(var(--rubin-teal-2));
+}
+
+h4 {
+  color: var(--rubin-gray-1);
+  font-weight: bold;
 }
 
 
