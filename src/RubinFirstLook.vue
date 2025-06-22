@@ -101,6 +101,7 @@
       </div>
       <div id="right-buttons">
         <div
+          v-if="!fullscreen"
           :class="[{'go-to-a': mode == 'b', 'go-to-b': mode == 'a'}]"
           id="goto-other-image"
           @click="gotoMainImage((mode == 'a') ? 'b' : 'a', false)"
@@ -108,7 +109,7 @@
         >
           Go to Image {{ mode == 'a' ? 'B' : 'A' }}
         </div>
-        <div v-hide="fullscreen">
+        <div v-if="!fullscreen">
           <icon-button
             id="info-icon"
             v-model="showTextSheet"
@@ -119,7 +120,7 @@
           >
           </icon-button>
         </div>
-        <div v-hide="fullscreen">
+        <div v-if="!fullscreen">
           <icon-button
             v-model="showVideoSheet"
             fa-icon="video"
@@ -321,6 +322,7 @@
                       Vera Rubin Image Credit: Carnegie Institution for Science/NOIRLab. <a href="https://noirlab.edu/public/images/VeraRubin-6-enlarged-CC/" target="_blank" rel="noopener noreferrer">Link to original</a>
                     </cite>
                   </p>
+                  <v-spacer class="end-spacer"></v-spacer>
                 </v-container>
                   
                 <!-- <a href="https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0" target="_blank" rel="noopener noreferrer">Rubin Visual Identity</a>
@@ -763,6 +765,9 @@ function placeInView(place: Place, fraction=1/3): boolean {
   // Assume the Zoom level corresponds to the size of the image
   // fraction_of_place is ~fraction of the place that must be in the current FOV
   // by default, allow 1/3 of the place to be visible and still be considered in view
+  if (place == null) {
+    return false;
+  }
   const iset = place.get_studyImageset() ?? place.get_backgroundImageset();
   if (iset == null) {
     return false;
