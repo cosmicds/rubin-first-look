@@ -5,6 +5,7 @@ import RubinFirstLook from "./RubinFirstLook.vue";
 import FolderView from "./components/FolderView.vue";
 import ExpansionWrapper from "./components/ExpansionWrapper.vue";
 import Infobox from "./components/Infobox.vue";
+import Scalebar from "./components/Scalebar.vue";
 import SplashScreen from "./components/SplashScreen.vue";
 import WWTTrackedContent from "./components/WWTTrackedContent.vue";
 import vuetify from "../plugins/vuetify";
@@ -74,6 +75,7 @@ createApp(RubinFirstLook, {
   .component('expansion-wrapper', ExpansionWrapper)
   .component('infobox', Infobox)
   .component('wwt-tracked-content', WWTTrackedContent)
+  .component('scalebar', Scalebar)
 
   // Mount
   .mount("#app");
