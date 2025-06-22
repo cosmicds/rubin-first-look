@@ -35,11 +35,10 @@
       :place="place"
       :name="place.get_name()"
       :offset-ra="offsets[place.get_name()]?.raOff ?? 0"
-      :offset-dec="1.5"
+      :offset-dec="offsets[place.get_name()]?.decOff ?? 0"
       :store="store"
       :visible="showLabels && atTopLevel"
       v-slot="props"
-      debug
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
       @mouseenter="onMarkerHover(place, true)"
@@ -550,7 +549,7 @@ const mode = ref<Mode>("b");
 const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
 
 const INFOBOX_ZOOM_CUTOFF = 10;
-const SMALL_LABELS_ZOOM = 50;
+const SMALL_LABELS_ZOOM = 25;
 let circle: Circle | null = null;
 const showOptions = ref(false);
 const showCircle = ref(true);
@@ -1270,10 +1269,6 @@ video {
   transition: scale 0.2s ease-in-out;
 }
 
-.tracked-place.top-level-place {
-  font-weight: bold;
-}
-
 .tracked-element:hover {
   scale: 1.2;
   z-index: 10;
@@ -1292,6 +1287,14 @@ video {
   transform: translateY(-50%) translateX(1.5em);
   position: absolute;
 }
+
+.tracked-places.top-level-place {
+  font-size: 1em;
+  padding: 0.5em 1em;
+  color: rgb(var(--v-theme-rubin-teal-2));
+  transform: translate(-50%, -100%); 
+}
+
 
 .tracked-places.star {
   transform: translateY(-50%) translateX(0.5em);
