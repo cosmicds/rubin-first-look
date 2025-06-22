@@ -23,8 +23,10 @@
       v-slot="props"
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
+      @mouseenter="forceShowCircle(place, true)"
+      @mouseleave="forceShowCircle(place, false)"
     >
-        <div :class='["tracked-places", {"star": place.get_name().includes("*")}]' v-on="props.on">{{ place.get_name() }}</div>
+        <div :class='["tracked-places", {"star": place.angularSize < 0.02}]' v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
 
     <wwt-tracked-content
@@ -590,16 +592,17 @@ function rotateOffsetToScreen(offset: Offset): Offset {
     decOff: -offset.raOff * sinRoll + offset.decOff * cosRoll,
   };
 }
-const forceCircles = ref(true);
+const forceCircles = ref(false);
 function createCircleAnnotation(place: Place): Circle {
   const newCircle = new Circle();
   newCircle.set_id("infobox");
   newCircle.set_lineWidth(3);
   newCircle.set_lineColor("#6ff542");
   newCircle.set_skyRelative(true);
-  newCircle.set_opacity(0.5);
+  newCircle.set_opacity(1);
   newCircle.setCenter(place.get_RA() * 15, place.get_dec());
-  newCircle.set_radius(place?.angularSize / 2);
+  console.log(place.angularSize);
+  newCircle.set_radius(place?.angularSize);
   store.addAnnotation(newCircle);
   return newCircle;
 }
@@ -621,7 +624,6 @@ fetch(`${domain}/offsets.json`)
     console.error("Error fetching offsets:", error);
   });
   
-
 onMounted(() => {
   store.waitForReady().then(async () => {
     // window.addEventListener('contextmenu', function(event) {
@@ -716,6 +718,25 @@ function updateCircle(place: Place | null) {
   }
 
   circle.set_opacity(showCircle.value ? 1 : 0);
+  circle.setCenter(place.get_RA() * 15, place.get_dec());
+  circle.set_radius(place?.angularSize);
+}
+
+function forceShowCircle(place: Place, show: boolean) {
+  if (!show) {
+    circle?.set_opacity(0);
+    return;
+  }
+  if (circle === null) {
+    circle = new Circle();
+    circle.set_id("infobox");
+    circle.set_lineWidth(3);
+    circle.set_lineColor("#ffffff");
+    circle.set_skyRelative(true);
+    store.addAnnotation(circle);
+  }
+
+  circle.set_opacity(1);
   circle.setCenter(place.get_RA() * 15, place.get_dec());
   circle.set_radius(place?.angularSize);
 }
@@ -1285,9 +1306,11 @@ video {
 
 .tracked-places {
   width: max-content;
+  font-size: 0.8em;
   padding: 0.25em 0.5em;
   color: white;
   background-color: rgba(0, 0, 0, 0.51);
+  border: 0.5px solid rgb(var(--v-theme-rubin-teal-4));
   backdrop-filter: blur(5px);
   border-radius: 5px;
   // transform: translate(-50%, -50%); // center on the point
@@ -1299,17 +1322,17 @@ video {
   transform: translateY(-50%) translateX(0.5em);
 }
 
-.tracked-places:not(.star):before {
-  position: absolute;
-  content:'';
-  box-shadow: 0px 0px 0px 2px black, 0px 0px 0px 4px white, 0px 0px 0px 6px black;
-  width: 0.5em;
-  height: 0.5em;
-  border-radius: 50%;
-  top: 50%;
-  left: -1em;
-  transform: translateY(-50%) translateX(-50%);
-}
+// .tracked-places:not(.star):before {
+//   position: absolute;
+//   content:'';
+//   box-shadow: 0px 0px 0px 2px black, 0px 0px 0px 4px white;
+//   width: 0.5em;
+//   height: 0px;
+//   border-radius: 50%;
+//   top: 50%;
+//   left: -1em;
+//   transform: translateY(-50%) translateX(-50%);
+// }
 
 
 
