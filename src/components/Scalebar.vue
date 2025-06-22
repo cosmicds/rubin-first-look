@@ -168,7 +168,8 @@ watch(() => [props.color, props.backgroundColor], (_values) => update());
   padding: 5px;
   margin-right: 10px;
   margin-bottom: 5px;
-  
+  contain: layout;
+
   p {
     background: transparent;
     color: var(--color);
