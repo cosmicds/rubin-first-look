@@ -678,7 +678,6 @@ function findClosest(places: Place[]): Place | null {
 
   places.forEach(place => {
     const dist = distanceFromCenter(place);
-    console.log(place.get_name(), dist);
     if ((!isNaN(dist)) && ((closestDist === null) || (dist < closestDist))) {
       closest = place;
       closestDist = dist;
