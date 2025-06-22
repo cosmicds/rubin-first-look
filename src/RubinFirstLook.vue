@@ -23,8 +23,8 @@
       v-slot="props"
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
-      @mouseenter="forceShowCircle(place, true)"
-      @mouseleave="forceShowCircle(place, false)"
+      @mouseenter="onMarkerHover(place, true)"
+      @mouseleave="onMarkerHover(place, false)"
     >
         <div :class='["tracked-places", {"star": place.angularSize < 0.02}]' v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -35,15 +35,17 @@
       :place="place"
       :name="place.get_name()"
       :offset-ra="offsets[place.get_name()]?.raOff ?? 0"
-      :offset-dec="offsets[place.get_name()]?.decOff ?? 0"
+      :offset-dec="1.5"
       :store="store"
       :visible="showLabels && atTopLevel"
       v-slot="props"
       debug
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
+      @mouseenter="onMarkerHover(place, true)"
+      @mouseleave="onMarkerHover(place, false)"
     >
-        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+        <div class="tracked-places top-level-place" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
     
 
@@ -510,17 +512,6 @@ const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 useWWTKeyboardControls(store);
 
-document.addEventListener("click", (event) => {
-  // print out he screen coordinates of the click to console
-  console.log(`Click at: (${event.clientX}, ${event.clientY})`);
-  const radec = store.findRADecForScreenPoint({
-    x: event.clientX,
-    y: event.clientY,
-  });
-  console.log(`RADec: (${radec.ra}, ${radec.dec})`);
-  
-});
-
 const fullscreen = useFullscreen();
 
 const touchscreen = supportsTouchscreen();
@@ -594,20 +585,7 @@ function rotateOffsetToScreen(offset: Offset): Offset {
     decOff: -offset.raOff * sinRoll + offset.decOff * cosRoll,
   };
 }
-const forceCircles = ref(false);
-function createCircleAnnotation(place: Place): Circle {
-  const newCircle = new Circle();
-  newCircle.set_id("infobox");
-  newCircle.set_lineWidth(3);
-  newCircle.set_lineColor("#6ff542");
-  newCircle.set_skyRelative(true);
-  newCircle.set_opacity(1);
-  newCircle.setCenter(place.get_RA() * 15, place.get_dec());
-  console.log(place.angularSize);
-  newCircle.set_radius(place?.angularSize);
-  store.addAnnotation(newCircle);
-  return newCircle;
-}
+
 
 
 fetch(`${domain}/offsets.json`)
@@ -653,9 +631,6 @@ onMounted(() => {
               }
               lowerLevelPlaces.push(item);
             }
-            if (forceCircles.value) {
-              createCircleAnnotation(item);
-            }
           }
         });
         const highlightsRef = index === 0 ? highlightsA : highlightsB;
@@ -700,14 +675,24 @@ function findClosest(places: Place[]): Place | null {
   return closest !== null && placeInView(closest) ? closest : null;
 }
 
+const closestPlace = ref<Place | null>(null);
 function updateClosestPlace() {
   currentPlace.value = findClosest(atTopLevel.value ? topLevelPlaces : lowerLevelPlaces);
+  closestPlace.value = currentPlace.value;
 }
+
+const forceShowCircle = ref(false);
+const onMarkerHover = (place: Place, show: boolean) => {
+  forceShowCircle.value = show;
+  currentPlace.value = show ? place : (place.get_name() !== closestPlace.value?.get_name() && highlightPlaceFromZoom.value) ? closestPlace.value : null;
+};
 
 function updateCircle(place: Place | null) {
   if (!highlightPlaceFromZoom.value || place === null) {
-    circle?.set_opacity(0);
-    return;
+    if (!forceShowCircle.value) {
+      circle?.set_opacity(0);
+      return;
+    }
   }
 
   if (circle === null) {
@@ -720,25 +705,6 @@ function updateCircle(place: Place | null) {
   }
 
   circle.set_opacity(showCircle.value ? 1 : 0);
-  circle.setCenter(place.get_RA() * 15, place.get_dec());
-  circle.set_radius(place?.angularSize);
-}
-
-function forceShowCircle(place: Place, show: boolean) {
-  if (!show) {
-    circle?.set_opacity(0);
-    return;
-  }
-  if (circle === null) {
-    circle = new Circle();
-    circle.set_id("infobox");
-    circle.set_lineWidth(3);
-    circle.set_lineColor("#ffffff");
-    circle.set_skyRelative(true);
-    store.addAnnotation(circle);
-  }
-
-  circle.set_opacity(1);
   circle.setCenter(place.get_RA() * 15, place.get_dec());
   circle.set_radius(place?.angularSize);
 }
@@ -1302,6 +1268,10 @@ video {
 .tracked-element {
   pointer-events: auto;
   transition: scale 0.2s ease-in-out;
+}
+
+.tracked-place.top-level-place {
+  font-weight: bold;
 }
 
 .tracked-element:hover {
