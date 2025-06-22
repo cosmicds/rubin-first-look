@@ -292,9 +292,28 @@
           <v-window-item>
             <v-card class="no-bottom-border-radius scrollable">
               <v-card-text class="info-text no-bottom-border-radius">
-                Information goes here
-                <a href="https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0" target="_blank" rel="noopener noreferrer">Rubin Visual Identity</a>
-                <v-spacer class="end-spacer"></v-spacer>
+                <v-container class="pa-0">
+                  <p>
+                    This text is excerted from the <a href="https://noirlab.edu/public/news/noirlab2521/" target="_blank" rel="noopener noreferrer">Rubin First Look Press Release</a>. See the full release for more information.
+                  </p>
+                  <h4 class="user-guide-header">About Rubin Observatory</h4>  
+                  <p>
+                    The NSF–DOE Vera C. Rubin Observatory, a major new scientific facility jointly funded by the U.S. National Science Foundation and the U.S. Department of Energy's Office of Science, released its first imagery on June 23, 2025 at an event in Washington, D.C. The imagery shows cosmic phenomena captured at an unprecedented scale. In just over 10 hours of test observations, NSF–DOE Rubin Observatory has already captured millions of galaxies and Milky Way stars and thousands of asteroids. The imagery is a small preview of Rubin Observatory's upcoming 10-year scientific mission to explore and understand some of the Universe's biggest mysteries. 
+                  </p>
+                  <p>
+                    The result of more than two decades of work, Rubin Observatory is perched at the summit of Cerro Pachón in Chile, where dry air and dark skies provide one of the world's best observing locations. Rubin's innovative 8.4-meter telescope has the largest digital camera ever built, which feeds a powerful data processing system. Later in 2025, Rubin will begin its primary mission, the Legacy Survey of Space and Time, in which it will ceaselessly scan the sky nightly for 10 years to precisely capture every visible change.
+                  </p>
+                  <p>
+                    The result will be an ultrawide, ultra-high-definition time-lapse record of the Universe. It will bring the sky to life with a treasure trove of billions of scientific discoveries. The images will reveal asteroids and comets, pulsating stars, supernova explosions, far-off galaxies and perhaps cosmic phenomena that no one has seen before.
+                  </p>
+                  <h4 class="user-guide-header">Who was Vera Rubin?</h4>
+                  <p class="pb-5">
+                    Rubin Observatory is named in honor of trailblazing U.S. astronomer Vera C. Rubin, who found conclusive evidence of vast quantities of invisible material known as dark matter. Understanding the nature of dark matter, dark energy and other large-scale cosmic mysteries is a central focus of Rubin Observatory's mission. Dark energy is what scientists call the mysterious and colossally powerful force that appears to be causing galaxies in the Universe to move away from each other at an accelerating rate. Although dark matter and dark energy collectively comprise 95% of the Universe, their properties remain unknown.
+                  </p>
+                </v-container>
+                  
+                <!-- <a href="https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0" target="_blank" rel="noopener noreferrer">Rubin Visual Identity</a>
+                <v-spacer class="end-spacer"></v-spacer> -->
               </v-card-text>
             </v-card>
           </v-window-item>
@@ -303,7 +322,7 @@
               <v-card-text class="info-text no-bottom-border-radius">
                 <v-container class="pa-0">
                   <p>
-                    This WorldWide Telescope (WWT) interactive visualization provides a contextual, deep dive into the stunning new imagery from the Rubin Observatory.
+                    This <a href="https://www.worldwidetelescope.org/home" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a> (WWT) interactive visualization provides a contextual, deep dive into the stunning new imagery from the Rubin Observatory.
                   </p>    
                   <h4 class="user-guide-header">Navigation & Information</h4>  
                   <ul class="text-list mx-5">
@@ -425,7 +444,7 @@
                       <p>Pat Udomprasert</p>
                       <p>Alyssa Goodman</p>
 
-                      <h5><a href="https://www.worldwidetelescope.org/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a></h5>
+                      <h5><a href="https://www.worldwidetelescope.org/home" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a></h5>
                       <p>Peter Williams</p>
                       <p>Jon Carifio</p>
                       <p>David Weigel</p>
