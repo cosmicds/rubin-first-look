@@ -43,7 +43,7 @@ const props = withDefaults(defineProps<ScalebarProps>(), {
   width: 1000,
   color: "white",
   visible: true,
-  backgroundColor: "rgba(0, 0, 0, 0.7)",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
 });
 
 const show = computed(() => props.visible && ((props.maxDeg == null) || zoomDeg.value < props.maxDeg));
