@@ -595,10 +595,8 @@ const highlightColor = computed(() => theme.global.current.value.colors.accent);
 const textColor = computed(() => theme.global.current.value.colors["on-background"]);
 const tab = ref(0);
 
-const domain = "http://localhost:12345";
-// const wtmlUrl = `${domain}/index.wtml`;
-const imageAPlacesURL = `${domain}/a_places.wtml`;
-const imageBPlacesURL= `${domain}/b_places.wtml`;
+const imageAPlacesURL = "https://data1.wwtassets.org/noirlab2521a/a_places.wtml";
+const imageBPlacesURL= "https://data1.wwtassets.org/noirlab2521b/b_places.wtml";
 const selectedItem = ref<Thumbnail | null>(null);
 
 const lowerLevelPlaces: Place[] = [];
