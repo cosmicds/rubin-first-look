@@ -351,7 +351,7 @@
           <v-window-item>
             <v-card class="no-bottom-border-radius scrollable">
               <v-card-text class="info-text no-bottom-border-radius">
-                <v-container class="pa-0">
+                <v-container class="pa-0"  v-if="imagesLoaded.some(loaded => loaded)">
                   <p>
                     This text is excerpted from the <a href="https://noirlab.edu/public/news/noirlab2521/" target="_blank" rel="noopener noreferrer">Rubin First Look Press Release</a>. See the full release for more information.
                   </p>
@@ -381,7 +381,11 @@
                   </p>
                   <v-spacer class="end-spacer"></v-spacer>
                 </v-container>
-                  
+                <v-container class="pa-0" v-else>
+                  <p>
+                    Come back June 23rd, 11:20am EDT to learn more!
+                  </p> 
+                </v-container>
                 <!-- <a href="https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0" target="_blank" rel="noopener noreferrer">Rubin Visual Identity</a>
                 <v-spacer class="end-spacer"></v-spacer> -->
               </v-card-text>
