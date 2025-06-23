@@ -68,7 +68,7 @@ withDefaults(defineProps<Props>(), {
 
 .infobox-content {
   pointer-events: auto;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .infobox-mobile.infobox-content {

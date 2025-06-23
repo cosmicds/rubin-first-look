@@ -76,13 +76,15 @@
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
           :background-color="accentColor"
+          :thumbnail-color="thumbnailColor"
+          :highlight-color="highlightColor"
           :text-color="textColor"
           flex-direction="column"
           @select="({ item, type }) => handleSelection(item, type)"
         >
           <template #header="{ toggleExpanded, expanded }">
             <div class="fv-header">
-              <span>Explore {{ mode.charAt(0).toUpperCase() + mode.slice(1) }}</span>
+              <span>Explore</span>
               <font-awesome-icon
                 :icon="expanded ? 'chevron-up' : 'chevron-down'"
                 @click="toggleExpanded()"
@@ -162,28 +164,28 @@
             <v-checkbox
               v-model="showLabels"
               label="Object Labels"
-              :color="accentColor"
+              :color="buttonColor"
               hide-details
               density="compact"
             ></v-checkbox>
             <v-checkbox
               v-model="showCircle"
               label="Region Markers"
-              :color="accentColor"
+              :color="buttonColor"
               hide-details
               density="compact"
             ></v-checkbox>
             <v-checkbox
               v-model="showScalebar"
               label="Scale Bar"
-              :color="accentColor"
+              :color="buttonColor"
               hide-details
               density="compact"
             ></v-checkbox>
             <v-checkbox
               v-model="showConstellations"
               label="Constellations"
-              :color="accentColor"
+              :color="buttonColor"
               hide-details
               density="compact"
             ></v-checkbox>
@@ -559,6 +561,8 @@ let zoomTimeout: ReturnType<typeof setTimeout> | null = null;
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
 const accentColor = computed(() => theme.global.current.value.colors.primary);
 const buttonColor = computed(() => theme.global.current.value.colors.primaryVariant);
+const thumbnailColor = computed(() => theme.global.current.value.colors.info);
+const highlightColor = computed(() => theme.global.current.value.colors.accent);
 const textColor = computed(() => theme.global.current.value.colors["on-background"]);
 const tab = ref(0);
 
@@ -832,6 +836,7 @@ const cssVars = computed(() => {
     ...rubinColors,
     "--accent-color": accentColor.value,
     "--button-color": buttonColor.value,
+    "--thumbnail-color": thumbnailColor.value,
     "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100dvh",
     "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100dvw",
     "--info-sheet-width": infoSheetWidth.value,
@@ -921,7 +926,7 @@ watch(showConstellations, (show: boolean) => {
 });
 watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
-  theme.global.name.value = newMode === "b" ? "rubinB" : "rubinA";
+  theme.global.name.value = newMode === "a" ? "rubinA" : "rubinB";
 });
 </script>
 
@@ -1380,7 +1385,8 @@ video {
 }
 
 .fv-header {
-  font-size: 10pt;
+  font-size: 11pt;
+  font-weight: bold;
 
   svg {
     padding: 0px 5px;
@@ -1409,19 +1415,14 @@ video {
   font-size: 16pt;
   border-radius: 10px;
   user-select: none;
+
+  @media only screen and (max-width: 600px) {
+    font-size: 11pt;
+  }
 }
 
 // when in mode-a we want to show the button with mode-b colors
 #goto-other-image.go-to-b {
-  --bg: var(--v-theme-rubin-teal);
-  // background-color: rgb(var(--v-theme-rubin-teal)); // fallback
-  background: radial-gradient(circle, rgba(var(--bg), 0.9) 0%, rgba(var(--bg), 0.8) 100%);
-  color: rgb(var(--v-theme-rubin-off-white));
-  border: 1px solid rgb(var(--v-theme-rubin-off-white));
-}
-
-// when in mode-b we want to show the button with mode-a colors
-#goto-other-image.go-to-a {
   --bg: var(--v-theme-rubin-deep-charcoal);
   // background-color: rgb(var(--bg)); // fallback
   background: radial-gradient(circle, rgba(var(--bg), 0.8) 0%, rgba(var(--bg), 0.6) 100%);
@@ -1430,11 +1431,21 @@ video {
   border: 1px solid rgb(var(--v-theme-rubin-teal));
 }
 
+// when in mode-b we want to show the button with mode-a colors
+#goto-other-image.go-to-a {
+  --bg: var(--v-theme-rubin-teal);
+  // background-color: rgb(var(--v-theme-rubin-teal)); // fallback
+  background: radial-gradient(circle, rgba(var(--bg), 0.9) 0%, rgba(var(--bg), 0.8) 100%);
+  color: rgb(var(--v-theme-rubin-off-white));
+  border: 1px solid rgb(var(--v-theme-rubin-off-white));
+}
+
+
 #app details.expansion-panel {
-  border-radius: 0.75em;
+  border-radius: 0.5em;
 }
 #app .fv-root.folder-view {
-  border-radius: 0.75em;
+  border-radius: 0.5em;
   padding: calc(0.75em / 2);
   
   .item-name {
