@@ -265,6 +265,23 @@
       </infobox>
     </div>
 
+    <div id="coming-soon" v-if="!imagesLoaded[0] && !imagesLoaded[1] && showComingSoon">
+      <!-- close icon -->
+      <font-awesome-icon
+        id="close-coming-soon"
+        icon="times"
+        size="lg"
+        @click="showComingSoon = false"
+        @keyup.enter="showComingSoon = false"
+        tabindex="0"
+      ></font-awesome-icon>
+      <div class="coming-soon-text">
+      <strong>Coming Soon!</strong>
+      <p>
+        For now, feel free to explore this full-sky image from NOIRLab and the Digital Sky Survey.
+      </p>
+    </div>
+    </div>
 
     <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
@@ -1569,5 +1586,40 @@ h4 {
 .v-slider {
   width: 100% !important;
   pointer-events: auto;
+}
+
+#coming-soon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(75vw, 75vh);
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  background-color: rgb(var(--v-theme-rubin-teal-6));
+  
+  
+  font-size: min(2.5vw, 2.5vh);
+  padding: 1em;
+  
+  border: 1em solid rgb(var(--v-theme-rubin-teal-3));
+  border-radius: 1em;
+  color: rgb(var(--v-theme-deep-charcoal));
+  
+  .coming-soon-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  strong {
+    font-size: 5em;
+  }
+  
+  #close-coming-soon {
+    float: right;
+    font-size: 2em;
+  }
+
 }
 </style>
