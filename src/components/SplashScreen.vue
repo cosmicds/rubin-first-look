@@ -58,17 +58,10 @@
               },
             ]"
           />
-          <a href="https://rubinobservatory.org/" target="_blank" rel="noopener noreferrer">
-            <img
-              id="rubin-large-logo" 
-              alt="Rubin Observatory Logo"
-              src="@/assets/RubinLogo250.png"
-            />
-          </a>
         </div>
 
         <span>
-        Brought to you by <a href="https://rubinobservatory.org/" target="_blank" rel="noopener noreferrer">Rubin Observatory</a>, <a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer"><em>INTUITIVE</em>&reg; Planetarium at the U.S. Space & Rocket Center</a> , <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a>.
+        Brought to you by <a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer"><em>INTUITIVE</em>&reg; Planetarium at the U.S. Space & Rocket Center</a> , <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a>.
         </span>
       </div>
     </div>
@@ -86,7 +79,8 @@ export interface Props {
   cssVars?: any;
   title: string;
   color?: string,
-  highlightColor?: string
+  highlightColor?: string,
+  backgroundColor?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -97,9 +91,11 @@ const cssVars = computed(() => {
   return {
     ...props.cssVars,
     ...{'--accent-color': props.color == null ? props.cssVars['--accent-color'] : props.color},
-    ...{'--accent-color2': props.highlightColor == null ? props.cssVars['--accent-color2'] : props.highlightColor}
+    ...{'--accent-color2': props.highlightColor == null ? props.cssVars['--accent-color2'] : props.highlightColor},
+    ...{'--background-color': props.backgroundColor == null ? 'black' : props.backgroundColor}
   };
 });
+console.log('cssVars', cssVars.value);
 
 const emits = defineEmits(['close']);
 
@@ -129,7 +125,7 @@ function closeSplashScreen() {
 }
 
 #splash-screen {
-  color: var(--rubin-gray-1);
+  color: rgb(var(--v-theme-text-color));
 
   @media (max-width: 699px) {
     max-height: 80vh;
@@ -141,7 +137,7 @@ function closeSplashScreen() {
     max-width: min(70vw, 800px);
   }
 
-  background: var(--rubin-teal-7);
+  background: rgb(var(--v-theme-cosmic-background-variant));
   justify-content: space-around;
   align-content: center;
   padding-top: 2rem;
@@ -159,7 +155,7 @@ function closeSplashScreen() {
   }
 
   a {
-    color: var(--rubin-teal-2);
+    color: rgb(var(--v-theme-text-cosmic-color));
   }
   // make a paragraph inside the div centered horizontally and vertically
   p {
@@ -170,7 +166,7 @@ function closeSplashScreen() {
   }
     
   p.highlight {
-    color: var(--rubin-turquoise);
+    color: rgb(var(--v-theme-cosmic-color-variant));
     text-transform: uppercase;
     font-weight: bold;
   }
@@ -227,6 +223,10 @@ function closeSplashScreen() {
       color:var(--accent-color);
       margin: 0 10px;
     }
+  }
+  
+  #splash-screen-logos {
+    margin-bottom: 1em;;
   }
 
   #splash-screen-acknowledgements {

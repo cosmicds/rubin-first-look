@@ -23,8 +23,10 @@
       v-slot="props"
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
+      @mouseenter="_onMarkerHover(place, true)"
+      @mouseleave="_onMarkerHover(place, false)"
     >
-        <div :class='["tracked-places", {"star": place.angularSize < 0.02}]' v-on="props.on">{{ place.get_name() }}</div>
+        <div :class='["tracked-places", {"star": place.angularSize < 0.02}, {"is-region": place.get_names().length == 1}]' v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
 
     <wwt-tracked-content
@@ -47,6 +49,7 @@
     <splash-screen
       title="Rubin First Look"
       :cssVars="cssVars"
+      :background-color="theme.current.value.colors['cosmic-color-7']"
       @close="closeSplashScreen"
     ></splash-screen>
 
@@ -247,12 +250,6 @@
                 src: './SpaceRocketCenterIntuitivePlanetarium-Logo-small.png',
                 href: 'https://www.rocketcenter.com/INTUITIVEPlanetarium',
                 name: 'INTUITIVE'
-              },
-              {
-                alt: 'Vera C. Rubin Observatory',
-                src: './rubin_white_2.png',
-                href: 'https://rubinobservatory.org/',
-                name: 'RubinObservatory'
               }
             ]"
         />
@@ -333,8 +330,8 @@
         <v-tabs
           v-model="tab"
           height="32px"
-          color="rubin-turquoise"
-          slider-color="rubin-teal"
+          color="cosmic-color-variant"
+          slider-color="cosmic-color"
           id="tabs"
           dense
         >
@@ -561,7 +558,6 @@ import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
 import { BackgroundImageset, skyBackgroundImagesets, supportsTouchscreen, blurActiveElement, useWWTKeyboardControls } from "@cosmicds/vue-toolkit";
-import { RUBIN_COLORS } from "../plugins/vuetify";
 import { useDisplay, useTheme } from "vuetify";
 import { type ItemSelectionType } from "./types";
 
@@ -696,6 +692,30 @@ const showComingSoon = ref(false);
 watch(imagesLoaded, (newValue) => {
   showComingSoon.value = !newValue[0] && !newValue[1];
 }, { immediate: true });
+
+function goToUrlDefinedLocation() {
+  // find the place corresponging to the name in the name query parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const name = urlParams.get("name");
+  console.log(`Url name ${name}`);
+  if (name === null) {
+    return;   
+  }
+
+  let place = topLevelPlaces.find(place => place.get_names().includes(name));
+  if (place === undefined) {
+    place = lowerLevelPlaces.find(place => place.get_names().includes(name));
+  }
+  if (place !== undefined) {
+    console.log("Going to place from URL:", place.get_name());
+    handleSelection(place, "dblclick");
+    showLabels.value = true;
+    showCircle.value = true;
+  } else {
+    console.warn("No place found for name:", name);
+  }
+}
+
 onMounted(() => {
   store.waitForReady().then(async () => {
     // window.addEventListener('contextmenu', function(event) {
@@ -734,7 +754,7 @@ onMounted(() => {
       positionSet.value = true;
       layersLoaded.value = true;
       gotoMainImage(mode.value, true);
-    });
+    }).then(() => {goToUrlDefinedLocation();});
     
     store.loadImageCollection({
       url: "bg.wtml",
@@ -778,8 +798,8 @@ function updateClosestPlace() {
 const forceShowCircle = ref(false);
 const _onMarkerHover = (place: Place, show: boolean) => {
   forceShowCircle.value = show;
-  console.log(place.get_name(), closestPlace.value?.get_name());
-  currentPlace.value = show ? place : closestPlace.value; 
+  // console.log(place.get_name(), closestPlace.value?.get_name());
+  currentPlace.value = show ? place : null; //closestPlace.value; 
 };
 
 function updateCircle(place: Place | null) {
@@ -902,12 +922,8 @@ const infoSheetTransition = computed(() => infoSheetLocation.value === "bottom" 
 
 /* This lets us inject component data into element CSS */
 const cssVars = computed(() => {
-  const rubinColors = Object.keys(RUBIN_COLORS).reduce((acc: Record<string, string>, key: string) => {
-    acc[`--${key}`] = RUBIN_COLORS[key];
-    return acc;
-  }, {});
   return {
-    ...rubinColors,
+
     "--accent-color": accentColor.value,
     "--button-color": buttonColor.value,
     "--thumbnail-color": thumbnailColor.value,
@@ -1031,7 +1047,7 @@ html {
   &::-webkit-scrollbar {
     display: none;
   }
-  scrollbar-color: rgb(var(--v-theme-rubin-teal-2)) transparent;
+  scrollbar-color: rgb(var(--v-theme-text-cosmic-color)) transparent;
   
 }
 
@@ -1278,7 +1294,7 @@ video, #info-video {
   }
   
   cite {
-      color: rgb(var(--v-theme-rubin-teal-3));
+      color: rgb(var(--v-theme-cosmic-color-3));
       font-size:0.9em;
   }
   
@@ -1291,7 +1307,7 @@ video, #info-video {
     }
 
     a {
-      color: var(--rubin-teal-2)
+      color: rgb(var(--v-theme-text-cosmic-color))
     }
 
 
@@ -1403,7 +1419,7 @@ video, #info-video {
   padding: 0.25em 0.5em;
   color: white;
   background-color: rgba(0, 0, 0, 0.51);
-  border: 0.5px solid rgb(var(--v-theme-rubin-teal-4));
+  border: 0.5px solid rgb(var(--v-theme-cosmic-color-4));
   backdrop-filter: blur(5px);
   border-radius: 5px;
   // transform: translate(-50%, -50%); // center on the point
@@ -1414,7 +1430,7 @@ video, #info-video {
 .tracked-places.top-level-place {
   font-size: 1em;
   padding: 0.5em 1em;
-  color: rgb(var(--v-theme-rubin-teal-2));
+  color: rgb(var(--v-theme-text-cosmic-color));
   transform: translate(-50%, -100%); 
 }
 
@@ -1459,7 +1475,7 @@ video, #info-video {
   }
   
   input[type="checkbox"] {
-    color: rgb(var(--v-theme-rubin-teal-2));
+    color: rgb(var(--v-theme-text-cosmic-color));
   }
 }
 
@@ -1482,7 +1498,7 @@ video, #info-video {
   max-width: 50%;
   max-height: 50dvh;
   overflow-y: scroll;
-  scrollbar-color: rgb(var(--v-theme-rubin-teal-2)) transparent;
+  scrollbar-color: rgb(var(--v-theme-cosmic-color-2)) transparent;
 }
 
 .infobox.small-size {
@@ -1525,21 +1541,21 @@ video, #info-video {
 
 // when in mode-a we want to show the button with mode-b colors
 #goto-other-image.go-to-b {
-  --bg: var(--v-theme-rubin-deep-charcoal);
+  --bg: var(--v-theme-deep-charcoal);
   // background-color: rgb(var(--bg)); // fallback
   background: radial-gradient(circle, rgba(var(--bg), 0.8) 0%, rgba(var(--bg), 0.6) 100%);
   backdrop-filter: blur(5px); 
-  color: rgb(var(--v-theme-rubin-off-white));
-  border: 1px solid rgb(var(--v-theme-rubin-teal));
+  color: rgb(var(--v-theme-off-white));
+  border: 1px solid rgb(var(--v-theme-cosmic-color));
 }
 
 // when in mode-b we want to show the button with mode-a colors
 #goto-other-image.go-to-a {
-  --bg: var(--v-theme-rubin-teal);
-  // background-color: rgb(var(--v-theme-rubin-teal)); // fallback
+  --bg: var(--v-theme-cosmic-color);
+  // background-color: rgb(var(--v-theme-cosmic-color)); // fallback
   background: radial-gradient(circle, rgba(var(--bg), 0.9) 0%, rgba(var(--bg), 0.8) 100%);
-  color: rgb(var(--v-theme-rubin-off-white));
-  border: 1px solid rgb(var(--v-theme-rubin-off-white));
+  color: rgb(var(--v-theme-off-white));
+  border: 1px solid rgb(var(--v-theme-off-white));
 }
 
 
@@ -1563,17 +1579,17 @@ video, #info-video {
 }
 
 a {
-  color: rgb(var(--rubin-teal-2));
+  color: rgb(var(--v-theme-text-cosmic-color));
   text-decoration: underline;
   font-weight: regular;
 }
 
 a:visited {
-  color: rgb(var(--rubin-teal-2));
+  color: rgb(var(--v-theme-text-cosmic-color));
 }
 
 h4 {
-  color: var(--rubin-gray-1);
+  color: var(--off-white);
   font-weight: bold;
 }
 
@@ -1605,13 +1621,13 @@ h4 {
   width: min(75vw, 75vh);
   aspect-ratio: 1 / 1;
   transform: translate(-50%, -50%);
-  background-color: rgb(var(--v-theme-rubin-teal-6));
+  background-color: rgb(var(--v-theme-cosmic-color-6));
   
   
   font-size: min(3vw, 3vh);
   padding: 1em;
   
-  border: 1em solid rgb(var(--v-theme-rubin-teal-3));
+  border: 1em solid rgb(var(--v-theme-cosmic-color-3));
   border-radius: 1em;
   color: rgb(var(--v-theme-deep-charcoal));
   
@@ -1636,7 +1652,7 @@ h4 {
   #close-coming-soon {
     float: right;
     font-size: 1.5em;
-    color: rgb(var(--v-theme-rubin-turquoise));
+    color: rgb(var(--v-theme-cosmic-color-variant));
   }
 
 }

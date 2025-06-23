@@ -13,25 +13,24 @@ import { en } from 'vuetify/locale';
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 
-// Rubin Specific Colors
-export const RUBIN_COLORS = {
-  'rubin-turquoise': '#00BABC', // on light and dark backgrounds
-  'rubin-teal': '#058B8C', // on light and dark backgrounds
-  'rubin-charcoal': '#313333', // on light backgrounds
-  'rubin-off-white': '#F5F5F5', // on dark backgrounds
-  'rubin-purple': '#583671',
-  'rubin-highlight-gold': '#C4A447',
+export const LAGOON_COLORS = {
+  'charcoal': '#313333', 
+  'off-white': '#F5F5F5', 
+  'highlight-gold': '#C4A447', 
   'rubin-gray-1': '#DcE0E3',
-  'rubin-gray-2': '#6a6E6E',
-  'rubin-deep-charcoal': "#1F2121",
-  'rubin-teal-1': '#D9F7F6',
-  'rubin-teal-2': '#B1F2EF',
-  'rubin-teal-3': '#009FA1',
-  'rubin-teal-4': '#12726D',
-  'rubin-teal-5': '#0C4A47',
-  'rubin-teal-6': '#062E2C',
-  'rubin-teal-7': '#021A18',
+  'deep-charcoal': "#1F2121",
+  
+  'cosmic-color-variant': '#E89C9F', 
+  'cosmic-color': '#9E5A4C',
+  'cosmic-color-1': '#EFDBD6',
+  'cosmic-color-2': '#D99F92',
+  'cosmic-color-3': '#CB6C57',
+  'cosmic-color-4': '#A14B39',
+  'cosmic-color-5': '#753B2E',
+  'cosmic-color-6': '#552E25',
+  'cosmic-color-7': '#0E0909',
 } as const;
+
 
 export default createVuetify({
   // Icon Fonts
@@ -57,35 +56,41 @@ export default createVuetify({
         colors: {
           // Core brand colors
           // Lighter button color
-          primaryVariant: RUBIN_COLORS['rubin-turquoise'],
+          primaryVariant: LAGOON_COLORS['cosmic-color-variant'],
           // Darker accent color
-          primary: RUBIN_COLORS['rubin-teal'],
+          primary: LAGOON_COLORS['cosmic-color'],
 
           // Surface and backgrounds
           // Main "v-application" background color
-          background: RUBIN_COLORS['rubin-deep-charcoal'],
+          background: LAGOON_COLORS['deep-charcoal'],
           // Info Drawer background color (set by Vuetify default)
-          surface: RUBIN_COLORS['rubin-deep-charcoal'],
+          surface: LAGOON_COLORS['deep-charcoal'],
 
           // Thumbnail background color
-          info: RUBIN_COLORS['rubin-charcoal'],
+          info: LAGOON_COLORS['charcoal'],
 
           // Thumbnail highlight color
-          accent: RUBIN_COLORS['rubin-highlight-gold'],
+          accent: LAGOON_COLORS['highlight-gold'],
 
           // "On-color" colors. These are only used by default on Vuetify components.
           // when you have set the color using color="blah", then the text color
           // will be "on-blah".
-          "on-surface": RUBIN_COLORS['rubin-off-white'],
-          "on-background": RUBIN_COLORS['rubin-off-white'],
-          "on-primary": RUBIN_COLORS['rubin-off-white'],
+          "on-surface": LAGOON_COLORS['off-white'],
+          "on-background": LAGOON_COLORS['off-white'],
+          "on-primary": LAGOON_COLORS['off-white'],
 
           // Custom properties
-          // Infobox background color
-          "surface-variant": RUBIN_COLORS['rubin-deep-charcoal'],
-          "on-surface-variant": RUBIN_COLORS['rubin-off-white'],
+          // Infobox background color, # also tooltip colors
+          "surface-variant": LAGOON_COLORS['deep-charcoal'],
+          "on-surface-variant": LAGOON_COLORS['off-white'],
+          
+          "text-color": LAGOON_COLORS['off-white'],
+          "text-cosmic-color": LAGOON_COLORS['cosmic-color-2'],
+          "text-cosmic-color-variant": LAGOON_COLORS['cosmic-color-variant'],
+          
+          "cosmic-background-variant": LAGOON_COLORS['cosmic-color-7'],
 
-          ...RUBIN_COLORS,
+          ...LAGOON_COLORS,
         },
       },
       // TODO: This is the same as B right now
@@ -94,35 +99,41 @@ export default createVuetify({
         colors: {
           // Core brand colors
           // Button color
-          primaryVariant: RUBIN_COLORS['rubin-turquoise'],
+          primaryVariant: LAGOON_COLORS['cosmic-color-variant'],
           // Accent color
-          primary: RUBIN_COLORS['rubin-charcoal'],
+          primary: LAGOON_COLORS['charcoal'],
 
           // Surface and backgrounds
           // Main "v-application" background color
-          background: RUBIN_COLORS['rubin-deep-charcoal'],
+          background: LAGOON_COLORS['deep-charcoal'],
           // Info Drawer background color (set by Vuetify default)
-          surface: RUBIN_COLORS['rubin-deep-charcoal'],
+          surface: LAGOON_COLORS['deep-charcoal'],
 
           // Thumbnail background color
-          info: RUBIN_COLORS['rubin-teal'],
+          info: LAGOON_COLORS['cosmic-color'],
 
           // Thumbnail highlight color
-          accent: RUBIN_COLORS['rubin-highlight-gold'],
+          accent: LAGOON_COLORS['highlight-gold'],
           
           // "On-color" colors. These are only used by default on Vuetify components.
           // when you have set the color using color="blah", then the text color
           // will be "on-blah".
-          "on-surface": RUBIN_COLORS['rubin-off-white'],
-          "on-background": RUBIN_COLORS['rubin-off-white'],
-          "on-primary": RUBIN_COLORS['rubin-off-white'],
+          "on-surface": LAGOON_COLORS['off-white'],
+          "on-background": LAGOON_COLORS['off-white'],
+          "on-primary": LAGOON_COLORS['off-white'],
 
           // Custom properties
           // Infobox background color
-          "surface-variant": RUBIN_COLORS['rubin-deep-charcoal'],
-          "on-surface-variant": RUBIN_COLORS['rubin-off-white'],
+          "surface-variant": LAGOON_COLORS['deep-charcoal'],
+          "on-surface-variant": LAGOON_COLORS['off-white'],
+          
+          "text-color": LAGOON_COLORS['off-white'],
+          "text-cosmic-color": LAGOON_COLORS['cosmic-color-2'],
+          "text-cosmic-color-variant": LAGOON_COLORS['cosmic-color-variant'],
+          
+          "cosmic-background-variant": LAGOON_COLORS['cosmic-color-7'],
 
-          ...RUBIN_COLORS,
+          ...LAGOON_COLORS,
         }
       }
     },
