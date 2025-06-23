@@ -77,6 +77,7 @@
           :root-folder="folder"
           :background-color="accentColor"
           :thumbnail-color="thumbnailColor"
+          :highlight-color="highlightColor"
           :text-color="textColor"
           flex-direction="column"
           @select="({ item, type }) => handleSelection(item, type)"
@@ -561,6 +562,7 @@ let zoomTimeout: ReturnType<typeof setTimeout> | null = null;
 const accentColor = computed(() => theme.global.current.value.colors.primary);
 const buttonColor = computed(() => theme.global.current.value.colors.primaryVariant);
 const thumbnailColor = computed(() => theme.global.current.value.colors.info);
+const highlightColor = computed(() => theme.global.current.value.colors.accent);
 const textColor = computed(() => theme.global.current.value.colors["on-background"]);
 const tab = ref(0);
 

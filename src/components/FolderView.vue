@@ -171,12 +171,12 @@ const cssVars = computed(() => ({
   }
 	
 	&:hover {
-		border: 1px solid var(--highlight-color);
+		border: 2px solid var(--highlight-color);
 		transition: all 200ms ease-out;
   }
 
   &.selected {
-    border: 1px solid var(--highlight-color);
+    border: 2px solid var(--highlight-color);
   }
 }
 

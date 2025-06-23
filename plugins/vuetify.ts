@@ -70,6 +70,9 @@ export default createVuetify({
           // Thumbnail background color
           info: RUBIN_COLORS['rubin-charcoal'],
 
+          // Thumbnail highlight color
+          accent: RUBIN_COLORS['rubin-highlight-gold'],
+
           // "On-color" colors. These are only used by default on Vuetify components.
           // when you have set the color using color="blah", then the text color
           // will be "on-blah".
@@ -103,7 +106,9 @@ export default createVuetify({
           // Thumbnail background color
           info: RUBIN_COLORS['rubin-teal'],
 
-
+          // Thumbnail highlight color
+          accent: RUBIN_COLORS['rubin-highlight-gold'],
+          
           // "On-color" colors. These are only used by default on Vuetify components.
           // when you have set the color using color="blah", then the text color
           // will be "on-blah".
