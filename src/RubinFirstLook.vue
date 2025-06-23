@@ -200,7 +200,7 @@
               v-if="!smallSize"
               v-model="showSlider"
               label="Opacity Slider"
-              :color="accentColor"
+              :color="buttonColor"
               hide-details
               density="compact"
             ></v-checkbox>
