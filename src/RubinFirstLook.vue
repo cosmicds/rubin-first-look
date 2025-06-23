@@ -185,7 +185,7 @@
             ></v-checkbox>
             <v-checkbox
               v-model="showCircle"
-              label="Region Markers"
+              label="Circle Region"
               :color="buttonColor"
               hide-details
               density="compact"
