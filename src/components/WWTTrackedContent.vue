@@ -215,7 +215,14 @@ const slots = defineSlots<{
     tabindex="0" 
 
     >
-    <slot :on="{'click': onClick, 'onDoubleClick': onDoubleClick, 'keydown.enter': onClick}" >
+    <slot 
+      :on="{'click': onClick, 'onDoubleClick': onDoubleClick, 'keydown.enter': onClick}" 
+      :ra="ra" 
+      :dec="dec" 
+      :_name="name"
+      :offsetDec="offsetDec" 
+      :offsetRa="offsetRA"
+      >
       <div 
         :class="['default-wwt-tracked-content-content', { debug: debug }]" 
         @click="onClick" 

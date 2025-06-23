@@ -54,6 +54,7 @@ const lastSelectedItem: Ref<Thumbnail | null> = ref(null);
 const props = withDefaults(defineProps<FolderViewProps>(), {
   gap: "5px",
   highlightColor: "#1671e0",
+  thumbnailColor: "white",
   backgroundColor: "black",
   textColor: "white",
 });
@@ -94,6 +95,7 @@ watch(() => props.rootFolder, updateFolder);
 const cssVars = computed(() => ({
   "--flex-direction": props.flexDirection,
   "--background-color": props.backgroundColor,
+  "--thumbnail-color": props.thumbnailColor,
   "--highlight-color": props.highlightColor,
   "--text-color": props.textColor,
   "--gap": props.gap,
@@ -121,9 +123,7 @@ const cssVars = computed(() => ({
   &::-webkit-scrollbar-thumb {
     background: #1671e0;
     border-radius: 10px;
-  }
-	
-	
+  }	
 
   //width: 100%;
   //justify-content: space-around;
@@ -154,37 +154,39 @@ const cssVars = computed(() => ({
 }
 
 .item {
-  padding: 3px;
+  padding: 1px;
   border: 1px solid #444;
+  background: var(--thumbnail-color);
   border-radius: 2px;
-  width: ~"min(96px, 16vw)";
+  width: ~"min(96px, 22vw)";
   color: var(--text-color);
   cursor: pointer;
   pointer-events: auto;
 
   & img {
     width: 100%;
-    height: ~"min(45px, 7.5vw)";
+    height: ~"min(45px, 10.3vw)";
     object-fit: cover;
     border-radius: 2px;
   }
 	
 	&:hover {
-		border: 1px solid var(--highlight-color);
+		border: 2px solid var(--highlight-color);
 		transition: all 200ms ease-out;
   }
 
   &.selected {
-    border: 1px solid var(--highlight-color);
+    border: 2px solid var(--highlight-color);
   }
 }
 
 .item-name {
   color: var(--text-color);
   width: 100%;
-  font-size: 7pt;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+  line-height: 1;
+  // text-overflow: ellipsis;
+  // overflow: hidden;
+  // white-space: nowrap;
+  padding-left: 2px;
 }
 </style>

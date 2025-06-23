@@ -5,6 +5,7 @@ export interface FolderViewProps {
   flexDirection: "row" | "column";
   gap?: string;
   backgroundColor?: string;
+  thumbnailColor?: string;
   highlightColor?: string;
   textColor?: string;
 }

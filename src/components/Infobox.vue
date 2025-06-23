@@ -26,12 +26,9 @@
     <expansion-wrapper
       class="infobox-content"
       v-else-if="place != null"
-      :normally-open="true"
+      :normally-open="false"
+      :title="place.get_name()"
     >
-      <template #title>
-        <strong>{{ place?.get_name() }}</strong>
-      </template>
-      
       <template #content>
         <div v-html="place.htmlDescription"></div> 
       </template>
@@ -61,6 +58,12 @@ withDefaults(defineProps<Props>(), {
   transition: width 0.5s, height 0.5s;
 }
 
+.infobox-activator {
+  pointer-events: auto;
+  user-select: none;
+  text-wrap: nowrap;;
+}
+
 .infobox-mobile {
   background: #00000080;
   background: rgba(var(--v-theme-surface-variant), .9);
@@ -71,7 +74,7 @@ withDefaults(defineProps<Props>(), {
 
 .infobox-content {
   pointer-events: auto;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .infobox-mobile.infobox-content {

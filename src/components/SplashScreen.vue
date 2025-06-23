@@ -22,7 +22,7 @@
           icon="xmark"
           tabindex="0"
           />
-        <div id="splash-screen-text">
+        <div id="splash-screen-text" class="mb-2">
           <p>See the</p>
           <p class="highlight">{{ title }}</p>
           Images!
@@ -47,6 +47,7 @@
       <div id="splash-screen-acknowledgements">
         <div id="splash-screen-logos">
           <credit-logos
+            id="splash-screen-credit-logos"
             :default-logos="['cosmicds', 'wwt']"
             :extra-logos = "[
               {
@@ -55,15 +56,17 @@
                 href: 'https://www.rocketcenter.com/INTUITIVEPlanetarium',
                 name: 'INTUITIVE'
               },
-              {
-                alt: 'Vera C. Rubin Observatory',
-                src: './rubin_white_2.png',
-                href: 'https://rubinobservatory.org/',
-                name: 'RubinObservatory'
-              },
             ]"
           />
+          <a href="https://rubinobservatory.org/" target="_blank" rel="noopener noreferrer">
+            <img
+              id="rubin-large-logo" 
+              alt="Rubin Observatory Logo"
+              src="@/assets/RubinLogo250.png"
+            />
+          </a>
         </div>
+
         <span>
         Brought to you by <a href="https://rubinobservatory.org/" target="_blank" rel="noopener noreferrer">Rubin Observatory</a>, <a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer"><em>INTUITIVE</em>&reg; Planetarium at the U.S. Space & Rocket Center</a> , <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a>.
         </span>
@@ -207,8 +210,6 @@ function closeSplashScreen() {
   .splash-get-started {
     border: 2px solid white;
     font-size: calc(1.8 * var(--default-font-size));
-    margin-top: 1.2em;
-    // margin-bottom: 2%;
     font-weight: bold !important;
   }
 
@@ -234,22 +235,22 @@ function closeSplashScreen() {
     font-size: calc(var(--default-font-size));
     line-height: calc(var(--default-line-height));
     width: 60%; 
+
+    @media only screen and (max-width: 600px) {
+      width: 80%;
+    }
   }
 
-  #splash-screen-logos {
-    margin-bottom: 1em;
-
+  #splash-screen-credit-logos {
     img {
-    height: 60px;
+    height: 65px;
     vertical-align: middle;
-    margin: 1em;
+    margin-inline: 0.5em;
     }
 
     @media only screen and (max-width: 600px) {
       img {
         height: 40px;
-        margin-inline: 0.5em;
-        margin-block: 1em;
       }
     }
 
@@ -292,6 +293,16 @@ function closeSplashScreen() {
   }
   #splash-screen-acknowledgements  {
     display: none;
+  }
+}
+
+#rubin-large-logo {
+  height: 100px;
+}
+
+@media (min-width: 600px) {
+  #rubin-large-logo {
+    height: 200px;
   }
 }
 

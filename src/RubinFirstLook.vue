@@ -21,11 +21,12 @@
       :store="store"
       :visible="showLabels && !atTopLevel"
       v-slot="props"
-      debug
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
+      @mouseenter="onMarkerHover(place, true)"
+      @mouseleave="onMarkerHover(place, false)"
     >
-        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+        <div :class='["tracked-places", {"star": place.angularSize < 0.02}]' v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
 
     <wwt-tracked-content
@@ -38,11 +39,12 @@
       :store="store"
       :visible="showLabels && atTopLevel"
       v-slot="props"
-      debug
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
+      @mouseenter="onMarkerHover(place, true)"
+      @mouseleave="onMarkerHover(place, false)"
     >
-        <div class="tracked-places" v-on="props.on">{{ place.get_name() }}</div>
+        <div class="tracked-places top-level-place" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
     
 
@@ -74,13 +76,15 @@
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
           :root-folder="folder"
           :background-color="accentColor"
+          :thumbnail-color="thumbnailColor"
+          :highlight-color="highlightColor"
           :text-color="textColor"
           flex-direction="column"
           @select="({ item, type }) => handleSelection(item, type)"
         >
           <template #header="{ toggleExpanded, expanded }">
             <div class="fv-header">
-              <span>Explore {{ mode.charAt(0).toUpperCase() + mode.slice(1) }}</span>
+              <span>Explore</span>
               <font-awesome-icon
                 :icon="expanded ? 'chevron-up' : 'chevron-down'"
                 @click="toggleExpanded()"
@@ -103,9 +107,11 @@
           :min="0"
           :max="100"
           color="secondary"
+          class="opacity-slider"
+          hide-details
         >
           <template #prepend>
-            NOIRLAB All-Sky/DSS
+            NOIRLab All-Sky/DSS
           </template>
           <template #append>
             {{ store.foregroundImageset?.get_name() }}
@@ -114,14 +120,15 @@
       </div>
       <div id="right-buttons">
         <div
-          v-if="!fullscreen"
+          v-if="!fullscreen && topLevelPlaces.length > 1"
           :class="[{'go-to-a': mode == 'b', 'go-to-b': mode == 'a'}]"
           id="goto-other-image"
           @click="gotoMainImage((mode == 'a') ? 'b' : 'a', false)"
           @dblclick="gotoMainImage((mode == 'a') ? 'b' : 'a', true)"
         >
-          Go to Image {{ mode == 'a' ? 'B' : 'A' }}
+          Go to {{ mode == 'a' ? 'the' : '' }} {{ topLevelPlaces[mode=='a'? 1 : 0]?.get_name() }}
         </div>
+        <div>
         <div v-if="!fullscreen">
           <icon-button
             id="info-icon"
@@ -174,21 +181,21 @@
             <v-checkbox
               v-model="showLabels"
               label="Object Labels"
-              :color="accentColor"
+              :color="buttonColor"
               hide-details
               density="compact"
             ></v-checkbox>
             <v-checkbox
               v-model="showCircle"
               label="Region Markers"
-              :color="accentColor"
+              :color="buttonColor"
               hide-details
               density="compact"
             ></v-checkbox>
             <v-checkbox
               v-model="showScalebar"
               label="Scale Bar"
-              :color="accentColor"
+              :color="buttonColor"
               hide-details
               density="compact"
             ></v-checkbox>
@@ -203,12 +210,13 @@
             <v-checkbox
               v-model="showConstellations"
               label="Constellations"
-              :color="accentColor"
+              :color="buttonColor"
               hide-details
               density="compact"
             ></v-checkbox>
           </div>
         </div>
+      </div>
 
       </div>
     </div>
@@ -251,14 +259,15 @@
             ]"
         />
       </div>
+      <infobox
+        :class="[{'with-scalebar': showScalebar}, {'small-size': smallSize}]"
+        v-hide="fullscreen"
+        :place="currentPlace"
+        :small="smallSize"
+      >
+      </infobox>
     </div>
 
-    <infobox
-      v-hide="fullscreen"
-      :place="currentPlace"
-      :small="smallSize"
-    >
-    </infobox>
 
     <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
@@ -523,7 +532,7 @@
 import { storeToRefs } from "pinia";
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 import { useFullscreen } from "./composables/useFullscreen";
-import { D2R, distance, H2R } from "@wwtelescope/astro";
+import { D2R, H2R, distance } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
 import { GotoRADecZoomParams, engineStore } from "@wwtelescope/engine-pinia";
@@ -581,6 +590,8 @@ let zoomTimeout: ReturnType<typeof setTimeout> | null = null;
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
 const accentColor = computed(() => theme.global.current.value.colors.primary);
 const buttonColor = computed(() => theme.global.current.value.colors.primaryVariant);
+const thumbnailColor = computed(() => theme.global.current.value.colors.info);
+const highlightColor = computed(() => theme.global.current.value.colors.accent);
 const textColor = computed(() => theme.global.current.value.colors["on-background"]);
 const tab = ref(0);
 
@@ -598,7 +609,7 @@ const currentPlace = ref<Place | null>(null);
 const mainImageInView = ref(false);
 
 type Mode = "a" | "b";
-const mode = ref<Mode>("b");
+const mode = ref<Mode>("a");
 const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
 
 const INFOBOX_ZOOM_CUTOFF = 10;
@@ -639,19 +650,7 @@ function rotateOffsetToScreen(offset: Offset): Offset {
     decOff: -offset.raOff * sinRoll + offset.decOff * cosRoll,
   };
 }
-const forceCircles = ref(false);
-function createCircleAnnotation(place: Place): Circle {
-  const newCircle = new Circle();
-  newCircle.set_id("infobox");
-  newCircle.set_lineWidth(3);
-  newCircle.set_lineColor("#4287f5");
-  newCircle.set_skyRelative(true);
-  newCircle.set_opacity(0.5);
-  newCircle.setCenter(place.get_RA() * 15, place.get_dec());
-  newCircle.set_radius(place?.angularSize / 2);
-  store.addAnnotation(newCircle);
-  return newCircle;
-}
+
 
 
 fetch(`${domain}/offsets.json`)
@@ -670,7 +669,6 @@ fetch(`${domain}/offsets.json`)
     console.error("Error fetching offsets:", error);
   });
   
-
 onMounted(() => {
   store.waitForReady().then(async () => {
     // window.addEventListener('contextmenu', function(event) {
@@ -697,9 +695,6 @@ onMounted(() => {
                 highlightsFolder.addChildPlace(item);
               }
               lowerLevelPlaces.push(item);
-            }
-            if (forceCircles.value) {
-              createCircleAnnotation(item);
             }
           }
         });
@@ -732,10 +727,10 @@ onMounted(() => {
 
 function findClosest(places: Place[]): Place | null {
   let closest = currentPlace.value;
-  let closestDist = closest === null ? null : distance(closest.get_RA() * H2R, closest.get_dec() * D2R, raRad.value, decRad.value);
+  let closestDist = closest === null ? null : distanceFromCenter(closest);
 
   places.forEach(place => {
-    const dist = distance(place.get_RA() * H2R, place.get_dec() * D2R, raRad.value, decRad.value);
+    const dist = distanceFromCenter(place);
     if ((!isNaN(dist)) && ((closestDist === null) || (dist < closestDist))) {
       closest = place;
       closestDist = dist;
@@ -745,14 +740,25 @@ function findClosest(places: Place[]): Place | null {
   return closest !== null && placeInView(closest) ? closest : null;
 }
 
+const closestPlace = ref<Place | null>(null);
 function updateClosestPlace() {
   currentPlace.value = findClosest(atTopLevel.value ? topLevelPlaces : lowerLevelPlaces);
+  closestPlace.value = currentPlace.value;
 }
+
+const forceShowCircle = ref(false);
+const onMarkerHover = (place: Place, show: boolean) => {
+  forceShowCircle.value = show;
+  console.log(place.get_name(), closestPlace.value?.get_name());
+  currentPlace.value = show ? place : closestPlace.value; 
+};
 
 function updateCircle(place: Place | null) {
   if (!highlightPlaceFromZoom.value || place === null) {
-    circle?.set_opacity(0);
-    return;
+    if (!forceShowCircle.value) {
+      circle?.set_opacity(0);
+      return;
+    }
   }
 
   if (circle === null) {
@@ -786,11 +792,15 @@ function wwtSmallestFov() {
   return Math.min(fovW, fovH);
 }
 
-function placeInView(place: Place, fraction=1/3): boolean {
+function distanceFromCenter(place: Place): number {
+  return distance(place.get_RA() * H2R, place.get_dec() * D2R, raRad.value, decRad.value);
+}
+
+function placeInView(place: Place, fraction=0.5): boolean {
   // checks if the center of place is in the current field of view
   // Assume the Zoom level corresponds to the size of the image
-  // fraction_of_place is ~fraction of the place that must be in the current FOV
-  // by default, allow 1/3 of the place to be visible and still be considered in view
+  // fraction is ~fraction of the place that must be in the current FOV
+  // by default, allow 1/2 of the place to be visible and still be considered in view
   if (place == null) {
     return false;
   }
@@ -799,13 +809,11 @@ function placeInView(place: Place, fraction=1/3): boolean {
     return false;
   }
 
-  const isetRa = iset.get_centerX() * D2R;
-  const isetDec = iset.get_centerY() * D2R;
+  let dist = distanceFromCenter(place);
   const isetFov = (place.get_zoomLevel() / 6) * D2R;
-  
   const curFov = wwtSmallestFov();
 
-  const dist = distance(isetRa, isetDec, raRad.value, decRad.value) + (fraction - 0.5) * isetFov;
+  dist += (fraction - 0.5) * isetFov;
   return dist < curFov / 2;
 }
 
@@ -859,6 +867,7 @@ const cssVars = computed(() => {
     ...rubinColors,
     "--accent-color": accentColor.value,
     "--button-color": buttonColor.value,
+    "--thumbnail-color": thumbnailColor.value,
     "--app-content-height": showTextSheet.value && infoSheetLocation.value === "bottom" ? `${100 - infoFraction}vh` : "100dvh",
     "--app-content-width": showTextSheet.value && infoSheetLocation.value === "right" ? `${100 - infoFraction}vw` : "100dvw",
     "--info-sheet-width": infoSheetWidth.value,
@@ -952,7 +961,7 @@ watch(showConstellations, (show: boolean) => {
 });
 watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
-  theme.global.name.value = newMode === "b" ? "rubinB" : "rubinA";
+  theme.global.name.value = newMode === "a" ? "rubinA" : "rubinB";
   opacity.value = 100;
 });
 watch(opacity, store.setForegroundOpacity);
@@ -979,6 +988,8 @@ html {
   &::-webkit-scrollbar {
     display: none;
   }
+  scrollbar-color: rgb(var(--v-theme-rubin-teal-2)) transparent;
+  
 }
 
 body {
@@ -1095,12 +1106,18 @@ body {
   aspect-ratio: 1.3 / 1;
 }
 
-#right-buttons {
+#right-buttons, #right-buttons > div {
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: flex-end;
   height: auto;
+}
+
+@media (max-width: 600px) {
+  .icon-wrapper {
+    font-size: 0.8em;
+  }
 }
 
 
@@ -1228,7 +1245,7 @@ video {
   
   cite {
       color: rgb(var(--v-theme-rubin-teal-3));
-      font-size:10pt;
+      font-size:0.9em;
   }
   
   .info-text {
@@ -1348,15 +1365,44 @@ video {
 
 .tracked-places {
   width: max-content;
-  padding: 0.5em;
+  font-size: 0.8em;
+  padding: 0.25em 0.5em;
   color: white;
   background-color: rgba(0, 0, 0, 0.51);
+  border: 0.5px solid rgb(var(--v-theme-rubin-teal-4));
   backdrop-filter: blur(5px);
   border-radius: 5px;
   // transform: translate(-50%, -50%); // center on the point
-  transform: translateY(-50%);
+  transform: translateY(-50%) translateX(1.5em);
   position: absolute;
 }
+
+.tracked-places.top-level-place {
+  font-size: 1em;
+  padding: 0.5em 1em;
+  color: rgb(var(--v-theme-rubin-teal-2));
+  transform: translate(-50%, -100%); 
+}
+
+
+.tracked-places.star {
+  transform: translateY(-50%) translateX(0.5em);
+}
+
+// .tracked-places:not(.star):before {
+//   position: absolute;
+//   content:'';
+//   box-shadow: 0px 0px 0px 2px black, 0px 0px 0px 4px white;
+//   width: 0.5em;
+//   height: 0px;
+//   border-radius: 50%;
+//   top: 50%;
+//   left: -1em;
+//   transform: translateY(-50%) translateX(-50%);
+// }
+
+
+
 
 #options {
   background: black;
@@ -1377,10 +1423,15 @@ video {
   #options-content {
     padding: 5px;
   }
+  
+  input[type="checkbox"] {
+    color: rgb(var(--v-theme-rubin-teal-2));
+  }
 }
 
 .fv-header {
-  font-size: 10pt;
+  font-size: 11pt;
+  font-weight: bold;
 
   svg {
     padding: 0px 5px;
@@ -1394,28 +1445,51 @@ video {
   left: 5px;
   bottom: 5px;
   max-width: 50%;
+  max-height: 50dvh;
+  overflow-y: scroll;
+  scrollbar-color: rgb(var(--v-theme-rubin-teal-2)) transparent;
 }
 
+.infobox.small-size {
+  overflow-y: visible;
+}
+#app details.expansion-panel[open] > summary > strong {
+  font-size: 1.2em;
+}
+
+@media (max-width: 592px) {
+  .infobox.small-size.with-scalebar {
+    bottom: 70px;
+    left: 25%;
+    transform: translateX(-50%);
+  }
+}
+
+#center-buttons {
+  min-width: 2rem;
+}
 #goto-other-image {
   pointer-events: auto;
   cursor: pointer;
   padding: 5px 10px;
-  font-size: 16pt;
+  font-size: min(16px, 5vw);
   border-radius: 10px;
   user-select: none;
+
+  @media only screen and (max-width: 600px) {
+    font-size: 11pt;
+  }
+}
+
+@media (max-width: 960px) {
+  #goto-other-image {
+    font-size: min(16px, 4vw);
+    padding: 5px 5px;
+  }
 }
 
 // when in mode-a we want to show the button with mode-b colors
 #goto-other-image.go-to-b {
-  --bg: var(--v-theme-rubin-teal);
-  // background-color: rgb(var(--v-theme-rubin-teal)); // fallback
-  background: radial-gradient(circle, rgba(var(--bg), 0.9) 0%, rgba(var(--bg), 0.8) 100%);
-  color: rgb(var(--v-theme-rubin-off-white));
-  border: 1px solid rgb(var(--v-theme-rubin-off-white));
-}
-
-// when in mode-b we want to show the button with mode-a colors
-#goto-other-image.go-to-a {
   --bg: var(--v-theme-rubin-deep-charcoal);
   // background-color: rgb(var(--bg)); // fallback
   background: radial-gradient(circle, rgba(var(--bg), 0.8) 0%, rgba(var(--bg), 0.6) 100%);
@@ -1424,15 +1498,26 @@ video {
   border: 1px solid rgb(var(--v-theme-rubin-teal));
 }
 
+// when in mode-b we want to show the button with mode-a colors
+#goto-other-image.go-to-a {
+  --bg: var(--v-theme-rubin-teal);
+  // background-color: rgb(var(--v-theme-rubin-teal)); // fallback
+  background: radial-gradient(circle, rgba(var(--bg), 0.9) 0%, rgba(var(--bg), 0.8) 100%);
+  color: rgb(var(--v-theme-rubin-off-white));
+  border: 1px solid rgb(var(--v-theme-rubin-off-white));
+}
+
+
 #app details.expansion-panel {
-  border-radius: 0.75em;
+  border-radius: 0.5em;
 }
 #app .fv-root.folder-view {
-  border-radius: 0.75em;
+  border-radius: 0.5em;
   padding: calc(0.75em / 2);
   
   .item-name {
     font-size: 0.9em;
+    line-height: 1.1;
   }
 }
 
@@ -1460,6 +1545,12 @@ h4 {
 .scalebar {
   display: inline-block;
   width: fit-content;
+  border-radius: 5px;
+}
+
+.opacity-slider {
+  background-color: rgba(33, 33, 33, 0.7);
+  padding-inline: 0.5em;
   border-radius: 5px;
 }
 
