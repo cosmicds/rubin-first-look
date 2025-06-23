@@ -206,6 +206,7 @@
               density="compact"
             ></v-checkbox>
             <v-checkbox
+              v-if="false"
               v-model="showConstellations"
               label="Constellations"
               :color="buttonColor"
