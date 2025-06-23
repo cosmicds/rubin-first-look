@@ -139,7 +139,6 @@
         </div>
         <div v-if="!fullscreen">
           <icon-button
-            v-if="false"
             v-model="showVideoSheet"
             fa-icon="video"
             :color="buttonColor"
@@ -306,14 +305,10 @@
           @keyup.enter="showVideoSheet = false"
           tabindex="0"
         ></font-awesome-icon>
+        
+        <iframe id="info-video"  width="560" height="315" src="https://www.youtube.com/embed/ZsIkLuw2Y68?si=wOzU-B0malOA0kW1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-          <iframe height="700"
-            id="info-video"
-            src="https://www.youtube.com/embed/DzXVy_99Ldg?si=MdpNGIRAA9kHOHAt"
-            title="YouTube video player"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen></iframe>
+
 
       </div>
     </v-dialog>
@@ -1218,7 +1213,7 @@ video, #info-video {
   // width: fit-content;
   max-width: 95%;
   object-fit: contain;
-  aspect-ratio: 9/17;
+
 }
 
 #video-container {
