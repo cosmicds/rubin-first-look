@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    if: ${{ github.repository_owner == 'wwt-ambassadors' }}
+    if: ${{ github.repository_owner == 'cosmicds' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
