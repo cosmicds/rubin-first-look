@@ -276,9 +276,12 @@
         tabindex="0"
       ></font-awesome-icon>
       <div class="coming-soon-text">
-      <strong>Coming Soon!</strong>
+      <h1>Coming Soon!</h1>
       <p>
-        For now, feel free to explore this full-sky image from NOIRLab and the Digital Sky Survey.
+        Please <strong>REFRESH</strong> this page after June 23, 2025, 11:20am EDT to load the Rubin First Look imagery.
+      </p>
+      <p>
+        For now, you can explore this full-sky image from NOIRLab and the Digital Sky Survey and get used to navigating around the sky in WorldWide Telescope.
       </p>
     </div>
     </div>
@@ -1616,7 +1619,7 @@ h4 {
   background-color: rgb(var(--v-theme-rubin-teal-6));
   
   
-  font-size: min(2.5vw, 2.5vh);
+  font-size: min(3vw, 3vh);
   padding: 1em;
   
   border: 1em solid rgb(var(--v-theme-rubin-teal-3));
@@ -1630,13 +1633,21 @@ h4 {
     justify-content: center;
     text-align: center;
   }
-  strong {
-    font-size: 5em;
+
+  h1 {
+    margin-top: 0.5em;
+    font-size: 3em;
+    line-height: 1.2;
+  }
+  
+  p {
+    margin-block: 0.75em;
   }
   
   #close-coming-soon {
     float: right;
-    font-size: 2em;
+    font-size: 1.5em;
+    color: rgb(var(--v-theme-rubin-turquoise));
   }
 
 }
