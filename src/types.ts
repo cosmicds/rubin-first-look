@@ -8,6 +8,7 @@ export interface FolderViewProps {
   thumbnailColor?: string;
   highlightColor?: string;
   textColor?: string;
+  startExpanded?: boolean;
 }
 
 export type ItemSelectionType = "click" | "dblclick" | "keyup" | "folder";

@@ -57,13 +57,14 @@ const props = withDefaults(defineProps<FolderViewProps>(), {
   thumbnailColor: "white",
   backgroundColor: "black",
   textColor: "white",
+  startExpanded: true,
 });
 
 const emit = defineEmits<{
   (event: "select", data: { item: Thumbnail, type: ItemSelectionType }): void;
 }>();
 
-const expanded = ref(true);
+const expanded = ref(props.startExpanded);
 function toggleExpanded() {
   expanded.value = !expanded.value;
 }

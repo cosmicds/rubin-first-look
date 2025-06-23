@@ -77,6 +77,7 @@
           :text-color="textColor"
           flex-direction="column"
           @select="({ item, type }) => handleSelection(item, type)"
+          :start-expanded="!smallSize"
         >
           <template #header="{ toggleExpanded, expanded }">
             <div class="fv-header">
@@ -1431,6 +1432,7 @@ video {
 .fv-header {
   font-size: 11pt;
   font-weight: bold;
+  min-width: 96px;
 
   svg {
     padding: 0px 5px;
