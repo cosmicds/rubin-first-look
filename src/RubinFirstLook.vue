@@ -651,7 +651,7 @@ function rotateOffsetToScreen(offset: Offset): Offset {
 
 
 
-fetch(`${domain}/offsets.json`)
+fetch("https://data1.wwtassets.org/noirlab2521/offsets.json")
   .then(response => response.json())
   .then(data => {
     const keys = Object.keys(data);
