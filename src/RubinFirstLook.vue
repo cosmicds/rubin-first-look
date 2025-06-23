@@ -23,8 +23,6 @@
       v-slot="props"
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
-      @mouseenter="onMarkerHover(place, true)"
-      @mouseleave="onMarkerHover(place, false)"
     >
         <div :class='["tracked-places", {"star": place.angularSize < 0.02}]' v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -41,8 +39,6 @@
       v-slot="props"
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
-      @mouseenter="onMarkerHover(place, true)"
-      @mouseleave="onMarkerHover(place, false)"
     >
         <div class="tracked-places top-level-place" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -585,7 +581,7 @@ type Mode = "a" | "b";
 const mode = ref<Mode>("a");
 const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
 
-const INFOBOX_ZOOM_CUTOFF = 10;
+const INFOBOX_ZOOM_CUTOFF = 25;
 const SMALL_LABELS_ZOOM = 25;
 let circle: Circle | null = null;
 const showOptions = ref(false);
