@@ -477,6 +477,9 @@
                         </li>
                         <li>
                           <strong>Scale Bar</strong>: Display or hide the scale bar that contextualizes how much of the sky you are seeing.
+                        </li>                           
+                        <li>
+                          <strong>Opacity Slider</strong>: Display or hide the opacity slider that lets you compare the new Rubin imagery with a background sky from NOIRLab and the Digitized Sky Survey.
                         </li>                        
                         <li>
                           <strong>Constellations</strong>: Display or hide the constellation lines and labels to orient yourself in the sky.
@@ -612,7 +615,7 @@ const INFOBOX_ZOOM_CUTOFF = 25;
 const SMALL_LABELS_ZOOM = 25;
 let circle: Circle | null = null;
 const showOptions = ref(false);
-const showCircle = ref(true);
+const showCircle = ref(false);
 const showLabels = ref(false);
 const showScalebar = ref(!smallSize.value);
 const showSlider = ref(false);
@@ -743,7 +746,7 @@ function updateClosestPlace() {
 }
 
 const forceShowCircle = ref(false);
-const onMarkerHover = (place: Place, show: boolean) => {
+const _onMarkerHover = (place: Place, show: boolean) => {
   forceShowCircle.value = show;
   console.log(place.get_name(), closestPlace.value?.get_name());
   currentPlace.value = show ? place : closestPlace.value; 
