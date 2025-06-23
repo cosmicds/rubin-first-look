@@ -843,7 +843,7 @@ function distanceFromCenter(place: Place): number {
   return distance(place.get_RA() * H2R, place.get_dec() * D2R, raRad.value, decRad.value);
 }
 
-function placeInView(place: Place, fraction=0.5): boolean {
+function placeInView(place: Place, fraction=0.0): boolean {
   // checks if the center of place is in the current field of view
   // Assume the Zoom level corresponds to the size of the image
   // fraction is ~fraction of the place that must be in the current FOV
