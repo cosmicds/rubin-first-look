@@ -139,7 +139,6 @@
         </div>
         <div v-if="!fullscreen">
           <icon-button
-            v-if="false"
             v-model="showVideoSheet"
             fa-icon="video"
             :color="buttonColor"
@@ -306,12 +305,11 @@
           @keyup.enter="showVideoSheet = false"
           tabindex="0"
         ></font-awesome-icon>
-        <video
-          controls
-          id="info-video"
-        >
-          <source src="" type="video/mp4">
-        </video>
+        
+        <iframe id="info-video"  width="560" height="315" src="https://www.youtube.com/embed/ZsIkLuw2Y68?si=wOzU-B0malOA0kW1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+
       </div>
     </v-dialog>
 
@@ -1197,37 +1195,28 @@ button:focus-visible,
   border-radius: .125rem;
 }
 
-.video-wrapper {
+.video-wrapper {  
+  display: flex;
+  padding: 10px;
   height: 100%;
-  background: black;
+  max-width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
   text-align: center;
   z-index: 1000;
-
-  #video-close-icon {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 15;
-    
-    &:hover {
-      cursor: pointer;
-    }
-
-    &:focus {
-      color: white;
-      border: 2px solid white;
-    }
-  }
+  // border: 1px solid white;
 }
 
-video {
-  height: 100%;
-  width: auto;
-  max-width: 100%;
+video, #info-video {
+  margin: auto;
+  height: 90%; 
+  // width: fit-content;
+  max-width: 95%;
   object-fit: contain;
+
 }
 
-#info-video {
+#video-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -1236,7 +1225,7 @@ video {
   max-width: 100%;
   overflow: hidden;
   padding: 0px;
-  z-index: 10;
+  z-index: 1000;
 }
 
 .info-sheet {
