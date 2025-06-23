@@ -110,6 +110,7 @@
         >
           Go to {{ mode == 'a' ? 'the' : '' }} {{ topLevelPlaces[mode=='a'? 1 : 0]?.get_name() }}
         </div>
+        <div>
         <div v-if="!fullscreen">
           <icon-button
             id="info-icon"
@@ -189,6 +190,7 @@
             ></v-checkbox>
           </div>
         </div>
+      </div>
 
       </div>
     </div>
@@ -231,14 +233,15 @@
             ]"
         />
       </div>
+      <infobox
+        :class="[{'with-scalebar': showScalebar}, {'small-size': smallSize}]"
+        v-hide="fullscreen"
+        :place="currentPlace"
+        :small="smallSize"
+      >
+      </infobox>
     </div>
 
-    <infobox
-      v-hide="fullscreen"
-      :place="currentPlace"
-      :small="smallSize"
-    >
-    </infobox>
 
     <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
@@ -946,6 +949,8 @@ html {
   &::-webkit-scrollbar {
     display: none;
   }
+  scrollbar-color: rgb(var(--v-theme-rubin-teal-2)) transparent;
+  
 }
 
 body {
@@ -1062,12 +1067,18 @@ body {
   aspect-ratio: 1.3 / 1;
 }
 
-#right-buttons {
+#right-buttons, #right-buttons > div {
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: flex-end;
   height: auto;
+}
+
+@media (max-width: 600px) {
+  .icon-wrapper {
+    font-size: 0.8em;
+  }
 }
 
 
@@ -1195,7 +1206,7 @@ video {
   
   cite {
       color: rgb(var(--v-theme-rubin-teal-3));
-      font-size:10pt;
+      font-size:0.9em;
   }
   
   .info-text {
@@ -1381,6 +1392,7 @@ video {
 
 .fv-header {
   font-size: 10pt;
+  min-width: 80px;
 
   svg {
     padding: 0px 5px;
@@ -1398,18 +1410,39 @@ video {
   overflow-y: scroll;
   scrollbar-color: rgb(var(--v-theme-rubin-teal-2)) transparent;
 }
+
+.infobox.small-size {
+  overflow-y: visible;
+}
 #app details.expansion-panel[open] > summary > strong {
   font-size: 1.2em;
-
 }
 
+@media (max-width: 592px) {
+  .infobox.small-size.with-scalebar {
+    bottom: 70px;
+    left: 25%;
+    transform: translateX(-50%);
+  }
+}
+
+#center-buttons {
+  min-width: 2rem;
+}
 #goto-other-image {
   pointer-events: auto;
   cursor: pointer;
   padding: 5px 10px;
-  font-size: 16pt;
+  font-size: min(16px, 5vw);
   border-radius: 10px;
   user-select: none;
+}
+
+@media (max-width: 960px) {
+  #goto-other-image {
+    font-size: min(16px, 4vw);
+    padding: 5px 5px;
+  }
 }
 
 // when in mode-a we want to show the button with mode-b colors
@@ -1440,6 +1473,7 @@ video {
   
   .item-name {
     font-size: 0.9em;
+    line-height: 1.1;
   }
 }
 

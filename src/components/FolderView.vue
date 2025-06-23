@@ -31,6 +31,7 @@
         role="button"
         :aria-label="item.get_name()"
         :aria-selected="lastSelectedItem === item"
+        :style="{ '--url': item.get_thumbnailUrl() }"
       >
         <img :src="item.get_thumbnailUrl()" :alt="item.get_name()" />
         <div
@@ -146,6 +147,8 @@ const cssVars = computed(() => ({
   align-items: center;
   justify-content: space-around;
   gap: var(--gap);
+  width: max(96px, 16vw);
+  max-width: 120px;
 
   &::after {
     content: "";
@@ -157,16 +160,19 @@ const cssVars = computed(() => ({
   padding: 3px;
   border: 1px solid #444;
   border-radius: 2px;
-  width: ~"min(96px, 16vw)";
+  width: 100%;
   color: var(--text-color);
   cursor: pointer;
   pointer-events: auto;
-
+  display: flex;
+  flex-direction: column;
   & img {
     width: 100%;
-    height: ~"min(45px, 7.5vw)";
+    height: ~"min(50px, 9vw)";
     object-fit: cover;
     border-radius: 2px;
+    margin: 0;
+    padding: 0;
   }
 	
 	&:hover {
@@ -186,5 +192,7 @@ const cssVars = computed(() => ({
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  padding: 0;
+  margin: 0;
 }
 </style>

@@ -58,6 +58,12 @@ withDefaults(defineProps<Props>(), {
   transition: width 0.5s, height 0.5s;
 }
 
+.infobox-activator {
+  pointer-events: auto;
+  user-select: none;
+  text-wrap: nowrap;;
+}
+
 .infobox-mobile {
   background: #00000080;
   background: rgba(var(--v-theme-surface-variant), .9);
