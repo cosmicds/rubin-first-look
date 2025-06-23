@@ -610,7 +610,7 @@ const mainImageInView = ref(false);
 
 type Mode = "a" | "b";
 const mode = ref<Mode>("a");
-const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
+const folder = computed(() => (mode.value == "a" && imagesLoaded.value[0]) ? highlightsA.value : highlightsB.value);
 
 const INFOBOX_ZOOM_CUTOFF = 25;
 const SMALL_LABELS_ZOOM = 25;
@@ -669,6 +669,11 @@ fetch(`${domain}/offsets.json`)
     console.error("Error fetching offsets:", error);
   });
   
+const imagesLoaded = ref<[boolean, boolean]>([false, false]);
+const showComingSoon = ref(false);
+watch(imagesLoaded, (newValue) => {
+  showComingSoon.value = !newValue[0] && !newValue[1];
+}, { immediate: true });
 onMounted(() => {
   store.waitForReady().then(async () => {
     // window.addEventListener('contextmenu', function(event) {
@@ -700,6 +705,8 @@ onMounted(() => {
         });
         const highlightsRef = index === 0 ? highlightsA : highlightsB;
         highlightsRef.value = highlightsFolder;
+        const length = highlightsRef.value.get_children()?.length ?? 0;
+        imagesLoaded.value = imagesLoaded.value.map((loaded, i) => i === index ? length > 0 : loaded) as [boolean, boolean];
       });
     }).then(() => {
       positionSet.value = true;
