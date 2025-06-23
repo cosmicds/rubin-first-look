@@ -158,14 +158,14 @@ const cssVars = computed(() => ({
   border: 1px solid #444;
   background: var(--thumbnail-color);
   border-radius: 2px;
-  width: ~"min(96px, 16vw)";
+  width: ~"min(96px, 22vw)";
   color: var(--text-color);
   cursor: pointer;
   pointer-events: auto;
 
   & img {
     width: 100%;
-    height: ~"min(45px, 7.5vw)";
+    height: ~"min(45px, 10.3vw)";
     object-fit: cover;
     border-radius: 2px;
   }
@@ -183,10 +183,10 @@ const cssVars = computed(() => ({
 .item-name {
   color: var(--text-color);
   width: 100%;
-  font-size: 7pt;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+  line-height: 1;
+  // text-overflow: ellipsis;
+  // overflow: hidden;
+  // white-space: nowrap;
   padding-left: 2px;
 }
 </style>

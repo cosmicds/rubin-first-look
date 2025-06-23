@@ -1404,6 +1404,10 @@ video {
   font-size: 16pt;
   border-radius: 10px;
   user-select: none;
+
+  @media only screen and (max-width: 600px) {
+    font-size: 11pt;
+  }
 }
 
 // when in mode-a we want to show the button with mode-b colors
@@ -1427,10 +1431,10 @@ video {
 
 
 #app details.expansion-panel {
-  border-radius: 0.75em;
+  border-radius: 0.5em;
 }
 #app .fv-root.folder-view {
-  border-radius: 0.75em;
+  border-radius: 0.5em;
   padding: calc(0.75em / 2);
   
   .item-name {
