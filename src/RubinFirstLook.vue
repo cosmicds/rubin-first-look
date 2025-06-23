@@ -23,8 +23,6 @@
       v-slot="props"
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
-      @mouseenter="onMarkerHover(place, true)"
-      @mouseleave="onMarkerHover(place, false)"
     >
         <div :class='["tracked-places", {"star": place.angularSize < 0.02}]' v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -41,8 +39,6 @@
       v-slot="props"
       @click="handleSelection(place, 'click')"
       @dblclick="handleSelection(place, 'dblclick')"
-      @mouseenter="onMarkerHover(place, true)"
-      @mouseleave="onMarkerHover(place, false)"
     >
         <div class="tracked-places top-level-place" v-on="props.on">{{ place.get_name() }}</div>
     </wwt-tracked-content>
@@ -81,6 +77,7 @@
           :text-color="textColor"
           flex-direction="column"
           @select="({ item, type }) => handleSelection(item, type)"
+          :start-expanded="!smallSize"
         >
           <template #header="{ toggleExpanded, expanded }">
             <div class="fv-header">
@@ -481,6 +478,9 @@
                         </li>
                         <li>
                           <strong>Scale Bar</strong>: Display or hide the scale bar that contextualizes how much of the sky you are seeing.
+                        </li>                           
+                        <li>
+                          <strong>Opacity Slider</strong>: Display or hide the opacity slider that lets you compare the new Rubin imagery with a background sky from NOIRLab and the Digitized Sky Survey.
                         </li>                        
                         <li>
                           <strong>Constellations</strong>: Display or hide the constellation lines and labels to orient yourself in the sky.
@@ -612,11 +612,11 @@ type Mode = "a" | "b";
 const mode = ref<Mode>("a");
 const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
 
-const INFOBOX_ZOOM_CUTOFF = 10;
+const INFOBOX_ZOOM_CUTOFF = 25;
 const SMALL_LABELS_ZOOM = 25;
 let circle: Circle | null = null;
 const showOptions = ref(false);
-const showCircle = ref(true);
+const showCircle = ref(false);
 const showLabels = ref(false);
 const showScalebar = ref(!smallSize.value);
 const showSlider = ref(false);
@@ -747,7 +747,7 @@ function updateClosestPlace() {
 }
 
 const forceShowCircle = ref(false);
-const onMarkerHover = (place: Place, show: boolean) => {
+const _onMarkerHover = (place: Place, show: boolean) => {
   forceShowCircle.value = show;
   console.log(place.get_name(), closestPlace.value?.get_name());
   currentPlace.value = show ? place : closestPlace.value; 
@@ -1432,6 +1432,7 @@ video {
 .fv-header {
   font-size: 11pt;
   font-weight: bold;
+  min-width: 96px;
 
   svg {
     padding: 0px 5px;
