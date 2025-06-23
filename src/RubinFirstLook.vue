@@ -1198,10 +1198,10 @@ video {
   .v-overlay__content {
     align-self: flex-end;
     padding: 0;
-    margin: 0;
-    max-width: 100%;
-    height: var(--info-sheet-height);
-    width: var(--info-sheet-width);
+    margin: 0 !important;
+    max-width: 100% !important;
+    height: var(--info-sheet-height) !important;
+    width: var(--info-sheet-width) !important;
   }
 
   &.info-sheet-right .v-overlay__content {
