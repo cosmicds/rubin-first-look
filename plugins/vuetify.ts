@@ -50,9 +50,9 @@ export default createVuetify({
   theme: {
     // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
 
-    defaultTheme: 'rubinB',
+    defaultTheme: 'rubinA',
     themes: {
-      rubinB: {
+      rubinA: {
         dark: false,
         colors: {
           // Core brand colors
@@ -66,6 +66,9 @@ export default createVuetify({
           background: RUBIN_COLORS['rubin-deep-charcoal'],
           // Info Drawer background color (set by Vuetify default)
           surface: RUBIN_COLORS['rubin-deep-charcoal'],
+
+          // Thumbnail background color
+          info: RUBIN_COLORS['rubin-charcoal'],
 
           // "On-color" colors. These are only used by default on Vuetify components.
           // when you have set the color using color="blah", then the text color
@@ -82,20 +85,24 @@ export default createVuetify({
         },
       },
       // TODO: This is the same as B right now
-      rubinA: {
-        dark: false,
+      rubinB: {
+        dark: true,
         colors: {
           // Core brand colors
           // Button color
           primaryVariant: RUBIN_COLORS['rubin-turquoise'],
           // Accent color
-          primary: RUBIN_COLORS['rubin-deep-charcoal'],
+          primary: RUBIN_COLORS['rubin-charcoal'],
 
           // Surface and backgrounds
           // Main "v-application" background color
           background: RUBIN_COLORS['rubin-deep-charcoal'],
           // Info Drawer background color (set by Vuetify default)
           surface: RUBIN_COLORS['rubin-deep-charcoal'],
+
+          // Thumbnail background color
+          info: RUBIN_COLORS['rubin-teal'],
+
 
           // "On-color" colors. These are only used by default on Vuetify components.
           // when you have set the color using color="blah", then the text color

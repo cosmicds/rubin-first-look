@@ -54,6 +54,7 @@ const lastSelectedItem: Ref<Thumbnail | null> = ref(null);
 const props = withDefaults(defineProps<FolderViewProps>(), {
   gap: "5px",
   highlightColor: "#1671e0",
+  thumbnailColor: "white",
   backgroundColor: "black",
   textColor: "white",
 });
@@ -94,6 +95,7 @@ watch(() => props.rootFolder, updateFolder);
 const cssVars = computed(() => ({
   "--flex-direction": props.flexDirection,
   "--background-color": props.backgroundColor,
+  "--thumbnail-color": props.thumbnailColor,
   "--highlight-color": props.highlightColor,
   "--text-color": props.textColor,
   "--gap": props.gap,
@@ -121,9 +123,7 @@ const cssVars = computed(() => ({
   &::-webkit-scrollbar-thumb {
     background: #1671e0;
     border-radius: 10px;
-  }
-	
-	
+  }	
 
   //width: 100%;
   //justify-content: space-around;
@@ -156,6 +156,7 @@ const cssVars = computed(() => ({
 .item {
   padding: 3px;
   border: 1px solid #444;
+  background: var(--thumbnail-color);
   border-radius: 2px;
   width: ~"min(96px, 16vw)";
   color: var(--text-color);
