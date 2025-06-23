@@ -84,7 +84,7 @@
         >
           <template #header="{ toggleExpanded, expanded }">
             <div class="fv-header">
-              <span>Explore {{ mode.charAt(0).toUpperCase() + mode.slice(1) }}</span>
+              <span>Explore</span>
               <font-awesome-icon
                 :icon="expanded ? 'chevron-up' : 'chevron-down'"
                 @click="toggleExpanded()"
@@ -1380,7 +1380,8 @@ video {
 }
 
 .fv-header {
-  font-size: 10pt;
+  font-size: 11pt;
+  font-weight: bold;
 
   svg {
     padding: 0px 5px;

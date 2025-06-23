@@ -154,7 +154,7 @@ const cssVars = computed(() => ({
 }
 
 .item {
-  padding: 3px;
+  padding: 1px;
   border: 1px solid #444;
   background: var(--thumbnail-color);
   border-radius: 2px;
@@ -187,5 +187,6 @@ const cssVars = computed(() => ({
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  padding-left: 2px;
 }
 </style>
