@@ -803,10 +803,13 @@ function updateCircle(place: Place | null) {
   circle.set_radius(place?.angularSize);
 }
 
+import { copyPlace } from "./wwt-hacks";
 function gotoMainImage(image: Mode, instant=false) {
   const index = image === "a" ? 0 : 1;
+  const item = copyPlace(topLevelPlaces[index]);
+  item.set_zoomLevel(zoomLevelForPlace(item) * 1.2);
   store.gotoTarget({
-    place: topLevelPlaces[index],
+    place: item,
     noZoom: false,
     instant,
     trackObject: false,
@@ -818,6 +821,17 @@ function wwtSmallestFov() {
   const fovH = renderContext.get_fovAngle() * D2R;
   const fovW = fovH * renderContext.width / renderContext.height;
   return Math.min(fovW, fovH);
+}
+
+function zoomLevelForPlace(place: Place): number {
+  // we want the wwt zoom level  to be same as the places .get_zoomLevel()
+  const {width, height} = WWTControl.singleton.renderContext;
+  // console.log(width, height, place.get_zoomLevel()/6 * D2R, wwtSmallestFov());
+  if (width > height) {
+    // landscape
+    return place.get_zoomLevel();
+  }
+  return place.get_zoomLevel() * (height / width);
 }
 
 function distanceFromCenter(place: Place): number {
