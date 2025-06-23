@@ -139,6 +139,7 @@
         </div>
         <div v-if="!fullscreen">
           <icon-button
+            v-if="false"
             v-model="showVideoSheet"
             fa-icon="video"
             :color="buttonColor"
@@ -184,7 +185,7 @@
             ></v-checkbox>
             <v-checkbox
               v-model="showCircle"
-              label="Region Markers"
+              label="Region Circle"
               :color="buttonColor"
               hide-details
               density="compact"
@@ -205,6 +206,7 @@
               density="compact"
             ></v-checkbox>
             <v-checkbox
+              v-if="false"
               v-model="showConstellations"
               label="Constellations"
               :color="buttonColor"
@@ -265,6 +267,26 @@
       </infobox>
     </div>
 
+    <div id="coming-soon" v-if="!imagesLoaded[0] && !imagesLoaded[1] && showComingSoon">
+      <!-- close icon -->
+      <font-awesome-icon
+        id="close-coming-soon"
+        icon="times"
+        size="lg"
+        @click="showComingSoon = false"
+        @keyup.enter="showComingSoon = false"
+        tabindex="0"
+      ></font-awesome-icon>
+      <div class="coming-soon-text">
+      <h1>Coming Soon!</h1>
+      <p>
+        Please <strong>REFRESH</strong> this page after June 23, 2025, 11:20am EDT to load the Rubin First Look imagery.
+      </p>
+      <p>
+        For now, you can explore this full-sky image from NOIRLab and the Digital Sky Survey and get used to navigating around the sky in WorldWide Telescope.
+      </p>
+    </div>
+    </div>
 
     <!-- This dialog contains the video that is displayed when the video icon is clicked -->
 
@@ -334,7 +356,7 @@
           <v-window-item>
             <v-card class="no-bottom-border-radius scrollable">
               <v-card-text class="info-text no-bottom-border-radius">
-                <v-container class="pa-0">
+                <v-container class="pa-0"  v-if="imagesLoaded.some(loaded => loaded)">
                   <p>
                     This text is excerpted from the <a href="https://noirlab.edu/public/news/noirlab2521/" target="_blank" rel="noopener noreferrer">Rubin First Look Press Release</a>. See the full release for more information.
                   </p>
@@ -364,7 +386,11 @@
                   </p>
                   <v-spacer class="end-spacer"></v-spacer>
                 </v-container>
-                  
+                <v-container class="pa-0" v-else>
+                  <p>
+                    Come back June 23rd, 11:20am EDT to learn more!
+                  </p> 
+                </v-container>
                 <!-- <a href="https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0" target="_blank" rel="noopener noreferrer">Rubin Visual Identity</a>
                 <v-spacer class="end-spacer"></v-spacer> -->
               </v-card-text>
@@ -412,8 +438,8 @@
                   <v-row>
                     <v-col class="pt-0">
                       <ul class="text-list mx-5">
-                        <li>
-                          <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> the <strong>Go to Image {{ mode == 'a' ? 'B' : 'A' }}</strong> button in the upper right to switch the view to that image.
+                        <li v-if="imagesLoaded.every(loaded => loaded)">
+                          <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> the <strong>Go to Image {{ topLevelPlaces[mode=='a'? 1 : 0]?.get_name() }}</strong> button in the upper right to switch the view to that image.
                         </li>
                         <li>
                           <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> on an object <strong>Image Thumbnail</strong> or <strong>Label</strong> to pan to that object.
@@ -608,7 +634,7 @@ const mainImageInView = ref(false);
 
 type Mode = "a" | "b";
 const mode = ref<Mode>("a");
-const folder = computed(() => mode.value == "a" ? highlightsA.value : highlightsB.value);
+const folder = computed(() => (mode.value == "a" && imagesLoaded.value[0]) ? highlightsA.value : highlightsB.value);
 
 const INFOBOX_ZOOM_CUTOFF = 25;
 const SMALL_LABELS_ZOOM = 25;
@@ -667,6 +693,11 @@ fetch("https://data1.wwtassets.org/noirlab2521/offsets.json")
     console.error("Error fetching offsets:", error);
   });
   
+const imagesLoaded = ref<[boolean, boolean]>([false, false]);
+const showComingSoon = ref(false);
+watch(imagesLoaded, (newValue) => {
+  showComingSoon.value = !newValue[0] && !newValue[1];
+}, { immediate: true });
 onMounted(() => {
   store.waitForReady().then(async () => {
     // window.addEventListener('contextmenu', function(event) {
@@ -698,6 +729,8 @@ onMounted(() => {
         });
         const highlightsRef = index === 0 ? highlightsA : highlightsB;
         highlightsRef.value = highlightsFolder;
+        const length = highlightsRef.value.get_children()?.length ?? 0;
+        imagesLoaded.value = imagesLoaded.value.map((loaded, i) => i === index ? length > 0 : loaded) as [boolean, boolean];
       });
     }).then(() => {
       positionSet.value = true;
@@ -773,10 +806,13 @@ function updateCircle(place: Place | null) {
   circle.set_radius(place?.angularSize);
 }
 
+import { copyPlace } from "./wwt-hacks";
 function gotoMainImage(image: Mode, instant=false) {
   const index = image === "a" ? 0 : 1;
+  const item = copyPlace(topLevelPlaces[index]);
+  item.set_zoomLevel(zoomLevelForPlace(item) * 1.2);
   store.gotoTarget({
-    place: topLevelPlaces[index],
+    place: item,
     noZoom: false,
     instant,
     trackObject: false,
@@ -790,11 +826,22 @@ function wwtSmallestFov() {
   return Math.min(fovW, fovH);
 }
 
+function zoomLevelForPlace(place: Place): number {
+  // we want the wwt zoom level  to be same as the places .get_zoomLevel()
+  const {width, height} = WWTControl.singleton.renderContext;
+  // console.log(width, height, place.get_zoomLevel()/6 * D2R, wwtSmallestFov());
+  if (width > height) {
+    // landscape
+    return place.get_zoomLevel();
+  }
+  return place.get_zoomLevel() * (height / width);
+}
+
 function distanceFromCenter(place: Place): number {
   return distance(place.get_RA() * H2R, place.get_dec() * D2R, raRad.value, decRad.value);
 }
 
-function placeInView(place: Place, fraction=0.5): boolean {
+function placeInView(place: Place, fraction=0.0): boolean {
   // checks if the center of place is in the current field of view
   // Assume the Zoom level corresponds to the size of the image
   // fraction is ~fraction of the place that must be in the current FOV
@@ -1560,5 +1607,48 @@ h4 {
 .v-slider {
   width: 100% !important;
   pointer-events: auto;
+}
+
+#coming-soon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(75vw, 75vh);
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  background-color: rgb(var(--v-theme-rubin-teal-6));
+  
+  
+  font-size: min(3vw, 3vh);
+  padding: 1em;
+  
+  border: 1em solid rgb(var(--v-theme-rubin-teal-3));
+  border-radius: 1em;
+  color: rgb(var(--v-theme-deep-charcoal));
+  
+  .coming-soon-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  h1 {
+    margin-top: 0.5em;
+    font-size: 3em;
+    line-height: 1.2;
+  }
+  
+  p {
+    margin-block: 0.75em;
+  }
+  
+  #close-coming-soon {
+    float: right;
+    font-size: 1.5em;
+    color: rgb(var(--v-theme-rubin-turquoise));
+  }
+
 }
 </style>

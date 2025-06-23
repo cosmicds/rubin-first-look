@@ -83,6 +83,7 @@ export default createVuetify({
           // Custom properties
           // Infobox background color
           "surface-variant": RUBIN_COLORS['rubin-deep-charcoal'],
+          "on-surface-variant": RUBIN_COLORS['rubin-off-white'],
 
           ...RUBIN_COLORS,
         },
@@ -119,6 +120,7 @@ export default createVuetify({
           // Custom properties
           // Infobox background color
           "surface-variant": RUBIN_COLORS['rubin-deep-charcoal'],
+          "on-surface-variant": RUBIN_COLORS['rubin-off-white'],
 
           ...RUBIN_COLORS,
         }
