@@ -53,7 +53,7 @@ export default createVuetify({
     defaultTheme: 'rubinA',
     themes: {
       rubinA: {
-        dark: false,
+        dark: true,
         colors: {
           // Core brand colors
           // Lighter button color
