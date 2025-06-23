@@ -15,7 +15,7 @@ withDefaults(defineProps<Props>(), {
 <template>
   <details class="expansion-panel" :open="normallyOpen">
     <summary>
-      <slot name="title">{{ title }}</slot>
+      <slot name="title" ><strong>{{ title }}</strong></slot>
     </summary>
     <article>
       <slot name="content">

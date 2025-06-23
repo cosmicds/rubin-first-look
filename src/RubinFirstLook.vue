@@ -714,7 +714,8 @@ function updateClosestPlace() {
 const forceShowCircle = ref(false);
 const onMarkerHover = (place: Place, show: boolean) => {
   forceShowCircle.value = show;
-  currentPlace.value = show ? place : (place.get_name() !== closestPlace.value?.get_name() && highlightPlaceFromZoom.value) ? closestPlace.value : null;
+  console.log(place.get_name(), closestPlace.value?.get_name());
+  currentPlace.value = show ? place : closestPlace.value; 
 };
 
 function updateCircle(place: Place | null) {
@@ -1372,6 +1373,10 @@ video {
   #options-content {
     padding: 5px;
   }
+  
+  input[type="checkbox"] {
+    color: rgb(var(--v-theme-rubin-teal-2));
+  }
 }
 
 .fv-header {
@@ -1389,6 +1394,12 @@ video {
   left: 5px;
   bottom: 5px;
   max-width: 50%;
+  max-height: 50dvh;
+  overflow-y: auto;
+}
+#app details.expansion-panel[open] > summary > strong {
+  font-size: 1.2em;
+
 }
 
 #goto-other-image {
