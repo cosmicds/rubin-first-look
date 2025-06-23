@@ -98,13 +98,19 @@
       </div>
       <div id="center-buttons" v-hide="fullscreen">
         <v-slider
-          v-if="showSlider && !smallSize"
+          v-if="!smallSize && showSlider && mainImageInView"
           v-model="opacity"
-          label="Opacity"
           :min="0"
           :max="100"
           color="secondary"
-        ></v-slider>
+        >
+          <template #prepend>
+            NOIRLAB All-Sky/DSS
+          </template>
+          <template #append>
+            {{ store.foregroundImageset?.get_name() }}
+          </template>
+        </v-slider>
       </div>
       <div id="right-buttons">
         <div
@@ -589,6 +595,7 @@ const topLevelPlaces: Place[] = [];
 const highlightsA = ref(new Folder());
 const highlightsB = ref(new Folder());
 const currentPlace = ref<Place | null>(null);
+const mainImageInView = ref(false);
 
 type Mode = "a" | "b";
 const mode = ref<Mode>("b");
@@ -911,8 +918,12 @@ function selectSheet(sheetType: SheetType | null) {
 function onMove() {
   if (placeInView(topLevelPlaces[0])) {
     mode.value = "a";
+    mainImageInView.value = true;
   } else if (placeInView(topLevelPlaces[1])) {
     mode.value = "b";
+    mainImageInView.value = true;
+  } else {
+    mainImageInView.value = false;
   }
   updateClosestPlace();
 }
