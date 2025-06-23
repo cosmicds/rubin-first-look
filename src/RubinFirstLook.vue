@@ -101,6 +101,22 @@
         </folder-view>
       </div>
       <div id="center-buttons" v-hide="fullscreen">
+        <v-slider
+          v-if="!smallSize && showSlider && mainImageInView"
+          v-model="opacity"
+          :min="0"
+          :max="100"
+          color="secondary"
+          class="opacity-slider"
+          hide-details
+        >
+          <template #prepend>
+            NOIRLab All-Sky/DSS
+          </template>
+          <template #append>
+            {{ store.foregroundImageset?.get_name() }}
+          </template>
+        </v-slider>
       </div>
       <div id="right-buttons">
         <div
@@ -180,6 +196,14 @@
               v-model="showScalebar"
               label="Scale Bar"
               :color="buttonColor"
+              hide-details
+              density="compact"
+            ></v-checkbox>
+            <v-checkbox
+              v-if="!smallSize"
+              v-model="showSlider"
+              label="Opacity Slider"
+              :color="accentColor"
               hide-details
               density="compact"
             ></v-checkbox>
@@ -560,6 +584,8 @@ const sheet = ref<SheetType | null>(null);
 const layersLoaded = ref(false);
 const positionSet = ref(false);
 const zooming = ref(false);
+const opacity = ref(100);
+
 let zoomTimeout: ReturnType<typeof setTimeout> | null = null;
 // See https://rubin.canto.com/g/RubinVisualIdentity/index?viewIndex=0
 const accentColor = computed(() => theme.global.current.value.colors.primary);
@@ -580,6 +606,7 @@ const topLevelPlaces: Place[] = [];
 const highlightsA = ref(new Folder());
 const highlightsB = ref(new Folder());
 const currentPlace = ref<Place | null>(null);
+const mainImageInView = ref(false);
 
 type Mode = "a" | "b";
 const mode = ref<Mode>("a");
@@ -592,6 +619,7 @@ const showOptions = ref(false);
 const showCircle = ref(true);
 const showLabels = ref(false);
 const showScalebar = ref(!smallSize.value);
+const showSlider = ref(false);
 const showConstellations = ref(false);
 const highlightPlaceFromZoom = computed(() => zoomDeg.value < INFOBOX_ZOOM_CUTOFF);
 const showPlaceHighlights = computed(() => !showTextSheet.value && currentPlace.value !== null && highlightPlaceFromZoom.value);
@@ -899,8 +927,12 @@ function selectSheet(sheetType: SheetType | null) {
 function onMove() {
   if (placeInView(topLevelPlaces[0])) {
     mode.value = "a";
+    mainImageInView.value = true;
   } else if (placeInView(topLevelPlaces[1])) {
     mode.value = "b";
+    mainImageInView.value = true;
+  } else {
+    mainImageInView.value = false;
   }
   updateClosestPlace();
 }
@@ -930,7 +962,9 @@ watch(showConstellations, (show: boolean) => {
 watch(currentPlace, updateCircle);
 watch(mode, (newMode: Mode) => {
   theme.global.name.value = newMode === "a" ? "rubinA" : "rubinB";
+  opacity.value = 100;
 });
+watch(opacity, store.setForegroundOpacity);
 </script>
 
 <style lang="less">
@@ -1512,5 +1546,20 @@ h4 {
   display: inline-block;
   width: fit-content;
   border-radius: 5px;
+}
+
+.opacity-slider {
+  background-color: rgba(33, 33, 33, 0.7);
+  padding-inline: 0.5em;
+  border-radius: 5px;
+}
+
+#center-buttons {
+  width: 50%;
+}
+
+.v-slider {
+  width: 100% !important;
+  pointer-events: auto;
 }
 </style>
