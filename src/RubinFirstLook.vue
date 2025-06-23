@@ -139,6 +139,7 @@
         </div>
         <div v-if="!fullscreen">
           <icon-button
+            v-if="false"
             v-model="showVideoSheet"
             fa-icon="video"
             :color="buttonColor"
