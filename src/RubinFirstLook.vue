@@ -436,8 +436,8 @@
                   <v-row>
                     <v-col class="pt-0">
                       <ul class="text-list mx-5">
-                        <li>
-                          <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> the <strong>Go to Image {{ mode == 'a' ? 'B' : 'A' }}</strong> button in the upper right to switch the view to that image.
+                        <li v-if="imagesLoaded.every(loaded => loaded)">
+                          <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> the <strong>Go to Image {{ topLevelPlaces[mode=='a'? 1 : 0]?.get_name() }}</strong> button in the upper right to switch the view to that image.
                         </li>
                         <li>
                           <strong>{{ touchscreen ? "Tap" : "Click" }}</strong> on an object <strong>Image Thumbnail</strong> or <strong>Label</strong> to pan to that object.
