@@ -24,7 +24,7 @@
           />
         <div id="splash-screen-text" class="mb-2">
           <p>See the</p>
-          <p class="highlight">{{ title }}</p>
+          <p class="highlight"><a href="http://rubinobservatory.org/" target="_blank" rel="noopener noreferrer">{{ title }}</a></p>
           Images!
         </div>
       </div>
@@ -48,6 +48,7 @@
         <div id="splash-screen-logos">
           <credit-logos
             id="splash-screen-credit-logos"
+            logo-size="5vmin"
             :default-logos="['cosmicds', 'wwt']"
             :extra-logos = "[
               {
@@ -68,7 +69,8 @@
         </div>
 
         <span>
-        Brought to you by <a href="https://rubinobservatory.org/" target="_blank" rel="noopener noreferrer">Rubin Observatory</a>, <a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer"><em>INTUITIVE</em>&reg; Planetarium at the U.S. Space & Rocket Center</a> , <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a>.
+        Brought to you by 
+        <a href="https://www.rocketcenter.com/INTUITIVEPlanetarium" target="_blank" rel="noopener noreferrer"><em>INTUITIVE</em>&reg; Planetarium at the U.S. Space & Rocket Center</a>, <a href="https://www.cosmicds.cfa.harvard.edu/" target="_blank" rel="noopener noreferrer">Cosmic Data Stories</a> and <a href="https://www.worldwidetelescope.org/home/" target="_blank" rel="noopener noreferrer">WorldWide Telescope</a> using the "first look" images from  <a href="https://rubinobservatory.org/" target="_blank" rel="noopener noreferrer">Rubin Observatory</a>.
         </span>
       </div>
     </div>
@@ -124,7 +126,7 @@ function closeSplashScreen() {
 #splash-overlay {
   align-items: center;
   justify-content: center;
-  font-size: min(8vw, 7vh);
+  font-size: min(8vw, 5vh);
   transition: width 0.5s, height 0.5s;
 }
 
@@ -174,6 +176,7 @@ function closeSplashScreen() {
     text-transform: uppercase;
     font-weight: bold;
   }
+
   
   p.small {
     font-size: var(--default-font-size);
@@ -234,7 +237,7 @@ function closeSplashScreen() {
     margin: clamp(0.5rem, 3vh, 3rem) auto;
     font-size: calc(var(--default-font-size));
     line-height: calc(var(--default-line-height));
-    width: 60%; 
+    width: 80%; 
 
     @media only screen and (max-width: 600px) {
       width: 80%;

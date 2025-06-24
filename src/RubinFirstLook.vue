@@ -264,6 +264,7 @@
         :small="smallSize"
       >
       </infobox>
+      <div class="perma-credit">Image Credit: RubinObs/NOIRLab/SLAC/NSF/DOE/AURA</div>
     </div>
 
     <div id="coming-soon" v-if="!imagesLoaded[0] && !imagesLoaded[1] && showComingSoon">
@@ -1167,21 +1168,25 @@ body {
 #bottom-content {
   display: flex;
   flex-direction: column;
-  position: absolute;
-  bottom: 0;
+  position: fixed;
+  bottom: 8px;
   right: 0;
   width: fit-content;
   align-items: flex-end;
-  pointer-events: none;
+  pointer-events: auto;
   align-items: flex-end;
   gap: 10px;
 }
 
 #body-logos {
   align-self: flex-end;
-  img{
+  img {
     margin-inline: 1rem;
   }
+}
+
+#body-logos a{
+  margin-inline: 1rem;
 }
 
 
@@ -1478,7 +1483,7 @@ video, #info-video {
 .infobox {
   position: fixed;
   left: 5px;
-  bottom: 5px;
+  bottom: 30px;
   max-width: 50%;
   max-height: 50dvh;
   overflow-y: scroll;
@@ -1492,12 +1497,23 @@ video, #info-video {
   font-size: 1.2em;
 }
 
-@media (max-width: 592px) {
+@media (max-width: 644px) {
   .infobox.small-size.with-scalebar {
     bottom: 70px;
     left: 25%;
     transform: translateX(-50%);
   }
+}
+
+.perma-credit {
+  position: fixed;;
+  bottom: 0;
+  left: 0;
+  padding: 5px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  text-align: center;
+  font-size: 0.9em;
 }
 
 #center-buttons {
