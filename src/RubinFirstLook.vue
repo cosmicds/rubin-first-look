@@ -138,7 +138,7 @@
           >
           </icon-button>
         </div>
-        <div v-if="!hideUI">
+        <div v-if="!(hideUI || kiosk)">
           <icon-button
             v-model="showVideoSheet"
             fa-icon="video"
