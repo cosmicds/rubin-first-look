@@ -2,6 +2,7 @@
 <v-app
   id="app"
   :style="cssVars"
+  :class="[kiosk ? 'kiosk' : '']"
 >
   <div
     id="main-content"
@@ -66,7 +67,7 @@
     <!-- This block contains the elements (e.g. icon buttons displayed at/near the top of the screen -->
 
     <div id="top-content">
-      <div id="left-buttons" v-hide="fullscreen">
+      <div id="left-buttons" v-hide="hideUI">
         <folder-view
           v-show="folder.get_children()?.length ?? 0 > 0"
           :class="['folder-view', smallSize ? 'folder-view-tall' : '']"
@@ -97,7 +98,7 @@
           </template>
         </folder-view>
       </div>
-      <div id="center-buttons" v-hide="fullscreen">
+      <div id="center-buttons" v-hide="hideUI">
         <v-slider
           v-if="!smallSize && showSlider && mainImageInView"
           v-model="opacity"
@@ -126,7 +127,7 @@
           Go to {{ mode == 'a' ? 'the' : '' }} {{ topLevelPlaces[mode=='a'? 1 : 0]?.get_name() }}
         </div>
         <div>
-        <div v-if="!fullscreen">
+        <div v-if="!hideUI">
           <icon-button
             id="info-icon"
             v-model="showTextSheet"
@@ -137,7 +138,7 @@
           >
           </icon-button>
         </div>
-        <div v-if="!fullscreen">
+        <div v-if="!hideUI">
           <icon-button
             v-model="showVideoSheet"
             fa-icon="video"
@@ -148,6 +149,7 @@
           </icon-button>
         </div>
         <icon-button
+          v-if="!kiosk"
           id="fullscreen-icon"
           @activate="fullscreen = !fullscreen"
           :fa-icon="fullscreen ? 'compress' : 'expand'"
@@ -158,7 +160,7 @@
         </icon-button>
         <div
           id="options"
-          v-hide="fullscreen"
+          v-hide="hideUI"
         >
           <div id="options-top-row">
             <icon-button
@@ -230,7 +232,7 @@
 
     <div
       id="bottom-content"
-      v-hide="fullscreen"
+      v-hide="hideUI"
     >
       <scalebar
         :width="1920"
@@ -259,7 +261,7 @@
       </div>
       <infobox
         :class="[{'with-scalebar': showScalebar}, {'small-size': smallSize}]"
-        v-hide="fullscreen"
+        v-hide="hideUI"
         :place="currentPlace"
         :small="smallSize"
       >
@@ -556,7 +558,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
-import { useFullscreen } from "./composables/useFullscreen";
+import { useFullscreen, UseFullscreenOptions } from "./composables/useFullscreen";
 import { D2R, H2R, distance } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
@@ -573,12 +575,21 @@ export interface RubinFirstLookProps {
   initialCameraParams?: CameraParams;
 }
 
+const searchParams = new URLSearchParams(window.location.search);
+const kiosk = searchParams.get("kiosk")?.toLowerCase() === "true";
+if (kiosk) {
+  document.body.classList.add("kiosk");
+}
+
+const fullscreenOptions: UseFullscreenOptions | undefined = kiosk ? { startFullscreen: true, allowToggle: false } : undefined;
+
 const store = engineStore();
 const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 useWWTKeyboardControls(store);
 
-const fullscreen = useFullscreen();
+const fullscreen = useFullscreen(fullscreenOptions);
+const hideUI = computed(() => fullscreen.value && !kiosk);
 
 const touchscreen = supportsTouchscreen();
 // TODO: Determine this in a better way
@@ -673,7 +684,6 @@ function rotateOffsetToScreen(offset: Offset): Offset {
     decOff: -offset.raOff * sinRoll + offset.decOff * cosRoll,
   };
 }
-
 
 
 fetch("https://data1.wwtassets.org/noirlab2521/offsets.json")
@@ -779,7 +789,6 @@ function updateClosestPlace() {
 const forceShowCircle = ref(false);
 const _onMarkerHover = (place: Place, show: boolean) => {
   forceShowCircle.value = show;
-  console.log(place.get_name(), closestPlace.value?.get_name());
   currentPlace.value = show ? place : closestPlace.value; 
 };
 
@@ -920,6 +929,8 @@ const cssVars = computed(() => {
   };
 });
 
+
+
   
 /**
   Computed flags that control whether the relevant dialogs display.
@@ -1047,6 +1058,13 @@ body {
   font-family: "Source Sans 3", Helvetica, sans-serif;
   font-weight: regular;
   color: rgb(var(--v-theme-on-background));
+
+  &.kiosk {
+    a {
+      pointer-events: none !important;
+      text-decoration: none !important;
+    }
+  }
 }
 
 #main-content {
