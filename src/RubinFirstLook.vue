@@ -149,7 +149,7 @@
           </icon-button>
         </div>
         <icon-button
-          v-if="!kiosk"
+          v-if="!(kiosk && fullscreen)"
           id="fullscreen-icon"
           @activate="fullscreen = !fullscreen"
           :fa-icon="fullscreen ? 'compress' : 'expand'"
@@ -558,7 +558,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
-import { useFullscreen, UseFullscreenOptions } from "./composables/useFullscreen";
+import { useFullscreen } from "./composables/useFullscreen";
 import { D2R, H2R, distance } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
 import { ImageSetType, Thumbnail } from "@wwtelescope/engine-types";
@@ -581,14 +581,12 @@ if (kiosk) {
   document.body.classList.add("kiosk");
 }
 
-const fullscreenOptions: UseFullscreenOptions | undefined = kiosk ? { startFullscreen: true, allowToggle: false } : undefined;
-
 const store = engineStore();
 const { raRad, decRad, zoomDeg } = storeToRefs(store);
 
 useWWTKeyboardControls(store);
 
-const fullscreen = useFullscreen(fullscreenOptions);
+const fullscreen = useFullscreen();
 const hideUI = computed(() => fullscreen.value && !kiosk);
 
 const touchscreen = supportsTouchscreen();
