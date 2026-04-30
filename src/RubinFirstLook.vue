@@ -663,7 +663,7 @@ const smallSize = computed(() => {
 });
 
 const question = Math.random() > 0.5 ? 
-  "Is this interesting?" :
+  "Does this spark your curiosity?" :
   "Are you learning something new?";
 const currentRating = ref<UserExperienceRating | null>(null);
 const currentComments = ref<string | null>(null);
