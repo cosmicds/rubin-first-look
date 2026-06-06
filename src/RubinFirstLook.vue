@@ -605,7 +605,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { ref, reactive, computed, watch, onBeforeMount, onMounted, nextTick } from "vue";
+import { ref, reactive, computed, watch, onMounted, nextTick } from "vue";
 import { useFullscreen } from "./composables/useFullscreen";
 import { D2R, H2R, distance } from "@wwtelescope/astro";
 import { Circle, Folder, Imageset, Place, WWTControl } from "@wwtelescope/engine";
@@ -773,9 +773,9 @@ watch(imagesLoaded, (newValue) => {
   showComingSoon.value = !newValue[0] && !newValue[1];
 }, { immediate: true });
 
-onBeforeMount(() => {
-  ratingOptedOut.value = window.localStorage.getItem(RATING_OPT_OUT_KEY)?.toLowerCase() === "true";
-});
+// onBeforeMount(() => {
+//   ratingOptedOut.value = window.localStorage.getItem(RATING_OPT_OUT_KEY)?.toLowerCase() === "true";
+// });
 
 onMounted(() => {
   store.waitForReady().then(async () => {
@@ -832,11 +832,11 @@ onMounted(() => {
 
     updateClosestPlace();
 
-    ratingDisplaySetup();
+    // ratingDisplaySetup();
   });
 });
 
-async function ratingDisplaySetup() {
+async function _ratingDisplaySetup() {
   if (ratingOptedOut.value) {
     return;
   }
